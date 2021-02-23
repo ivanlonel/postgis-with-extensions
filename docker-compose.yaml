@@ -1,0 +1,47 @@
+version: "3.7"
+
+services:
+
+    postgres:
+        # image: postgis/postgis:latest
+        build:
+            context: . # Use image from Dockerfile in current dir
+            args:
+                - ORACLE_FDW_VERSION=2_3_0
+                - SQLITE_FDW_VERSION=1.3.1
+        restart: always
+        ports:
+            - 5432:5432
+        environment:
+            - POSTGRES_PASSWORD_FILE=/run/secrets/postgres-passwd
+            - TZ=America/Sao_Paulo
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+            - ./postgres-passwd:/run/secrets/postgres-passwd
+        networks:
+            - pgnetwork
+
+    pgadmin:
+        image: dpage/pgadmin4:latest
+        restart: always
+        ports:
+            - 80:80
+        environment:
+            - PGADMIN_DEFAULT_EMAIL
+            - PGADMIN_DEFAULT_PASSWORD
+            - TZ=America/Sao_Paulo
+        volumes:
+            - pgadmin4_data:/var/lib/pgadmin
+            - ./servers.json:/pgadmin4/servers.json
+        networks:
+            - pgnetwork
+        depends_on:
+            - postgres
+
+volumes:
+    postgres_data:
+    pgadmin4_data:
+
+networks:
+    pgnetwork:
+        driver: bridge
