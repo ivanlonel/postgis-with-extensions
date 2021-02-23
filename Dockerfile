@@ -129,6 +129,10 @@ RUN apt-get update && \
         postgresql-plpython3-$PG_MAJOR && \
     apt-get purge -y --auto-remove
 
+COPY --from=build-sqlite_fdw /usr/share/postgresql/$PG_MAJOR/extension/sqlite_fdw* /usr/share/postgresql/$PG_MAJOR/extension/
+COPY --from=build-sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw* /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/
+COPY --from=build-sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/sqlite_fdw* /usr/lib/postgresql/$PG_MAJOR/lib/
+COPY --from=build-sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/libpg*.a /usr/lib/postgresql/$PG_MAJOR/lib/
 
 COPY --from=build-oracle_fdw ${ORACLE_HOME} ${ORACLE_HOME}
 COPY --from=build-oracle_fdw /etc/ld.so.conf.d/oracle_instantclient.conf /etc/ld.so.conf.d/oracle_instantclient.conf
