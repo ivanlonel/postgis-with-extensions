@@ -1,6 +1,6 @@
 FROM postgis/postgis:latest as base-image
 
-ENV ORACLE_HOME=/usr/lib/oracle/client
+ENV ORACLE_HOME /usr/lib/oracle/client
 ENV PATH $PATH:${ORACLE_HOME}
 
 
@@ -109,7 +109,7 @@ ENV POSTGRES_INITDB_ARGS " \
 	--lc-time=pt_BR.UTF-8 \
 "
 
-# Install pg_cron, mysql_fdw, ogr_fdw, orafce, pgaudit, pgpcre, pgtap, pldebugger, plpgsql_check, tds_fdw and plpython3
+# Install pg_cron, mysql_fdw, ogr_fdw, orafce, pgaudit, pgpcre, pgtap, pldebugger, plpgsql_check, tds_fdw, plpython3 and more
 # libaio1 is a runtime requirement for the Oracle client that oracle_fdw uses
 # I think libsqlite3-dev is a runtime requirement for sqlite_fdw
 RUN apt-get update && \
@@ -117,16 +117,49 @@ RUN apt-get update && \
         libaio1 \
         libsqlite3-dev \
         postgresql-$PG_MAJOR-cron \
+        postgresql-13-dirtyread \
+        postgresql-13-extra-window-functions \
+        postgresql-13-first-last-agg \
+        postgresql-13-ip4r \
+        postgresql-13-jsquery \
         postgresql-$PG_MAJOR-mysql-fdw \
+        postgresql-13-numeral \
         postgresql-$PG_MAJOR-ogr-fdw \
         postgresql-$PG_MAJOR-orafce \
+        postgresql-13-periods \
+        postgresql-13-pg-fact-loader \
         postgresql-$PG_MAJOR-pgaudit \
+        postgresql-13-pgl-ddl-deploy \
+        postgresql-13-pglogical \
+        postgresql-13-pglogical-ticker \
+        postgresql-13-pgmp \
         postgresql-$PG_MAJOR-pgpcre \
+        postgresql-13-pgq-node \
+        postgresql-13-pgrouting \
+        postgresql-13-pgsphere \
         postgresql-$PG_MAJOR-pgtap \
         postgresql-$PG_MAJOR-pldebugger \
         postgresql-$PG_MAJOR-plpgsql-check \
+        postgresql-13-plr \
+        postgresql-13-plsh \
+        postgresql-13-pointcloud \
+        postgresql-13-prefix \
+        postgresql-13-preprepare \
+        postgresql-13-q3c \
+        postgresql-13-rational \
+        postgresql-13-repack \
+        postgresql-13-rum \
+        postgresql-13-similarity \
         postgresql-$PG_MAJOR-tds-fdw \
-        postgresql-plpython3-$PG_MAJOR && \
+        postgresql-13-unit \
+        postgresql-plpython3-$PG_MAJOR \
+        # extensions below are all for PoWA
+        postgresql-$PG_MAJOR-hypopg \
+        postgresql-$PG_MAJOR-pg-qualstats \
+        postgresql-$PG_MAJOR-pg-stat-kcache \
+        postgresql-$PG_MAJOR-pg-track-settings \
+        postgresql-$PG_MAJOR-pg-wait-sampling \
+        postgresql-$PG_MAJOR-powa && \
     apt-get purge -y --auto-remove && \
     rm -rf /var/lib/apt/lists/*
 
@@ -147,6 +180,3 @@ COPY --from=build-oracle_fdw /usr/share/postgresql/$PG_MAJOR/extension/oracle_fd
 #   See the "Database Configuration" section at https://github.com/docker-library/docs/blob/master/postgres/README.md
 # Use initialization scripts to create the database, roles etc at build-time
 #   See the "Initialization scripts" section at https://github.com/docker-library/docs/blob/master/postgres/README.md
-
-
-
