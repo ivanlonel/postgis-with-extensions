@@ -127,7 +127,8 @@ RUN apt-get update && \
         postgresql-$PG_MAJOR-plpgsql-check \
         postgresql-$PG_MAJOR-tds-fdw \
         postgresql-plpython3-$PG_MAJOR && \
-    apt-get purge -y --auto-remove
+    apt-get purge -y --auto-remove && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY --from=build-sqlite_fdw /usr/share/postgresql/$PG_MAJOR/extension/sqlite_fdw* /usr/share/postgresql/$PG_MAJOR/extension/
 COPY --from=build-sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw* /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/
