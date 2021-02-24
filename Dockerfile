@@ -117,41 +117,40 @@ RUN apt-get update && \
         libaio1 \
         libsqlite3-dev \
         postgresql-$PG_MAJOR-cron \
-        postgresql-13-dirtyread \
-        postgresql-13-extra-window-functions \
-        postgresql-13-first-last-agg \
-        postgresql-13-ip4r \
-        postgresql-13-jsquery \
+        postgresql-$PG_MAJOR-dirtyread \
+        postgresql-$PG_MAJOR-extra-window-functions \
+        postgresql-$PG_MAJOR-first-last-agg \
+        postgresql-$PG_MAJOR-ip4r \
+        postgresql-$PG_MAJOR-jsquery \
         postgresql-$PG_MAJOR-mysql-fdw \
-        postgresql-13-numeral \
+        postgresql-$PG_MAJOR-numeral \
         postgresql-$PG_MAJOR-ogr-fdw \
         postgresql-$PG_MAJOR-orafce \
-        postgresql-13-periods \
-        postgresql-13-pg-fact-loader \
+        postgresql-$PG_MAJOR-periods \
+        postgresql-$PG_MAJOR-pg-fact-loader \
         postgresql-$PG_MAJOR-pgaudit \
-        postgresql-13-pgl-ddl-deploy \
-        postgresql-13-pglogical \
-        postgresql-13-pglogical-ticker \
-        postgresql-13-pgmp \
+        postgresql-$PG_MAJOR-pgl-ddl-deploy \
+        postgresql-$PG_MAJOR-pglogical \
+        postgresql-$PG_MAJOR-pglogical-ticker \
+        postgresql-$PG_MAJOR-pgmp \
         postgresql-$PG_MAJOR-pgpcre \
-        postgresql-13-pgq-node \
-        postgresql-13-pgrouting \
-        postgresql-13-pgsphere \
+        postgresql-$PG_MAJOR-pgq-node \
+        postgresql-$PG_MAJOR-pgrouting \
+        postgresql-$PG_MAJOR-pgsphere \
         postgresql-$PG_MAJOR-pgtap \
         postgresql-$PG_MAJOR-pldebugger \
         postgresql-$PG_MAJOR-plpgsql-check \
-        postgresql-13-plr \
-        postgresql-13-plsh \
-        postgresql-13-pointcloud \
-        postgresql-13-prefix \
-        postgresql-13-preprepare \
-        postgresql-13-q3c \
-        postgresql-13-rational \
-        postgresql-13-repack \
-        postgresql-13-rum \
-        postgresql-13-similarity \
+        postgresql-$PG_MAJOR-plsh \
+        postgresql-$PG_MAJOR-pointcloud \
+        postgresql-$PG_MAJOR-prefix \
+        postgresql-$PG_MAJOR-preprepare \
+        postgresql-$PG_MAJOR-q3c \
+        postgresql-$PG_MAJOR-rational \
+        postgresql-$PG_MAJOR-repack \
+        postgresql-$PG_MAJOR-rum \
+        postgresql-$PG_MAJOR-similarity \
         postgresql-$PG_MAJOR-tds-fdw \
-        postgresql-13-unit \
+        postgresql-$PG_MAJOR-unit \
         postgresql-plpython3-$PG_MAJOR \
         # extensions below are all for PoWA
         postgresql-$PG_MAJOR-hypopg \
