@@ -99,14 +99,14 @@ ENV LANG pt_BR.utf8
 # lc-ctype=C would make Postgres features that use ctype.h (e.g. upper(), lower(), initcap(), ILIKE, citext)
 #     work as expected only for characters in the US-ASCII range (that is, up to codepoint 0x7F in Unicode).
 ENV POSTGRES_INITDB_ARGS " \
-	-E utf8 \
-	--auth-host=md5 \
-	--lc-collate=C \
-	--lc-ctype=pt_BR.UTF-8 \
-	--lc-messages=pt_BR.UTF-8 \
-	--lc-monetary=pt_BR.UTF-8 \
-	--lc-numeric=pt_BR.UTF-8 \
-	--lc-time=pt_BR.UTF-8 \
+    -E utf8 \
+    --auth-host=md5 \
+    --lc-collate=C \
+    --lc-ctype=pt_BR.UTF-8 \
+    --lc-messages=pt_BR.UTF-8 \
+    --lc-monetary=pt_BR.UTF-8 \
+    --lc-numeric=pt_BR.UTF-8 \
+    --lc-time=pt_BR.UTF-8 \
 "
 
 # Install pg_cron, mysql_fdw, ogr_fdw, orafce, pgaudit, pgpcre, pgtap, pldebugger, plpgsql_check, tds_fdw, plpython3 and more
@@ -136,7 +136,6 @@ RUN apt-get update && \
         postgresql-$PG_MAJOR-pgpcre \
         postgresql-$PG_MAJOR-pgq-node \
         postgresql-$PG_MAJOR-pgrouting \
-        postgresql-$PG_MAJOR-pgsphere \
         postgresql-$PG_MAJOR-pgtap \
         postgresql-$PG_MAJOR-pldebugger \
         postgresql-$PG_MAJOR-plpgsql-check \
@@ -144,7 +143,6 @@ RUN apt-get update && \
         postgresql-$PG_MAJOR-pointcloud \
         postgresql-$PG_MAJOR-prefix \
         postgresql-$PG_MAJOR-preprepare \
-        postgresql-$PG_MAJOR-q3c \
         postgresql-$PG_MAJOR-rational \
         postgresql-$PG_MAJOR-repack \
         postgresql-$PG_MAJOR-rum \
@@ -167,11 +165,11 @@ COPY --from=build-sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fd
 COPY --from=build-sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/sqlite_fdw* /usr/lib/postgresql/$PG_MAJOR/lib/
 COPY --from=build-sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/libpg*.a /usr/lib/postgresql/$PG_MAJOR/lib/
 
-COPY --from=build-oracle_fdw ${ORACLE_HOME} ${ORACLE_HOME}
 COPY --from=build-oracle_fdw /etc/ld.so.conf.d/oracle_instantclient.conf /etc/ld.so.conf.d/oracle_instantclient.conf
-COPY --from=build-oracle_fdw /usr/lib/postgresql/$PG_MAJOR/lib/oracle_fdw.so /usr/lib/postgresql/$PG_MAJOR/lib/oracle_fdw.so
-COPY --from=build-oracle_fdw /usr/share/doc/postgresql-doc-$PG_MAJOR/extension/README.oracle_fdw /usr/share/doc/postgresql-doc-$PG_MAJOR/extension/README.oracle_fdw
 COPY --from=build-oracle_fdw /usr/share/postgresql/$PG_MAJOR/extension/oracle_fdw* /usr/share/postgresql/$PG_MAJOR/extension/
+COPY --from=build-oracle_fdw /usr/share/doc/postgresql-doc-$PG_MAJOR/extension/README.oracle_fdw /usr/share/doc/postgresql-doc-$PG_MAJOR/extension/README.oracle_fdw
+COPY --from=build-oracle_fdw /usr/lib/postgresql/$PG_MAJOR/lib/oracle_fdw.so /usr/lib/postgresql/$PG_MAJOR/lib/oracle_fdw.so
+COPY --from=build-oracle_fdw ${ORACLE_HOME} ${ORACLE_HOME}
 
 
 # TO-DO:
