@@ -35,10 +35,12 @@ ARG ORACLE_SQLPLUS_URL=https://download.oracle.com/otn_software/linux/instantcli
 ARG ORACLE_SDK_URL=https://download.oracle.com/otn_software/linux/instantclient/${ORACLE_CLIENT_PATH}/instantclient-sdk-linux.x64-${ORACLE_CLIENT_VERSION}dbru.zip
 
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends unzip && \
+RUN apt-get install -y --no-install-recommends \
+        libaio1 \
+        unzip
+
     # instant client
-    wget -O instant_client.zip ${ORACLE_CLIENT_URL} && \
+RUN wget -O instant_client.zip ${ORACLE_CLIENT_URL} && \
     unzip instant_client.zip && \
     # sqlplus
     wget -O sqlplus.zip ${ORACLE_SQLPLUS_URL} && \
@@ -48,7 +50,7 @@ RUN apt-get update && \
     unzip sdk.zip && \
     # install
     mkdir -p ${ORACLE_HOME} && \
-    mv instantclient*/* ${ORACLE_HOME}
+    mv ./instantclient*/* ${ORACLE_HOME}
 
 # Install oracle_fdw
 ARG ORACLE_FDW_VERSION=2_3_0
@@ -56,9 +58,7 @@ ARG ORACLE_FDW_URL=https://github.com/laurenz/oracle_fdw/archive/ORACLE_FDW_${OR
 ARG SOURCE_FILES=/tmp/oracle_fdw
 
 WORKDIR ${SOURCE_FILES}
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends libaio1 && \
-    wget -O - ${ORACLE_FDW_URL} | tar -zx --strip-components=1 -C . && \
+RUN wget -O - ${ORACLE_FDW_URL} | tar -zx --strip-components=1 -C . && \
     make && \
     make install && \
     echo ${ORACLE_HOME} > /etc/ld.so.conf.d/oracle_instantclient.conf && \
@@ -74,13 +74,7 @@ ARG SQLITE_FDW_URL=https://github.com/pgspider/sqlite_fdw/archive/v${SQLITE_FDW_
 ARG SOURCE_FILES=/tmp/sqlite_fdw
 
 WORKDIR ${SOURCE_FILES}
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        libsqlite3-dev \
-        cmake \
-        pkg-config \
-        libssl-dev \
-        libzstd-dev && \
+RUN apt-get install -y --no-install-recommends libsqlite3-dev && \
     wget -O - ${SQLITE_FDW_URL} | tar -zx -C . --strip-components=1 && \
     make USE_PGXS=1 && \
     make USE_PGXS=1 install
@@ -162,8 +156,7 @@ RUN apt-get update && \
 
 COPY --from=build-sqlite_fdw /usr/share/postgresql/$PG_MAJOR/extension/sqlite_fdw* /usr/share/postgresql/$PG_MAJOR/extension/
 COPY --from=build-sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw* /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/
-COPY --from=build-sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/sqlite_fdw* /usr/lib/postgresql/$PG_MAJOR/lib/
-COPY --from=build-sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/libpg*.a /usr/lib/postgresql/$PG_MAJOR/lib/
+COPY --from=build-sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/sqlite_fdw* /usr/lib/postgresql/$PG_MAJOR/lib/libpg*.a /usr/lib/postgresql/$PG_MAJOR/lib/
 
 COPY --from=build-oracle_fdw /etc/ld.so.conf.d/oracle_instantclient.conf /etc/ld.so.conf.d/oracle_instantclient.conf
 COPY --from=build-oracle_fdw /usr/share/postgresql/$PG_MAJOR/extension/oracle_fdw* /usr/share/postgresql/$PG_MAJOR/extension/
