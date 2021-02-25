@@ -8,11 +8,11 @@ FROM base-image as common-deps
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        wget \
         ca-certificates \
-        make \
         gcc \
-        postgresql-server-dev-$PG_MAJOR
+        make \
+        postgresql-server-dev-$PG_MAJOR \
+        wget 
 
 
 FROM common-deps as build-oracle_fdw
@@ -60,9 +60,7 @@ ARG SOURCE_FILES=/tmp/oracle_fdw
 WORKDIR ${SOURCE_FILES}
 RUN wget -O - ${ORACLE_FDW_URL} | tar -zx --strip-components=1 -C . && \
     make && \
-    make install && \
-    echo ${ORACLE_HOME} > /etc/ld.so.conf.d/oracle_instantclient.conf && \
-    ldconfig
+    make install
 
 
 
@@ -75,7 +73,7 @@ ARG SOURCE_FILES=/tmp/sqlite_fdw
 
 WORKDIR ${SOURCE_FILES}
 RUN apt-get install -y --no-install-recommends libsqlite3-dev && \
-    wget -O - ${SQLITE_FDW_URL} | tar -zx -C . --strip-components=1 && \
+    wget -O - ${SQLITE_FDW_URL} | tar -zx --strip-components=1 -C . && \
     make USE_PGXS=1 && \
     make USE_PGXS=1 install
 
@@ -158,11 +156,12 @@ COPY --from=build-sqlite_fdw /usr/share/postgresql/$PG_MAJOR/extension/sqlite_fd
 COPY --from=build-sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw* /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/
 COPY --from=build-sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/sqlite_fdw* /usr/lib/postgresql/$PG_MAJOR/lib/libpg*.a /usr/lib/postgresql/$PG_MAJOR/lib/
 
-COPY --from=build-oracle_fdw /etc/ld.so.conf.d/oracle_instantclient.conf /etc/ld.so.conf.d/oracle_instantclient.conf
 COPY --from=build-oracle_fdw /usr/share/postgresql/$PG_MAJOR/extension/oracle_fdw* /usr/share/postgresql/$PG_MAJOR/extension/
 COPY --from=build-oracle_fdw /usr/share/doc/postgresql-doc-$PG_MAJOR/extension/README.oracle_fdw /usr/share/doc/postgresql-doc-$PG_MAJOR/extension/README.oracle_fdw
 COPY --from=build-oracle_fdw /usr/lib/postgresql/$PG_MAJOR/lib/oracle_fdw.so /usr/lib/postgresql/$PG_MAJOR/lib/oracle_fdw.so
 COPY --from=build-oracle_fdw ${ORACLE_HOME} ${ORACLE_HOME}
+RUN echo ${ORACLE_HOME} > /etc/ld.so.conf.d/oracle_instantclient.conf && \
+    ldconfig
 
 
 # TO-DO:
