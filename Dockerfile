@@ -153,8 +153,9 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=build-sqlite_fdw /usr/share/postgresql/$PG_MAJOR/extension/sqlite_fdw* /usr/share/postgresql/$PG_MAJOR/extension/
-COPY --from=build-sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw* /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/
-COPY --from=build-sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/sqlite_fdw* /usr/lib/postgresql/$PG_MAJOR/lib/libpg*.a /usr/lib/postgresql/$PG_MAJOR/lib/
+COPY --from=build-sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw.index.bc /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw.index.bc
+COPY --from=build-sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw
+COPY --from=build-sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/sqlite_fdw.so /usr/lib/postgresql/$PG_MAJOR/lib/sqlite_fdw.so
 
 COPY --from=build-oracle_fdw /usr/share/postgresql/$PG_MAJOR/extension/oracle_fdw* /usr/share/postgresql/$PG_MAJOR/extension/
 COPY --from=build-oracle_fdw /usr/share/doc/postgresql-doc-$PG_MAJOR/extension/README.oracle_fdw /usr/share/doc/postgresql-doc-$PG_MAJOR/extension/README.oracle_fdw
