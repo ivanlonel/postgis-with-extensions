@@ -51,12 +51,9 @@ RUN wget -O instant_client.zip ${ORACLE_CLIENT_URL} && \
     mv ./instantclient*/* ${ORACLE_HOME}
 
 # Install oracle_fdw
-ARG ORACLE_FDW_VERSION=2_3_0
-ARG ORACLE_FDW_URL=https://github.com/laurenz/oracle_fdw/archive/ORACLE_FDW_${ORACLE_FDW_VERSION}.tar.gz
-ARG SOURCE_FILES=/tmp/oracle_fdw
-
-WORKDIR ${SOURCE_FILES}
-RUN wget -O - ${ORACLE_FDW_URL} | tar -zx --strip-components=1 -C . && \
+WORKDIR /tmp/oracle_fdw
+RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/laurenz/oracle_fdw/releases/latest)) \
+    wget -O - https://github.com/laurenz/oracle_fdw/archive/${ASSET_NAME}.tar.gz | tar -zx --strip-components=1 -C . && \
     make && \
     make install
 
@@ -65,13 +62,10 @@ RUN wget -O - ${ORACLE_FDW_URL} | tar -zx --strip-components=1 -C . && \
 
 FROM common-deps as build-sqlite_fdw
 
-ARG SQLITE_FDW_VERSION=1.3.1
-ARG SQLITE_FDW_URL=https://github.com/pgspider/sqlite_fdw/archive/v${SQLITE_FDW_VERSION}.tar.gz
-ARG SOURCE_FILES=/tmp/sqlite_fdw
-
-WORKDIR ${SOURCE_FILES}
-RUN apt-get install -y --no-install-recommends libsqlite3-dev && \
-    wget -O - ${SQLITE_FDW_URL} | tar -zx --strip-components=1 -C . && \
+WORKDIR /tmp/sqlite_fdw
+RUN apt-get install -y --no-install-recommends libsqlite3-dev
+RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/pgspider/sqlite_fdw/releases/latest)) \
+    wget -O - https://github.com/pgspider/sqlite_fdw/archive/${ASSET_NAME}.tar.gz | tar -zx --strip-components=1 -C . && \
     make USE_PGXS=1 && \
     make USE_PGXS=1 install
 
