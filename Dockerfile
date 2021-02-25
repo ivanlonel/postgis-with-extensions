@@ -10,10 +10,10 @@ FROM base-image as common-deps
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         ca-certificates \
+        curl \
         gcc \
         make \
-        postgresql-server-dev-$PG_MAJOR \
-        wget 
+        postgresql-server-dev-$PG_MAJOR
 
 
 
@@ -25,26 +25,19 @@ ARG ORACLE_CLIENT_URL=https://download.oracle.com/otn_software/linux/instantclie
 ARG ORACLE_SQLPLUS_URL=https://download.oracle.com/otn_software/linux/instantclient/instantclient-sqlplus-linuxx64.zip
 ARG ORACLE_SDK_URL=https://download.oracle.com/otn_software/linux/instantclient/instantclient-sdk-linuxx64.zip
 
-# Version specific setup
-#ARG ORACLE_CLIENT_VERSION=21.1.0.0.0
-#ARG ORACLE_CLIENT_PATH=211000
-#ARG ORACLE_CLIENT_URL=https://download.oracle.com/otn_software/linux/instantclient/${ORACLE_CLIENT_PATH}/instantclient-basic-linux.x64-${ORACLE_CLIENT_VERSION}dbru.zip
-#ARG ORACLE_SQLPLUS_URL=https://download.oracle.com/otn_software/linux/instantclient/${ORACLE_CLIENT_PATH}/instantclient-sqlplus-linux.x64-${ORACLE_CLIENT_VERSION}dbru.zip
-#ARG ORACLE_SDK_URL=https://download.oracle.com/otn_software/linux/instantclient/${ORACLE_CLIENT_PATH}/instantclient-sdk-linux.x64-${ORACLE_CLIENT_VERSION}dbru.zip
-
 # /var/lib/apt/lists/ still has the indexes from previous stage, so there's no need to run apt-get update again.
 RUN apt-get install -y --no-install-recommends \
         libaio1 \
         unzip
 
     # instant client
-RUN wget -O instant_client.zip ${ORACLE_CLIENT_URL} && \
+RUN curl -L -o instant_client.zip ${ORACLE_CLIENT_URL} && \
     unzip instant_client.zip && \
     # sqlplus
-    wget -O sqlplus.zip ${ORACLE_SQLPLUS_URL} && \
+    curl -L -o sqlplus.zip ${ORACLE_SQLPLUS_URL} && \
     unzip sqlplus.zip && \
     # sdk
-    wget -O sdk.zip ${ORACLE_SDK_URL} && \
+    curl -L -o sdk.zip ${ORACLE_SDK_URL} && \
     unzip sdk.zip && \
     # install
     mkdir -p ${ORACLE_HOME} && \
@@ -52,8 +45,8 @@ RUN wget -O instant_client.zip ${ORACLE_CLIENT_URL} && \
 
 # Install oracle_fdw
 WORKDIR /tmp/oracle_fdw
-RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/laurenz/oracle_fdw/releases/latest)) \
-    wget -O - https://github.com/laurenz/oracle_fdw/archive/${ASSET_NAME}.tar.gz | tar -zx --strip-components=1 -C . && \
+RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/laurenz/oracle_fdw/releases/latest)) && \
+    curl -L https://github.com/laurenz/oracle_fdw/archive/${ASSET_NAME}.tar.gz | tar -zx --strip-components=1 -C . && \
     make && \
     make install
 
@@ -64,8 +57,8 @@ FROM common-deps as build-sqlite_fdw
 
 WORKDIR /tmp/sqlite_fdw
 RUN apt-get install -y --no-install-recommends libsqlite3-dev
-RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/pgspider/sqlite_fdw/releases/latest)) \
-    wget -O - https://github.com/pgspider/sqlite_fdw/archive/${ASSET_NAME}.tar.gz | tar -zx --strip-components=1 -C . && \
+RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/pgspider/sqlite_fdw/releases/latest)) && \
+    curl -L https://github.com/pgspider/sqlite_fdw/archive/${ASSET_NAME}.tar.gz | tar -zx --strip-components=1 -C . && \
     make USE_PGXS=1 && \
     make USE_PGXS=1 install
 
