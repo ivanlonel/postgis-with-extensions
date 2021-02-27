@@ -20,11 +20,11 @@ cron.database_name = '${POSTGRES_DB:-postgres}'
 ## pg_partman
 #pg_partman_bgw.dbname = '${POSTGRES_DB:-postgres}'
 
-# pglogical
+# pglogical and wal2json
 wal_level = 'logical'
-max_worker_processes = 8    # one per database needed on provider node
+max_worker_processes = 10   # one per database needed on provider node
                             # one per node needed on subscriber node
-max_replication_slots = 8   # one per node needed on provider node
-max_wal_senders = 8         # one per node needed on provider node
+max_replication_slots = 10  # one per node needed on provider node
+max_wal_senders = 10        # one per node needed on provider node
 track_commit_timestamp = on # needed for last/first update wins conflict resolution
 EOT
