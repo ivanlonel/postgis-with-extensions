@@ -111,11 +111,11 @@ ENV POSTGRES_INITDB_ARGS " \
 "
 
 # libaio1 is a runtime requirement for the Oracle client that oracle_fdw uses
-# libsqlite3-dev is a runtime requirement for sqlite_fdw
+# libsqlite3-mod-spatialite is a runtime requirement for using spatialite with sqlite_fdw
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         libaio1 \
-        libsqlite3-dev \
+        libsqlite3-mod-spatialite \
         postgresql-$PG_MAJOR-asn1oid \
         postgresql-$PG_MAJOR-cron \
         postgresql-$PG_MAJOR-dirtyread \
@@ -142,7 +142,7 @@ RUN apt-get update && \
         postgresql-$PG_MAJOR-pgpcre \
         postgresql-$PG_MAJOR-pgq-node \
         postgresql-$PG_MAJOR-pgrouting \
-        postgresql-$PG_MAJOR-pgsphere \
+      # postgresql-$PG_MAJOR-pgsphere \
         postgresql-$PG_MAJOR-pgtap \
         postgresql-$PG_MAJOR-pldebugger \
       # postgresql-$PG_MAJOR-pllua \
