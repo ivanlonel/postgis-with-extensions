@@ -8,12 +8,30 @@ ENV PATH $PATH:${ORACLE_HOME}
 
 
 
-FROM base-image as common-deps
+
+FROM base-image as basic-deps
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         ca-certificates \
-        curl \
+        curl
+
+
+
+
+FROM basic-deps as powa-scripts
+
+WORKDIR /tmp/powa
+RUN curl -LOJ https://raw.githubusercontent.com/powa-team/powa-docker/master/powa-archivist/$PG_MAJOR/setup_powa-archivist.sh && \
+    curl -LOJ https://raw.githubusercontent.com/powa-team/powa-docker/master/powa-archivist/$PG_MAJOR/install_all_powa_ext.sql
+
+
+
+
+FROM basic-deps as common-deps
+
+# /var/lib/apt/lists/ still has the indexes from previous stage, so there's no need to run apt-get update again.
+RUN apt-get install -y --no-install-recommends \
         gcc \
         make \
         postgresql-server-dev-$PG_MAJOR
@@ -28,7 +46,6 @@ ARG ORACLE_CLIENT_URL=https://download.oracle.com/otn_software/linux/instantclie
 ARG ORACLE_SQLPLUS_URL=https://download.oracle.com/otn_software/linux/instantclient/instantclient-sqlplus-linuxx64.zip
 ARG ORACLE_SDK_URL=https://download.oracle.com/otn_software/linux/instantclient/instantclient-sdk-linuxx64.zip
 
-# /var/lib/apt/lists/ still has the indexes from previous stage, so there's no need to run apt-get update again.
 RUN apt-get install -y --no-install-recommends \
         libaio1 \
         unzip
@@ -158,8 +175,8 @@ COPY --from=build-oracle_fdw ${ORACLE_HOME} ${ORACLE_HOME}
 RUN echo ${ORACLE_HOME} > /etc/ld.so.conf.d/oracle_instantclient.conf && \
     ldconfig
 
-COPY --from=powateam/powa-archivist-$PG_MAJOR:latest /docker-entrypoint-initdb.d/setup_powa-archivist.sh /docker-entrypoint-initdb.d/setup_powa-archivist.sh
-COPY --from=powateam/powa-archivist-$PG_MAJOR:latest /usr/local/src/install_all_powa_ext.sql /usr/local/src/install_all_powa_ext.sql
+COPY --from=powa-scripts /tmp/powa/setup_powa-archivist.sh /docker-entrypoint-initdb.d/setup_powa-archivist.sh
+COPY --from=powa-scripts /tmp/powa/install_all_powa_ext.sql /usr/local/src/install_all_powa_ext.sql
 
 COPY ./conf.sh /docker-entrypoint-initdb.d/z_conf.sh
 
