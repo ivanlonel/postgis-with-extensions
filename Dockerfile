@@ -1,4 +1,7 @@
-FROM postgis/postgis:latest as base-image
+ARG BASE_IMAGE=postgis/postgis
+ARG BASE_IMAGE_TAG=latest
+
+FROM $BASE_IMAGE:$BASE_IMAGE_TAG as base-image
 
 ENV ORACLE_HOME /usr/lib/oracle/client
 ENV PATH $PATH:${ORACLE_HOME}
@@ -65,7 +68,7 @@ RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://g
 
 
 
-FROM base-image as merge-pipeline
+FROM base-image as final-stage
 
 # See the "Locale Customization" section at https://github.com/docker-library/docs/blob/master/postgres/README.md
 RUN localedef -i pt_BR -c -f UTF-8 -A /usr/share/locale/locale.alias pt_BR.UTF-8
@@ -97,29 +100,35 @@ RUN apt-get update && \
         postgresql-$PG_MAJOR-dirtyread \
         postgresql-$PG_MAJOR-extra-window-functions \
         postgresql-$PG_MAJOR-first-last-agg \
+        postgresql-$PG_MAJOR-hll \
+        postgresql-$PG_MAJOR-icu-ext \
         postgresql-$PG_MAJOR-ip4r \
         postgresql-$PG_MAJOR-jsquery \
         postgresql-$PG_MAJOR-mysql-fdw \
         postgresql-$PG_MAJOR-numeral \
         postgresql-$PG_MAJOR-ogr-fdw \
         postgresql-$PG_MAJOR-orafce \
+        postgresql-$PG_MAJOR-partman \
         postgresql-$PG_MAJOR-periods \
         postgresql-$PG_MAJOR-pg-fact-loader \
         postgresql-$PG_MAJOR-pgaudit \
         postgresql-$PG_MAJOR-pgl-ddl-deploy \
         postgresql-$PG_MAJOR-pglogical \
         postgresql-$PG_MAJOR-pglogical-ticker \
+        postgresql-$PG_MAJOR-pgmemcache \
         postgresql-$PG_MAJOR-pgmp \
         postgresql-$PG_MAJOR-pgpcre \
         postgresql-$PG_MAJOR-pgq-node \
         postgresql-$PG_MAJOR-pgrouting \
+      # postgresql-$PG_MAJOR-pgsphere \
         postgresql-$PG_MAJOR-pgtap \
         postgresql-$PG_MAJOR-pldebugger \
         postgresql-$PG_MAJOR-plpgsql-check \
+      # postgresql-$PG_MAJOR-plr \
         postgresql-$PG_MAJOR-plsh \
         postgresql-$PG_MAJOR-pointcloud \
         postgresql-$PG_MAJOR-prefix \
-        postgresql-$PG_MAJOR-preprepare \
+      # postgresql-$PG_MAJOR-q3c \
         postgresql-$PG_MAJOR-rational \
         postgresql-$PG_MAJOR-repack \
         postgresql-$PG_MAJOR-rum \
@@ -127,7 +136,7 @@ RUN apt-get update && \
         postgresql-$PG_MAJOR-tds-fdw \
         postgresql-$PG_MAJOR-unit \
         postgresql-plpython3-$PG_MAJOR \
-        # extensions below are all for PoWA
+    # extensions below are all for PoWA
         postgresql-$PG_MAJOR-hypopg \
         postgresql-$PG_MAJOR-pg-qualstats \
         postgresql-$PG_MAJOR-pg-stat-kcache \
@@ -149,9 +158,13 @@ COPY --from=build-oracle_fdw ${ORACLE_HOME} ${ORACLE_HOME}
 RUN echo ${ORACLE_HOME} > /etc/ld.so.conf.d/oracle_instantclient.conf && \
     ldconfig
 
+COPY --from=powateam/powa-archivist-$PG_MAJOR:latest /docker-entrypoint-initdb.d/setup_powa-archivist.sh /docker-entrypoint-initdb.d/setup_powa-archivist.sh
+COPY --from=powateam/powa-archivist-$PG_MAJOR:latest /usr/local/src/install_all_powa_ext.sql /usr/local/src/install_all_powa_ext.sql
+
+COPY ./conf.sh /docker-entrypoint-initdb.d/z_conf.sh
 
 # TO-DO:
-# Find out which other modifications each extension requires me to do, like changing something on postgresql.conf (looking at you, pg_cron)
-#   See the "Database Configuration" section at https://github.com/docker-library/docs/blob/master/postgres/README.md
-# Use initialization scripts to create the database, roles etc at build-time
+# Set up github actions to deploy this to dockerhub automatically
+# Use initialization scripts to create the database, roles etc during first run
 #   See the "Initialization scripts" section at https://github.com/docker-library/docs/blob/master/postgres/README.md
+#   Since that info is irrelevant to the image itself, it's probably better to inject this script via docker-compose instead of Dockerfile (maybe even as buildkit secrets)
