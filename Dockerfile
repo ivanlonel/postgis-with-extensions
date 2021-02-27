@@ -121,11 +121,11 @@ RUN apt-get update && \
         postgresql-$PG_MAJOR-icu-ext \
         postgresql-$PG_MAJOR-ip4r \
         postgresql-$PG_MAJOR-jsquery \
-        postgresql-$PG_MAJOR-mysql-fdw \
+      # postgresql-$PG_MAJOR-mysql-fdw \
         postgresql-$PG_MAJOR-numeral \
         postgresql-$PG_MAJOR-ogr-fdw \
         postgresql-$PG_MAJOR-orafce \
-        postgresql-$PG_MAJOR-partman \
+      # postgresql-$PG_MAJOR-partman \
         postgresql-$PG_MAJOR-periods \
         postgresql-$PG_MAJOR-pg-fact-loader \
         postgresql-$PG_MAJOR-pgaudit \
