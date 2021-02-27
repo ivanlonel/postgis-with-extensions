@@ -4,7 +4,24 @@ services:
 
     postgres:
         # image: postgis/postgis:latest
-        build: . # Use image from Dockerfile in current dir
+        build:
+            context: . # Use image from Dockerfile in current dir
+            args:
+                - BASE_IMAGE_TAG=latest
+        command:
+            - postgres
+            - -c
+            - effective_cache_size=2048MB
+            - -c
+            - shared_buffers=256MB
+            - -c
+            - work_mem=8MB
+            - -c
+            - maintenance_work_mem=256MB
+            - -c
+            - track_counts=on
+            - -c
+            - autovacuum=on
         restart: always
         ports:
             - 5432:5432
