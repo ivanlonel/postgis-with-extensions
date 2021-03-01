@@ -79,8 +79,7 @@ RUN apt-get install -y --no-install-recommends unzip && \
 # Install oracle_fdw
 WORKDIR /tmp/oracle_fdw
 RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/laurenz/oracle_fdw/releases/latest)) && \
-    curl -L https://github.com/laurenz/oracle_fdw/archive/${ASSET_NAME}.tar.gz | \
-        tar -zx --strip-components=1 -C . && \
+    curl -L https://github.com/laurenz/oracle_fdw/archive/${ASSET_NAME}.tar.gz | tar -zx --strip-components=1 -C . && \
     make && \
     make install
 
