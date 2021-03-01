@@ -59,6 +59,7 @@ FROM common-deps as build-mongo_fdw
 WORKDIR /tmp/mongo_fdw
 RUN apt-get install -y --no-install-recommends \
         libssl-dev \
+        pkg-config \
         wget && \
     ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/EnterpriseDB/mongo_fdw/releases/latest)) && \
     curl -L https://github.com/EnterpriseDB/mongo_fdw/archive/${ASSET_NAME}.tar.gz | tar -zx --strip-components=1 -C . && \
