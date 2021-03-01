@@ -45,7 +45,8 @@ RUN apt-get install -y --no-install-recommends \
 FROM common-deps as build-sqlite_fdw
 
 WORKDIR /tmp/sqlite_fdw
-RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/pgspider/sqlite_fdw/releases/latest)) && \
+RUN apt-get install -y --no-install-recommends libsqlite3-dev && \
+    ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/pgspider/sqlite_fdw/releases/latest)) && \
     curl -L https://github.com/pgspider/sqlite_fdw/archive/${ASSET_NAME}.tar.gz | \
         tar -zx --strip-components=1 -C . && \
     make USE_PGXS=1 && \
