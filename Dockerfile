@@ -62,9 +62,7 @@ ARG ORACLE_CLIENT_URL=https://download.oracle.com/otn_software/linux/instantclie
 ARG ORACLE_SQLPLUS_URL=https://download.oracle.com/otn_software/linux/instantclient/instantclient-sqlplus-linuxx64.zip
 ARG ORACLE_SDK_URL=https://download.oracle.com/otn_software/linux/instantclient/instantclient-sdk-linuxx64.zip
 
-RUN apt-get install -y --no-install-recommends \
-        libaio1 \
-        unzip && \
+RUN apt-get install -y --no-install-recommends unzip && \
     # instant client
     curl -L -o instant_client.zip ${ORACLE_CLIENT_URL} && \
     unzip instant_client.zip && \
