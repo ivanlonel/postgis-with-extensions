@@ -45,8 +45,7 @@ RUN apt-get install -y --no-install-recommends \
 FROM common-deps as build-sqlite_fdw
 
 WORKDIR /tmp/sqlite_fdw
-RUN apt-get install -y --no-install-recommends libsqlite3-dev && \
-    ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/pgspider/sqlite_fdw/releases/latest)) && \
+RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/pgspider/sqlite_fdw/releases/latest)) && \
     curl -L https://github.com/pgspider/sqlite_fdw/archive/${ASSET_NAME}.tar.gz | \
         tar -zx --strip-components=1 -C . && \
     make USE_PGXS=1 && \
@@ -62,9 +61,7 @@ ARG ORACLE_CLIENT_URL=https://download.oracle.com/otn_software/linux/instantclie
 ARG ORACLE_SQLPLUS_URL=https://download.oracle.com/otn_software/linux/instantclient/instantclient-sqlplus-linuxx64.zip
 ARG ORACLE_SDK_URL=https://download.oracle.com/otn_software/linux/instantclient/instantclient-sdk-linuxx64.zip
 
-RUN apt-get install -y --no-install-recommends \
-        libaio1 \
-        unzip && \
+RUN apt-get install -y --no-install-recommends unzip && \
     # instant client
     curl -L -o instant_client.zip ${ORACLE_CLIENT_URL} && \
     unzip instant_client.zip && \
