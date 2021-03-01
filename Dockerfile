@@ -42,6 +42,19 @@ RUN apt-get install -y --no-install-recommends \
 
 
 
+FROM common-deps as build-sqlite_fdw
+
+WORKDIR /tmp/sqlite_fdw
+RUN apt-get install -y --no-install-recommends libsqlite3-dev && \
+    ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/pgspider/sqlite_fdw/releases/latest)) && \
+    curl -L https://github.com/pgspider/sqlite_fdw/archive/${ASSET_NAME}.tar.gz | \
+        tar -zx --strip-components=1 -C . && \
+    make USE_PGXS=1 && \
+    make USE_PGXS=1 install
+
+
+
+
 FROM common-deps as build-oracle_fdw
 
 # Latest version
@@ -68,46 +81,36 @@ RUN apt-get install -y --no-install-recommends \
 # Install oracle_fdw
 WORKDIR /tmp/oracle_fdw
 RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/laurenz/oracle_fdw/releases/latest)) && \
-    curl -L https://github.com/laurenz/oracle_fdw/archive/${ASSET_NAME}.tar.gz | tar -zx --strip-components=1 -C . && \
+    curl -L https://github.com/laurenz/oracle_fdw/archive/${ASSET_NAME}.tar.gz | \
+        tar -zx --strip-components=1 -C . && \
     make && \
     make install
 
 
 
 
-FROM common-deps as build-sqlite_fdw
-
-WORKDIR /tmp/sqlite_fdw
-RUN apt-get install -y --no-install-recommends libsqlite3-dev && \
-    ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/pgspider/sqlite_fdw/releases/latest)) && \
-    curl -L https://github.com/pgspider/sqlite_fdw/archive/${ASSET_NAME}.tar.gz | tar -zx --strip-components=1 -C . && \
-    make USE_PGXS=1 && \
-    make USE_PGXS=1 install
-
-
-
-
 FROM base-image as final-stage
 
-ARG CUSTOM_LOCALE=pt_BR
+ARG MY_LOCALE=pt_BR
 
-# See the "Locale Customization" section at https://github.com/docker-library/docs/blob/master/postgres/README.md
-RUN localedef -i $CUSTOM_LOCALE -c -f UTF-8 -A /usr/share/locale/locale.alias $CUSTOM_LOCALE.UTF-8
-ENV LANG $CUSTOM_LOCALE.utf8
+# See "Locale Customization" in https://github.com/docker-library/docs/blob/master/postgres/README.md
+RUN localedef -i $MY_LOCALE -c -f UTF-8 -A /usr/share/locale/locale.alias $MY_LOCALE.UTF-8
+ENV LANG $MY_LOCALE.utf8
 
 # lc-collate=C makes strings comparison (and decurring operations like sorting) faster,
 #     because it's just byte-to-byte comparison (no complex locale rules)
-# lc-ctype=C would make Postgres features that use ctype.h (e.g. upper(), lower(), initcap(), ILIKE, citext)
-#     work as expected only for characters in the US-ASCII range (up to codepoint 0x7F in Unicode).
+# lc-ctype=C would make Postgres features that use ctype.h
+#     (e.g. upper(), lower(), initcap(), ILIKE, citext) work as expected only for
+#     characters in the US-ASCII range (up to codepoint 0x7F in Unicode).
 ENV POSTGRES_INITDB_ARGS " \
     -E utf8 \
     --auth-host=md5 \
     --lc-collate=C \
-    --lc-ctype=$CUSTOM_LOCALE.UTF-8 \
-    --lc-messages=$CUSTOM_LOCALE.UTF-8 \
-    --lc-monetary=$CUSTOM_LOCALE.UTF-8 \
-    --lc-numeric=$CUSTOM_LOCALE.UTF-8 \
-    --lc-time=$CUSTOM_LOCALE.UTF-8 \
+    --lc-ctype=$MY_LOCALE.UTF-8 \
+    --lc-messages=$MY_LOCALE.UTF-8 \
+    --lc-monetary=$MY_LOCALE.UTF-8 \
+    --lc-numeric=$MY_LOCALE.UTF-8 \
+    --lc-time=$MY_LOCALE.UTF-8 \
 "
 
 # libaio1 is a runtime requirement for the Oracle client that oracle_fdw uses
@@ -173,19 +176,37 @@ RUN apt-get update && \
     apt-get purge -y --auto-remove && \
     rm -rf /var/lib/apt/lists/*
 
-COPY ./conf.sh /docker-entrypoint-initdb.d/z_conf.sh
+COPY ./conf.sh  /docker-entrypoint-initdb.d/z_conf.sh
 
-COPY --from=powa-scripts /tmp/powa/setup_powa-archivist.sh /docker-entrypoint-initdb.d/setup_powa-archivist.sh
-COPY --from=powa-scripts /tmp/powa/install_all_powa_ext.sql /usr/local/src/install_all_powa_ext.sql
+COPY --from=powa-scripts \
+    /tmp/powa/setup_powa-archivist.sh \
+    /docker-entrypoint-initdb.d/setup_powa-archivist.sh
+COPY --from=powa-scripts \
+    /tmp/powa/install_all_powa_ext.sql \
+    /usr/local/src/install_all_powa_ext.sql
 
-COPY --from=build-sqlite_fdw /usr/share/postgresql/$PG_MAJOR/extension/sqlite_fdw* /usr/share/postgresql/$PG_MAJOR/extension/
-COPY --from=build-sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw.index.bc /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw.index.bc
-COPY --from=build-sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw
-COPY --from=build-sqlite_fdw /usr/lib/postgresql/$PG_MAJOR/lib/sqlite_fdw.so /usr/lib/postgresql/$PG_MAJOR/lib/sqlite_fdw.so
+COPY --from=build-sqlite_fdw \
+    /usr/share/postgresql/$PG_MAJOR/extension/sqlite_fdw* \
+    /usr/share/postgresql/$PG_MAJOR/extension/
+COPY --from=build-sqlite_fdw \
+    /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw.index.bc \
+    /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw.index.bc
+COPY --from=build-sqlite_fdw \
+    /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw \
+    /usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw
+COPY --from=build-sqlite_fdw \
+    /usr/lib/postgresql/$PG_MAJOR/lib/sqlite_fdw.so \
+    /usr/lib/postgresql/$PG_MAJOR/lib/sqlite_fdw.so
 
-COPY --from=build-oracle_fdw /usr/share/postgresql/$PG_MAJOR/extension/oracle_fdw* /usr/share/postgresql/$PG_MAJOR/extension/
-COPY --from=build-oracle_fdw /usr/share/doc/postgresql-doc-$PG_MAJOR/extension/README.oracle_fdw /usr/share/doc/postgresql-doc-$PG_MAJOR/extension/README.oracle_fdw
-COPY --from=build-oracle_fdw /usr/lib/postgresql/$PG_MAJOR/lib/oracle_fdw.so /usr/lib/postgresql/$PG_MAJOR/lib/oracle_fdw.so
-COPY --from=build-oracle_fdw ${ORACLE_HOME} ${ORACLE_HOME}
+COPY --from=build-oracle_fdw \
+    /usr/share/postgresql/$PG_MAJOR/extension/oracle_fdw* \
+    /usr/share/postgresql/$PG_MAJOR/extension/
+COPY --from=build-oracle_fdw \
+    /usr/share/doc/postgresql-doc-$PG_MAJOR/extension/README.oracle_fdw \
+    /usr/share/doc/postgresql-doc-$PG_MAJOR/extension/README.oracle_fdw
+COPY --from=build-oracle_fdw \
+    /usr/lib/postgresql/$PG_MAJOR/lib/oracle_fdw.so \
+    /usr/lib/postgresql/$PG_MAJOR/lib/oracle_fdw.so
+COPY --from=build-oracle_fdw  ${ORACLE_HOME}  ${ORACLE_HOME}
 RUN echo ${ORACLE_HOME} > /etc/ld.so.conf.d/oracle_instantclient.conf && \
     ldconfig
