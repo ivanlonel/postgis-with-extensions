@@ -2,8 +2,6 @@ PostgreSQL image based on [postgis/postgis](https://hub.docker.com/r/postgis/pos
 
 ### Available extensions
 - [postgis](https://github.com/postgis/postgis)
-  - postgis_topology
-  - postgis_tiger_geocoder
 - [asn1oid](https://github.com/df7cb/pgsql-asn1oid)
 - [extra_window_functions](https://github.com/xocolatl/extra_window_functions)
 - [first_last_agg](https://github.com/wulczer/first_last_agg)
@@ -40,16 +38,15 @@ PostgreSQL image based on [postgis/postgis](https://hub.docker.com/r/postgis/pos
 - [pg_fact_loader](https://github.com/enova/pg_fact_loader)
 - [pg_rational](https://github.com/begriffs/pg_rational)
 - [pg_repack](https://github.com/reorg/pg_repack)
+- [pg_similarity](https://github.com/eulerto/pg_similarity)
 - [pldbgapi](https://github.com/EnterpriseDB/pldebugger)
 - [plpgsql_check](https://github.com/okbob/plpgsql_check)
-- [plpython3](https://www.postgresql.org/docs/current/plpython.html)
+- [plpython3u](https://www.postgresql.org/docs/current/plpython.html)
 - [plsh](https://github.com/petere/plsh)
 - [pointcloud](https://github.com/pgpointcloud/pointcloud)
-  - pointcloud_postgis
 - [powa (archivist)](https://github.com/powa-team/powa-archivist)
 - [prefix](https://github.com/dimitri/prefix)
 - [rum](https://github.com/postgrespro/rum)
-- [similarity](https://github.com/urbic/postgresql-similarity)
 - [sqlite_fdw](https://github.com/pgspider/sqlite_fdw)
 - [tdigest](https://github.com/tvondra/tdigest)
 - [tds_fdw](https://github.com/tds-fdw/tds_fdw)

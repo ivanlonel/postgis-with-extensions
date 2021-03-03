@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -Eeuo pipefail
 
 # The inner sed finds the line number of the last match for the the regex ^\s*shared_preload_libraries\s*=
 # The outer sed, operating on that line alone, extracts the text between single quotes after the equals sign
@@ -7,7 +7,7 @@ PREVIOUS_PRELOAD_LIBRARIES=$(sed -nE "$(sed -n '/^\s*shared_preload_libraries\s*
 
 # https://github.com/soycacan/pldebugger says '$libdir/plugin_debugger' should be added to shared_preload_libraries.
 # TO-DO: Test it this way to see if $libdir/ is actually necessary.
-NEW_PRELOAD_LIBRARIES="pg_cron,pgaudit,pglogical,pglogical_ticker,pgmemcache,plugin_debugger"  # ,pg_partman_bgw
+NEW_PRELOAD_LIBRARIES="pg_cron,pgaudit,pglogical,pglogical_ticker,pgmemcache,plugin_debugger,pg_similarity"  # ,pg_partman_bgw
 
 cat >> ${PGDATA}/postgresql.conf << EOT
 listen_addresses = '*'
