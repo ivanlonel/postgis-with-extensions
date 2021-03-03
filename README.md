@@ -1,4 +1,6 @@
-PostgreSQL image based on [postgis/postgis](https://hub.docker.com/r/postgis/postgis), with quite a few added extensions.
+#### PostgreSQL image based on [postgis/postgis](https://hub.docker.com/r/postgis/postgis), with quite a few added extensions.
+[![ivanlonel/postgis-with-extensions][docker-pulls-image]][docker-hub-url]
+[![ivanlonel/postgis-with-extensions][github-last-commit-image]][github-url]
 
 ### Available extensions
 - [postgis](https://github.com/postgis/postgis)
@@ -53,3 +55,8 @@ PostgreSQL image based on [postgis/postgis](https://hub.docker.com/r/postgis/pos
 - [toastinfo](https://github.com/credativ/toastinfo)
 - [unit](https://github.com/df7cb/postgresql-unit)
 - [wal2json](https://github.com/eulerto/wal2json)
+
+[docker-hub-url]: https://hub.docker.com/r/ivanlonel/postgis-with-extensions/
+[github-url]: https://github.com/ivanlonel/postgis-with-extensions/
+[docker-pulls-image]: https://img.shields.io/docker/pulls/ivanlonel/postgis-with-extensions.svg?style=flat
+[github-last-commit-image]: https://img.shields.io/github/last-commit/ivanlonel/postgis-with-extensions.svg?style=flat
