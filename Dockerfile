@@ -37,7 +37,7 @@ FROM basic-deps as common-deps
 RUN apt-get install -y --no-install-recommends \
         gcc \
         make \
-        postgresql-server-dev-$PG_MAJOR=$PG_VERSION
+        postgresql-server-dev-$PG_MAJOR
 
 
 
