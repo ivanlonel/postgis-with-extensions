@@ -37,9 +37,10 @@ services:
             - TZ=America/Sao_Paulo
         volumes:
             - postgres_data:/var/lib/postgresql/data
-            - ./postgres-passwd:/run/secrets/postgres-passwd
         networks:
             - pgnetwork
+        secrets:
+            - postgres-passwd
 
     powa-web:
         image: powateam/powa-web
@@ -48,6 +49,8 @@ services:
             - 8888:8888
         environment:
             - TZ=America/Sao_Paulo
+        volumes:
+            - powa-web.conf:/etc/powa-web.conf
         networks:
             - pgnetwork
         depends_on:
@@ -58,22 +61,40 @@ services:
         restart: always
         ports:
             - 80:80
+        entrypoint: /pgadmin_entrypoint.sh
         environment:
-            - PGADMIN_DEFAULT_EMAIL
-            - PGADMIN_DEFAULT_PASSWORD
+            - PGADMIN_DEFAULT_EMAIL_FILE=/run/secrets/pgadmin-email
+            - PGADMIN_DEFAULT_PASSWORD_FILE=/run/secrets/pgadmin-passwd
             - TZ=America/Sao_Paulo
         volumes:
             - pgadmin4_data:/var/lib/pgadmin
+            - ./pgadmin_entrypoint.sh:/pgadmin_entrypoint.sh
             - ./servers.json:/pgadmin4/servers.json
         networks:
             - pgnetwork
         depends_on:
             - postgres
+        secrets:
+            - pgadmin-email
+            - pgadmin-passwd
 
 volumes:
     postgres_data:
     pgadmin4_data:
 
+secrets:
+    postgres-passwd:
+        file: secrets/postgres-passwd.txt
+    pgadmin-email:
+        file: secrets/pgadmin-email.txt
+    pgadmin-passwd:
+        file: secrets/pgadmin-passwd.txt
+
 networks:
     pgnetwork:
         driver: bridge
+        ipam:
+            # defining static IP range for network, so it can be referenced in pg_hba.conf
+            driver: default
+            config:
+                - subnet: 172.24.240.0/24

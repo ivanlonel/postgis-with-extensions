@@ -2,10 +2,10 @@
 .git
 .cache
 
-# ignore all markdown files (md) beside all README*.md other than README-secret.md
+# ignore all markdown files (md) except those that start with README, but including README-secret.md
 *.md
 !README*.md
 README-secret.md
 
 # ignore secrets
-postgres-passwd
+/secrets
