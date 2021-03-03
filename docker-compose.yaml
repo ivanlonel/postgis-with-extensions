@@ -26,6 +26,13 @@ services:
         ports:
             - 5432:5432
         environment:
+            # LC_COLLATE=C makes strings comparison (and decurring operations like sorting) faster,
+            #     because it's just byte-to-byte comparison (no complex locale rules)
+            # LC_CTYPE=C would make Postgres features that use ctype.h
+            #     (e.g. upper(), lower(), initcap(), ILIKE, citext) work as expected only for
+            #     characters in the US-ASCII range (up to codepoint 0x7F in Unicode).
+            - LANG=pt_BR.utf8
+            - LC_COLLATE=C
             - POSTGRES_PASSWORD_FILE=/run/secrets/postgres-passwd
             - TZ=America/Sao_Paulo
         volumes:

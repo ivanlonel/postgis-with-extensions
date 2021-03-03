@@ -107,23 +107,6 @@ ARG MY_LOCALE=pt_BR
 
 # See "Locale Customization" in https://github.com/docker-library/docs/blob/master/postgres/README.md
 RUN localedef -i $MY_LOCALE -c -f UTF-8 -A /usr/share/locale/locale.alias $MY_LOCALE.UTF-8
-ENV LANG $MY_LOCALE.utf8
-
-# lc-collate=C makes strings comparison (and decurring operations like sorting) faster,
-#     because it's just byte-to-byte comparison (no complex locale rules)
-# lc-ctype=C would make Postgres features that use ctype.h
-#     (e.g. upper(), lower(), initcap(), ILIKE, citext) work as expected only for
-#     characters in the US-ASCII range (up to codepoint 0x7F in Unicode).
-ENV POSTGRES_INITDB_ARGS " \
-    -E utf8 \
-    --auth-host=md5 \
-    --lc-collate=C \
-    --lc-ctype=$MY_LOCALE.UTF-8 \
-    --lc-messages=$MY_LOCALE.UTF-8 \
-    --lc-monetary=$MY_LOCALE.UTF-8 \
-    --lc-numeric=$MY_LOCALE.UTF-8 \
-    --lc-time=$MY_LOCALE.UTF-8 \
-"
 
 # libaio1 is a runtime requirement for the Oracle client that oracle_fdw uses
 # libsqlite3-mod-spatialite is a runtime requirement for using spatialite with sqlite_fdw
