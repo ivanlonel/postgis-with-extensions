@@ -3,7 +3,7 @@ version: "3.7"
 services:
 
     postgres:
-        # image: postgis/postgis:latest
+        # image: ivanlonel/postgis-with-extensions:latest
         build:
             context: . # Use image from Dockerfile in current dir
             args:
@@ -33,6 +33,18 @@ services:
             - ./postgres-passwd:/run/secrets/postgres-passwd
         networks:
             - pgnetwork
+
+    powa-web:
+        image: powateam/powa-web
+        restart: always
+        ports:
+            - 8888:8888
+        environment:
+            - TZ=America/Sao_Paulo
+        networks:
+            - pgnetwork
+        depends_on:
+            - postgres
 
     pgadmin:
         image: dpage/pgadmin4:latest
