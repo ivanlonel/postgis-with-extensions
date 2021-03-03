@@ -1,0 +1,6 @@
+services:
+    sut:
+        build: .
+        command: run_tests.sh
+        environment:
+            - POSTGRES_HOST_AUTH_METHOD=trust
