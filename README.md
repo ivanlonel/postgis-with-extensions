@@ -54,7 +54,6 @@
 - [tds_fdw](https://github.com/tds-fdw/tds_fdw)
 - [toastinfo](https://github.com/credativ/toastinfo)
 - [unit](https://github.com/df7cb/postgresql-unit)
-- [wal2json](https://github.com/eulerto/wal2json)
 
 [docker-hub-url]: https://hub.docker.com/r/ivanlonel/postgis-with-extensions/
 [github-url]: https://github.com/ivanlonel/postgis-with-extensions/

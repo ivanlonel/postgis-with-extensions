@@ -159,7 +159,7 @@ RUN apt-get update && \
         postgresql-$PG_MAJOR-tds-fdw \
         postgresql-$PG_MAJOR-toastinfo \
         postgresql-$PG_MAJOR-unit \
-        postgresql-$PG_MAJOR-wal2json \
+      # postgresql-$PG_MAJOR-wal2json \
         postgresql-plpython3-$PG_MAJOR \
     # extensions below are all here for PoWA
         postgresql-$PG_MAJOR-hypopg \

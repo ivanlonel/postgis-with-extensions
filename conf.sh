@@ -20,7 +20,7 @@ cron.database_name = '${POSTGRES_DB:-${POSTGRES_USER:-postgres}}'
 ## pg_partman
 #pg_partman_bgw.dbname = '${POSTGRES_DB:-${POSTGRES_USER:-postgres}}'
 
-# pglogical and wal2json
+# pglogical
 wal_level = 'logical'
 max_worker_processes = 10   # one per database needed on provider node
                             # one per node needed on subscriber node
