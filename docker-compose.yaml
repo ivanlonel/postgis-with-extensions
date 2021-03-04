@@ -11,6 +11,14 @@ services:
         command:
             - postgres
             - -c
+            - logging_collector=on
+            - -c
+            - log_filename='postgresql-%a.log'
+            - -c
+            - log_rotation_age=1440
+            - -c
+            - log_truncate_on_rotation=on
+            - -c
             - effective_cache_size=2048MB
             - -c
             - shared_buffers=256MB
@@ -25,6 +33,7 @@ services:
         restart: always
         ports:
             - 5432:5432
+        shm_size: 2gb
         environment:
             # LC_COLLATE=C makes strings comparison (and decurring operations like sorting) faster,
             #     because it's just byte-to-byte comparison (no complex locale rules)
