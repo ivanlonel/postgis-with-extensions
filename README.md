@@ -41,7 +41,7 @@
 - [pg_rational](https://github.com/begriffs/pg_rational)
 - [pg_repack](https://github.com/reorg/pg_repack)
 - [pg_similarity](https://github.com/eulerto/pg_similarity)
-- [pldbgapi](https://github.com/EnterpriseDB/pldebugger)
+- [pldebugger (pldbgapi)](https://github.com/EnterpriseDB/pldebugger)
 - [plpgsql_check](https://github.com/okbob/plpgsql_check)
 - [plpython3u](https://www.postgresql.org/docs/current/plpython.html)
 - [plsh](https://github.com/petere/plsh)
