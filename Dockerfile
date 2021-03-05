@@ -24,8 +24,8 @@ RUN apt-get update && \
 FROM basic-deps as powa-scripts
 
 WORKDIR /tmp/powa
-RUN curl -LOJ https://raw.githubusercontent.com/powa-team/powa-docker/master/powa-archivist/$PG_MAJOR/setup_powa-archivist.sh && \
-    curl -LOJ https://raw.githubusercontent.com/powa-team/powa-docker/master/powa-archivist/$PG_MAJOR/install_all_powa_ext.sql
+RUN curl -LOJ "https://raw.githubusercontent.com/powa-team/powa-docker/master/powa-archivist/$PG_MAJOR/setup_powa-archivist.sh" && \
+    curl -LOJ "https://raw.githubusercontent.com/powa-team/powa-docker/master/powa-archivist/$PG_MAJOR/install_all_powa_ext.sql"
 
 
 
@@ -47,7 +47,7 @@ FROM common-deps as build-sqlite_fdw
 WORKDIR /tmp/sqlite_fdw
 RUN apt-get install -y --no-install-recommends libsqlite3-dev && \
     ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/pgspider/sqlite_fdw/releases/latest)) && \
-    curl -L https://github.com/pgspider/sqlite_fdw/archive/${ASSET_NAME}.tar.gz | tar -zx --strip-components=1 -C . && \
+    curl -L "https://github.com/pgspider/sqlite_fdw/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
     make USE_PGXS=1 && \
     make USE_PGXS=1 install
 
@@ -62,7 +62,7 @@ RUN apt-get install -y --no-install-recommends \
         pkg-config \
         wget && \
     ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/EnterpriseDB/mongo_fdw/releases/latest)) && \
-    curl -L https://github.com/EnterpriseDB/mongo_fdw/archive/${ASSET_NAME}.tar.gz | tar -zx --strip-components=1 -C . && \
+    curl -L "https://github.com/EnterpriseDB/mongo_fdw/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
     ./autogen.sh --with-master && \
     make && \
     make install
@@ -94,7 +94,7 @@ RUN apt-get install -y --no-install-recommends unzip && \
 # Install oracle_fdw
 WORKDIR /tmp/oracle_fdw
 RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/laurenz/oracle_fdw/releases/latest)) && \
-    curl -L https://github.com/laurenz/oracle_fdw/archive/${ASSET_NAME}.tar.gz | tar -zx --strip-components=1 -C . && \
+    curl -L "https://github.com/laurenz/oracle_fdw/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
     make && \
     make install
 
