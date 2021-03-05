@@ -3,11 +3,11 @@ version: "3.7"
 services:
 
     postgres:
-        # image: ivanlonel/postgis-with-extensions:latest
+        # image: ivanlonel/postgis-with-extensions:13-3.1
         build:
             context: . # Use image from Dockerfile in current dir
             args:
-                - BASE_IMAGE_TAG=latest
+                - BASE_IMAGE_TAG=13-3.1
         command:
             - postgres
             - -c
