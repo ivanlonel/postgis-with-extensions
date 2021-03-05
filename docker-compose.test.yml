@@ -1,0 +1,13 @@
+version: "3.7"
+
+services:
+    sut:
+        build:
+            context: .
+            args:
+                - BASE_IMAGE_TAG=$DOCKER_TAG
+        command: psql -a -f /tests/create_extensions.sql
+        environment:
+            - POSTGRES_HOST_AUTH_METHOD=trust
+        volumes:
+            - ./tests:/tests
