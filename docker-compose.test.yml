@@ -17,5 +17,3 @@ services:
         build: ./tests
         depends_on:
             - postgres
-        volumes:
-            - ./tests:/tests
