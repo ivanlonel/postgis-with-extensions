@@ -32,7 +32,7 @@ services:
             - autovacuum=on
         restart: always
         ports:
-            - 5432:5432
+            - "5432:5432"
         shm_size: 2gb
         environment:
             # LC_COLLATE=C makes strings comparison (and decurring operations like sorting) faster,
@@ -55,7 +55,7 @@ services:
         image: powateam/powa-web
         restart: always
         ports:
-            - 8888:8888
+            - "8888:8888"
         environment:
             - TZ=America/Sao_Paulo
         volumes:
@@ -69,7 +69,7 @@ services:
         image: dpage/pgadmin4:latest
         restart: always
         ports:
-            - 80:80
+            - "80:80"
         entrypoint: /pgadmin_entrypoint.sh
         environment:
             - PGADMIN_DEFAULT_EMAIL_FILE=/run/secrets/pgadmin-email

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-PG_URI="postgresql://postgres:postgres@postgres:5433/postgres"
+PG_URI="postgresql://postgres:postgres@postgres:5432/postgres"
 
 #./wait-for-it.sh sut:5432 --timeout=600 --strict -- echo "postgres is up"
 while ! psql $PG_URI -c 'SELECT 1'; do

@@ -7,13 +7,11 @@ services:
             args:
                 - BASE_IMAGE_TAG=$DOCKER_TAG
         environment:
-            - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=postgres
-            - POSTGRES_DB=postgres
         networks:
             - pgtest_network
         ports:
-            - 5433:5432
+            - "5432:5432"
     
     sut:
         build: ./tests
