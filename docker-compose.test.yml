@@ -15,7 +15,7 @@ services:
     
     sut:
         image: governmentpaas/psql
-        command: psql postgres -U postgres -a -f /tests/create_extensions.sql
+        command: psql postgres -h postgres -p 5432 -U postgres -a -f /tests/create_extensions.sql
         depends_on:
             - postgres
         volumes:
