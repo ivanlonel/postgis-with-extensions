@@ -14,8 +14,7 @@ services:
             - 5432:5432
     
     sut:
-        image: governmentpaas/psql
-        command: /tests/run.sh
+        build: ./tests
         depends_on:
             - postgres
         volumes:
