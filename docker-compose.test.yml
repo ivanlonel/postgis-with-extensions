@@ -10,6 +10,8 @@ services:
             - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=postgres
             - POSTGRES_DB=postgres
+        networks:
+            - pgtest_network
         ports:
             - 5433:5432
     
@@ -17,3 +19,9 @@ services:
         build: ./tests
         depends_on:
             - postgres
+        networks:
+            - pgtest_network
+
+networks:
+    pgtest_network:
+        driver: bridge
