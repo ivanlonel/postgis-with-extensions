@@ -1,15 +1,21 @@
 version: "3.7"
 
 services:
-    sut:
+    postgres:
         build:
             context: .
             args:
                 - BASE_IMAGE_TAG=$DOCKER_TAG
-        command: psql postgres -U postgres -a -f /tests/create_extensions.sql
         environment:
             - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=postgres
             - POSTGRES_DB=postgres
+        ports:
+            - 5432:5432
+    
+    sut:
+        image: governmentpaas/psql
+        command: psql postgres -U postgres -a -f /tests/create_extensions.sql
+        depends_on: postgres
         volumes:
             - ./tests:/tests
