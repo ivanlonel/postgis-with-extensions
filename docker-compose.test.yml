@@ -14,8 +14,8 @@ services:
             - "5432:5432"
 
     sut:
-        # build: ./tests
-        image: governmentpaas/psql
+        build: ./tests
+        # image: governmentpaas/psql
         command:
             - "/tests/wait-for-postgres.sh"
             - "postgres"
@@ -23,7 +23,7 @@ services:
             - "postgresql://postgres:postgres@postgres:5432/postgres"
             - "-a"
             - "-f"
-            - "./tests/create_extensions.sql"
+            - "/tests/create_extensions.sql"
         depends_on:
             - postgres
         environment:
