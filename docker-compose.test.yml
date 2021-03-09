@@ -12,12 +12,12 @@ services:
             - pgtest_network
         ports:
             - "5432:5432"
-    
+
     sut:
         # build: ./tests
         image: governmentpaas/psql
         command:
-            - "./wait-for-postgres.sh"
+            - "/tests/wait-for-postgres.sh"
             - "postgres"
             - "psql"
             - "postgresql://postgres:postgres@postgres:5432/postgres"
@@ -30,6 +30,8 @@ services:
             - POSTGRES_PASSWORD=postgres
         networks:
             - pgtest_network
+        volumes:
+            - ./tests:/tests
 
 networks:
     pgtest_network:
