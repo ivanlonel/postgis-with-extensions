@@ -14,7 +14,7 @@ services:
         networks:
             - pgtest_network
         ports:
-            - "5432:5432"
+            - "5433:5432"
 
     sut:
         build: ./tests
@@ -27,8 +27,6 @@ services:
             - "/tests/create_extensions.sql"
         depends_on:
             - postgres
-        environment:
-            - POSTGRES_PASSWORD=postgres
         networks:
             - pgtest_network
 
