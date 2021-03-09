@@ -20,7 +20,6 @@ services:
         build: ./tests
         command:
             - "/tests/wait-for-postgres.sh"
-            - "postgres"
             - "psql"
             - "postgresql://postgres:postgres@postgres:5432/postgres"
             - "-a"
