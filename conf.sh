@@ -28,6 +28,3 @@ max_replication_slots = 10  # one per node needed on provider node
 max_wal_senders = 10        # one per node needed on provider node
 track_commit_timestamp = on # needed for last/first update wins conflict resolution
 EOT
-
-pg_ctl -D "${PGDATA}" -w stop -m fast
-pg_ctl -D "${PGDATA}" -w start
