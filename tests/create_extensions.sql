@@ -1,5 +1,5 @@
-\set VERBOSITY=verbose
-\set ON_ERROR_STOP=on
+\set VERBOSITY verbose
+\set ON_ERROR_STOP on
 
 CREATE DATABASE test;
 \c test
