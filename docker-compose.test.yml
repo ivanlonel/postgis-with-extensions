@@ -30,8 +30,6 @@ services:
             - POSTGRES_PASSWORD=postgres
         networks:
             - pgtest_network
-        volumes:
-            - ./tests:/tests
 
 networks:
     pgtest_network:
