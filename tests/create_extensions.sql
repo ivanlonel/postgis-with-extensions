@@ -4,8 +4,8 @@
 
 -- https://github.com/citusdata/pg_cron
 CREATE EXTENSION pg_cron;
-cron.schedule('nightly-vacuum', '0 3 * * *', 'VACUUM');
-cron.unschedule('nightly-vacuum');
+SELECT cron.schedule('nightly-vacuum', '0 3 * * *', 'VACUUM');
+SELECT cron.unschedule('nightly-vacuum');
 
 
 CREATE DATABASE test;
