@@ -15,8 +15,7 @@ listen_addresses = '*'
 shared_preload_libraries = '$(echo "$PREVIOUS_PRELOAD_LIBRARIES,$NEW_PRELOAD_LIBRARIES" | sed 's/^,//')'
 
 # pg_cron
-# pg_cron already uses database postgres by default
-#cron.database_name = '${POSTGRES_DB:-${POSTGRES_USER:-postgres}}'
+cron.database_name = '${POSTGRES_DB:-${POSTGRES_USER:-postgres}}'
 
 ## pg_partman
 #pg_partman_bgw.dbname = '${POSTGRES_DB:-${POSTGRES_USER:-postgres}}'
@@ -29,3 +28,6 @@ max_replication_slots = 10  # one per node needed on provider node
 max_wal_senders = 10        # one per node needed on provider node
 track_commit_timestamp = on # needed for last/first update wins conflict resolution
 EOT
+
+pg_ctl -D "${PGDATA}" -w stop -m fast
+pg_ctl -D "${PGDATA}" -w start
