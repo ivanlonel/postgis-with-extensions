@@ -184,3 +184,8 @@ SELECT '9.81 N'::unit / 'kg' AS gravity;
 
 -- https://www.postgresql.org/docs/current/plpython.html
 CREATE EXTENSION plpython3u;
+
+
+\c postgres
+
+DROP DATABASE TEST;
