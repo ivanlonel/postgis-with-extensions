@@ -1,6 +1,13 @@
 \set VERBOSITY verbose
 \set ON_ERROR_STOP on
 
+
+-- https://github.com/citusdata/pg_cron
+CREATE EXTENSION pg_cron;
+cron.schedule('nightly-vacuum', '0 3 * * *', 'VACUUM');
+cron.unschedule('nightly-vacuum');
+
+
 CREATE DATABASE test;
 \c test
 
@@ -48,11 +55,6 @@ CREATE EXTENSION sqlite_fdw;
 -- https://github.com/tds-fdw/tds_fdw
 CREATE EXTENSION tds_fdw;
 
-
--- https://github.com/citusdata/pg_cron
-CREATE EXTENSION pg_cron;
-cron.schedule('nightly-vacuum', '0 3 * * *', 'VACUUM');
-cron.unschedule('nightly-vacuum');
 
 -- https://github.com/df7cb/pgsql-asn1oid
 CREATE EXTENSION asn1oid;
