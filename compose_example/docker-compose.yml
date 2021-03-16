@@ -8,16 +8,20 @@ services:
             context: . # Use image from Dockerfile in current dir
             args:
                 - BASE_IMAGE_TAG=13-3.1
+                - LOCALE=pt_BR
+                - ENCODING=UTF-8
         command:
             - postgres
             - -c
             - logging_collector=on
             - -c
-            - log_filename='postgresql-%a.log'
+            - log_filename=postgresql-%a.log
             - -c
             - log_rotation_age=1440
             - -c
             - log_truncate_on_rotation=on
+            - -c
+            - "datestyle=ISO, DMY"
             - -c
             - effective_cache_size=2048MB
             - -c

@@ -7,8 +7,6 @@ services:
             args:
                 - BASE_IMAGE_TAG=$DOCKER_TAG
         environment:
-            - LANG=pt_BR.utf8
-            - LC_COLLATE=C
             - POSTGRES_PASSWORD=postgres
             - TZ=America/Sao_Paulo
         networks:

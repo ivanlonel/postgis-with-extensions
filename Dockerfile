@@ -103,11 +103,6 @@ RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://g
 
 FROM base-image as final-stage
 
-ARG MY_LOCALE=pt_BR
-
-# See "Locale Customization" in https://github.com/docker-library/docs/blob/master/postgres/README.md
-RUN localedef -i $MY_LOCALE -c -f UTF-8 -A /usr/share/locale/locale.alias $MY_LOCALE.UTF-8
-
 # libaio1 is a runtime requirement for the Oracle client that oracle_fdw uses
 # libsqlite3-mod-spatialite is a runtime requirement for using spatialite with sqlite_fdw
 RUN apt-get update && \
@@ -171,8 +166,6 @@ RUN apt-get update && \
     apt-get purge -y --auto-remove && \
     rm -rf /var/lib/apt/lists/*
 
-COPY ./conf.sh  /docker-entrypoint-initdb.d/z_conf.sh
-
 COPY --from=powa-scripts \
     /tmp/powa/setup_powa-archivist.sh \
     /docker-entrypoint-initdb.d/setup_powa-archivist.sh
@@ -233,3 +226,5 @@ COPY --from=build-oracle_fdw  ${ORACLE_HOME}  ${ORACLE_HOME}
 
 RUN echo ${ORACLE_HOME} > /etc/ld.so.conf.d/oracle_instantclient.conf && \
     ldconfig
+
+COPY ./conf.sh  /docker-entrypoint-initdb.d/z_conf.sh
