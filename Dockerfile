@@ -1,9 +1,6 @@
-# In case you want another postgres-based base image
-ARG BASE_IMAGE=postgis/postgis
-# In case you want to play safe and use a fixed version
 ARG BASE_IMAGE_TAG=latest
 
-FROM $BASE_IMAGE:$BASE_IMAGE_TAG as base-image
+FROM postgis/postgis:$BASE_IMAGE_TAG as base-image
 
 ENV ORACLE_HOME /usr/lib/oracle/client
 ENV PATH $PATH:${ORACLE_HOME}
