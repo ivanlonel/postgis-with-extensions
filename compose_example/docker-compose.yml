@@ -38,6 +38,7 @@ services:
         ports:
             - "5432:5432"
         shm_size: 2gb
+        stop_grace_period: 2m30s
         environment:
             # LC_COLLATE=C makes strings comparison (and decurring operations like sorting) faster,
             #     because it's just byte-to-byte comparison (no complex locale rules)
