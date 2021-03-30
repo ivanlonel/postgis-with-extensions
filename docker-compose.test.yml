@@ -1,33 +1,33 @@
 version: "3.7"
 
 services:
-    postgres:
-        build:
-            context: .
-            args:
-                - BASE_IMAGE_TAG=$DOCKER_TAG
-        environment:
-            - POSTGRES_PASSWORD=postgres
-            - TZ=America/Sao_Paulo
-        networks:
-            - pgtest_network
-        ports:
-            - "5433:5432"
+  postgres:
+    build:
+      context: .
+      args:
+        - BASE_IMAGE_TAG=$DOCKER_TAG
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - TZ=America/Sao_Paulo
+    networks:
+      - pgtest_network
+    ports:
+      - "5433:5432"
 
-    sut:
-        build: ./tests
-        command:
-            - "/tests/wait-for-postgres.sh"
-            - "psql"
-            - "postgresql://postgres:postgres@postgres:5432/postgres"
-            - "-a"
-            - "-f"
-            - "/tests/create_extensions.sql"
-        depends_on:
-            - postgres
-        networks:
-            - pgtest_network
+  sut:
+    build: ./tests
+    command:
+      - "/tests/wait-for-postgres.sh"
+      - "psql"
+      - "postgresql://postgres:postgres@postgres:5432/postgres"
+      - "-a"
+      - "-f"
+      - "/tests/create_extensions.sql"
+    depends_on:
+      - postgres
+    networks:
+      - pgtest_network
 
 networks:
-    pgtest_network:
-        driver: bridge
+  pgtest_network:
+    driver: bridge

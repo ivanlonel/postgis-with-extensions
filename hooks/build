@@ -1,3 +1,5 @@
 #!/bin/bash
 
-docker build --compress --no-cache --pull --rm --build-arg BASE_IMAGE_TAG=$DOCKER_TAG -f $DOCKERFILE_PATH -t $IMAGE_NAME .
+set -Eeuo pipefail
+
+docker build --no-cache --pull --rm --build-arg BASE_IMAGE_TAG=$DOCKER_TAG -f $DOCKERFILE_PATH -t $IMAGE_NAME .
