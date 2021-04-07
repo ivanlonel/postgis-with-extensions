@@ -11,6 +11,7 @@ ENV PATH $PATH:${ORACLE_HOME}
 FROM base-image as basic-deps
 
 RUN apt-get update && \
+	apt-get upgrade -y && \
 	apt-get install -y --no-install-recommends \
 		ca-certificates \
 		curl
@@ -32,9 +33,9 @@ FROM basic-deps as common-deps
 # /var/lib/apt/lists/ still has the indexes from parent stage, so there's no need to run apt-get update again.
 # (unless the parent stage cache is not invalidated...)
 RUN apt-get install -y --no-install-recommends \
-		gcc \
-		make \
-		postgresql-server-dev-$PG_MAJOR
+	gcc \
+	make \
+	postgresql-server-dev-$PG_MAJOR
 
 
 
@@ -103,6 +104,7 @@ FROM base-image as final-stage
 # libaio1 is a runtime requirement for the Oracle client that oracle_fdw uses
 # libsqlite3-mod-spatialite is a runtime requirement for using spatialite with sqlite_fdw
 RUN apt-get update && \
+	apt-get upgrade -y && \
 	apt-get install -y --no-install-recommends \
 		libaio1 \
 		libsqlite3-mod-spatialite \
