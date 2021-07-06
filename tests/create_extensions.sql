@@ -47,9 +47,6 @@ CREATE EXTENSION mysql_fdw;
 -- https://github.com/laurenz/oracle_fdw
 CREATE EXTENSION oracle_fdw;
 
--- https://github.com/EnterpriseDB/mongo_fdw
-CREATE EXTENSION mongo_fdw;
-
 -- https://github.com/pgspider/sqlite_fdw
 CREATE EXTENSION sqlite_fdw;
 
