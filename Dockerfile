@@ -52,23 +52,6 @@ RUN apt-get install -y --no-install-recommends libsqlite3-dev && \
 
 
 
-FROM common-deps as build-mongo_fdw
-
-WORKDIR /tmp/mongo_fdw
-RUN apt-get install -y --no-install-recommends \
-		cmake \
-		libssl-dev \
-		pkg-config \
-		wget && \
-	ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/EnterpriseDB/mongo_fdw/releases/latest)) && \
-	curl -L "https://github.com/EnterpriseDB/mongo_fdw/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
-	./autogen.sh --with-master && \
-	make && \
-	make install
-
-
-
-
 FROM common-deps as build-oracle_fdw
 
 # Latest version
@@ -185,33 +168,6 @@ COPY --from=build-sqlite_fdw \
 COPY --from=build-sqlite_fdw \
 	/usr/lib/postgresql/$PG_MAJOR/lib/sqlite_fdw.so \
 	/usr/lib/postgresql/$PG_MAJOR/lib/sqlite_fdw.so
-
-COPY --from=build-mongo_fdw \
-	/usr/share/postgresql/$PG_MAJOR/extension/mongo_fdw* \
-	/usr/share/postgresql/$PG_MAJOR/extension/
-COPY --from=build-mongo_fdw \
-	/usr/lib/postgresql/$PG_MAJOR/lib/bitcode/mongo_fdw.index.bc \
-	/usr/lib/postgresql/$PG_MAJOR/lib/bitcode/mongo_fdw.index.bc
-COPY --from=build-mongo_fdw \
-	/usr/lib/postgresql/$PG_MAJOR/lib/bitcode/mongo_fdw \
-	/usr/lib/postgresql/$PG_MAJOR/lib/bitcode/mongo_fdw
-COPY --from=build-mongo_fdw \
-	/usr/lib/postgresql/$PG_MAJOR/lib/mongo_fdw.so \
-	/usr/lib/postgresql/$PG_MAJOR/lib/mongo_fdw.so
-COPY --from=build-mongo_fdw \
-	/usr/local/bin/mongoc-stat \
-	/usr/local/bin/mongoc-stat
-COPY --from=build-mongo_fdw \
-	/usr/local/share/doc/libbson \
-	/usr/local/share/doc/libbson
-COPY --from=build-mongo_fdw \
-	/usr/local/share/doc/mongo-c-driver \
-	/usr/local/share/doc/mongo-c-driver
-COPY --from=build-mongo_fdw \
-	/usr/local/lib/libbson-* \
-	/usr/local/lib/libjson-c.* \
-	/usr/local/lib/libmongoc-* \
-	/usr/local/lib/
 
 COPY --from=build-oracle_fdw \
 	/usr/share/postgresql/$PG_MAJOR/extension/oracle_fdw* \

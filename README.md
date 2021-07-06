@@ -12,7 +12,6 @@
 - [icu_ext](https://github.com/dverite/icu_ext)
 - [ip4r](https://github.com/RhodiumToad/ip4r)
 - [jsquery](https://github.com/postgrespro/jsquery)
-- [mongo_fdw](https://github.com/EnterpriseDB/mongo_fdw)
 - [mysql_fdw](https://github.com/EnterpriseDB/mysql_fdw)
 - [numeral](https://github.com/df7cb/postgresql-numeral)
 - [ogr_fdw](https://github.com/pramsey/pgsql-ogr-fdw)
