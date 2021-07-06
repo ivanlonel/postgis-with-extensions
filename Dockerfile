@@ -56,6 +56,7 @@ FROM common-deps as build-mongo_fdw
 
 WORKDIR /tmp/mongo_fdw
 RUN apt-get install -y --no-install-recommends \
+		cmake \
 		libssl-dev \
 		pkg-config \
 		wget && \
