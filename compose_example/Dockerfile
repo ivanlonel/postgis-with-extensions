@@ -1,6 +1,6 @@
 ARG BASE_IMAGE_TAG=latest
 
-FROM ivanlonel/postgis-with-extensions:$BASE_IMAGE_TAG
+FROM ghcr.io/ivanlonel/postgis-with-extensions:$BASE_IMAGE_TAG
 
 ARG LOCALE
 ARG ENCODING=UTF-8
