@@ -6,6 +6,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=postgres
       - TZ=America/Sao_Paulo
+    restart: unless-stopped
     networks:
       - pgtest_network
     ports:
@@ -20,6 +21,7 @@ services:
       - "-a"
       - "-f"
       - "/tests/create_extensions.sql"
+    restart: 'no'
     depends_on:
       - postgres
     networks:
