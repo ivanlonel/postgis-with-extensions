@@ -11,7 +11,6 @@ ENV PATH $PATH:${ORACLE_HOME}
 FROM base-image as basic-deps
 
 RUN apt-get update && \
-	apt-get upgrade -y && \
 	apt-get install -y --no-install-recommends \
 		ca-certificates \
 		curl
