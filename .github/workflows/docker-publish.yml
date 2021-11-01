@@ -78,5 +78,5 @@ jobs:
       - name: Build test stack and run tests
         env:
           COMPOSE_FILE: ./docker-compose.test.yml
-          DOCKER_TAG: ${{ matrix.postgis_image_tag }}
-        run: docker-compose build && docker-compose run sut
+          IMAGE_NAME: ${{ steps.meta.outputs.tags }}
+        run: docker-compose build --pull --no-cache && docker-compose run sut
