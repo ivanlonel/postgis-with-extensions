@@ -23,19 +23,19 @@ jobs:
     strategy:
       matrix:
         postgis_image_tag:
-          - 'latest'
-          - '14-master'
-          - '14-3.1'
-          - '13-master'
-          - '13-3.1'
-          - '13-3.0'
-          - '12-master'
-          - '12-3.1'
-          - '12-3.0'
-          - '12-2.5'
-          - '11-3.1'
-          - '11-3.0'
-          - '11-2.5'
+          - latest
+          - 14-master
+          - 14-3.1
+          - 13-master
+          - 13-3.1
+          - 13-3.0
+          - 12-master
+          - 12-3.1
+          - 12-3.0
+          - 12-2.5
+          - 11-3.1
+          - 11-3.0
+          - 11-2.5
 
     steps:
       - name: Checkout repository
@@ -59,6 +59,7 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: ${{ matrix.postgis_image_tag }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
@@ -67,7 +68,7 @@ jobs:
           no-cache: true
           push: true
           pull: true
-          tags: ${{ matrix.postgis_image_tag }}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             BASE_IMAGE_TAG=${{ matrix.postgis_image_tag }}
