@@ -12,6 +12,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  COMPOSE_FILE: ./docker-compose.test.yml
 
 jobs:
   build-and-push-image:
@@ -75,8 +76,12 @@ jobs:
             LOCALE=pt_BR
             ENCODING=UTF-8
 
-      - name: Build test stack and run tests
+      - name: Build test stack
         env:
-          COMPOSE_FILE: ./docker-compose.test.yml
           IMAGE_NAME: ${{ steps.meta.outputs.tags }}
-        run: docker-compose build --pull --no-cache && docker-compose run sut
+        run: docker-compose build --pull --no-cache
+
+      - name: Run tests
+        env:
+          IMAGE_NAME: ${{ steps.meta.outputs.tags }}
+        run: docker-compose run sut
