@@ -58,9 +58,6 @@ CREATE EXTENSION tds_fdw;
 CREATE EXTENSION asn1oid;
 SELECT '1.3.6.1.4.1'::asn1oid;
 
--- https://github.com/df7cb/pg_dirtyread
-CREATE EXTENSION pg_dirtyread;
-
 -- https://github.com/xocolatl/extra_window_functions
 CREATE EXTENSION extra_window_functions;
 
