@@ -74,3 +74,9 @@ jobs:
             BASE_IMAGE_TAG=${{ matrix.postgis_image_tag }}
             LOCALE=pt_BR
             ENCODING=UTF-8
+
+      - name: Build test stack and run tests
+        env:
+          COMPOSE_FILE: ./docker-compose.test.yml
+          DOCKER_TAG: ${{ matrix.postgis_image_tag }}
+        run: docker-compose build && docker-compose run sut
