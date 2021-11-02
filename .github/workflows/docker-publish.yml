@@ -8,10 +8,11 @@ name: Create and publish a Docker image
 on:
   push:
     branches: ['master']
+  pull_request:
+    branches: ['master']
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
   TEST_TAG: ${{ github.repository }}:test
   COMPOSE_FILE: ./docker-compose.test.yml
 
@@ -23,6 +24,7 @@ jobs:
       packages: write
 
     strategy:
+      fail-fast: false
       matrix:
         postgis_image_tag:
           - latest
@@ -49,18 +51,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Log in to the Container registry
-        uses: docker/login-action@v1
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ github.repository }}
           tags: ${{ matrix.postgis_image_tag }}
           
       - name: Build and export to Docker
@@ -87,14 +82,26 @@ jobs:
           IMAGE_NAME: ${{ env.TEST_TAG }}
         run: docker compose start sut
 
-      - name: Push to registry
-        uses: docker/build-push-action@v2
+      - name: Log in to the Container registry
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: docker/login-action@v1
         with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            BASE_IMAGE_TAG=${{ matrix.postgis_image_tag }}
-            LOCALE=pt_BR
-            ENCODING=UTF-8
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to DockerHub
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push to registries
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: akhilerm/tag-push-action@v2
+        with:
+          src: ${{ env.TEST_TAG }}
+          dst: |
+            ${{ steps.meta.outputs.tags }}
+            docker.io/${{ github.repository }}:${{ matrix.postgis_image_tag }}
