@@ -12,6 +12,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  TEST_TAG: ${{ github.repository }}:test
   COMPOSE_FILE: ./docker-compose.test.yml
 
 jobs:
@@ -61,15 +62,15 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: ${{ matrix.postgis_image_tag }}
-
-      - name: Build and push Docker image
+          
+      - name: Build and export to Docker
         uses: docker/build-push-action@v2
         with:
           context: .
+          load: true
           no-cache: true
-          push: true
           pull: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ env.TEST_TAG }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             BASE_IMAGE_TAG=${{ matrix.postgis_image_tag }}
@@ -78,10 +79,22 @@ jobs:
 
       - name: Build test stack
         env:
-          IMAGE_NAME: ${{ steps.meta.outputs.tags }}
+          IMAGE_NAME: ${{ env.TEST_TAG }}
         run: docker compose up --build --no-start
 
       - name: Run tests
         env:
-          IMAGE_NAME: ${{ steps.meta.outputs.tags }}
+          IMAGE_NAME: ${{ env.TEST_TAG }}
         run: docker compose start sut
+
+      - name: Push to registry
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BASE_IMAGE_TAG=${{ matrix.postgis_image_tag }}
+            LOCALE=pt_BR
+            ENCODING=UTF-8
