@@ -79,9 +79,9 @@ jobs:
       - name: Build test stack
         env:
           IMAGE_NAME: ${{ steps.meta.outputs.tags }}
-        run: docker-compose build --pull --no-cache
+        run: docker compose up --build --no-start
 
       - name: Run tests
         env:
           IMAGE_NAME: ${{ steps.meta.outputs.tags }}
-        run: docker-compose run sut
+        run: docker compose start sut
