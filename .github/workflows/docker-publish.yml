@@ -89,6 +89,19 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Push to registry
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BASE_IMAGE_TAG=${{ matrix.postgis_image_tag }}
+            LOCALE=pt_BR
+            ENCODING=UTF-8
 
       - name: Login to DockerHub
         if: ${{ github.event_name != 'pull_request' }}
@@ -97,11 +110,10 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Push to registries
+      - name: Push to DockerHub
         if: ${{ github.event_name != 'pull_request' }}
         uses: akhilerm/tag-push-action@v2.0.0
         with:
-          src: ${{ env.TEST_TAG }}
+          src: ${{ steps.meta.outputs.tags }}
           dst: |
-            ${{ steps.meta.outputs.tags }}
             docker.io/${{ github.repository }}:${{ matrix.postgis_image_tag }}
