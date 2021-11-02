@@ -103,17 +103,25 @@ jobs:
             LOCALE=pt_BR
             ENCODING=UTF-8
 
-      - name: Login to DockerHub
+      - name: Login to Docker Hub
         if: ${{ github.event_name != 'pull_request' }}
         uses: docker/login-action@v1 
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Push to DockerHub
+      - name: Push to Docker Hub
         if: ${{ github.event_name != 'pull_request' }}
         uses: akhilerm/tag-push-action@v2.0.0
         with:
           src: ${{ steps.meta.outputs.tags }}
           dst: |
             docker.io/${{ github.repository }}:${{ matrix.postgis_image_tag }}
+
+      - name: Update Docker Hub description
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: peter-evans/dockerhub-description@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          repository: ${{ github.repository }}:${{ matrix.postgis_image_tag }}
