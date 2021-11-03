@@ -44,7 +44,7 @@
 - [pllua](https://github.com/pllua/pllua)
 - [plpgsql_check](https://github.com/okbob/plpgsql_check)
 - [plproxy](https://github.com/plproxy/plproxy)
-- [plpython3u](https://www.postgresql.org/docs/current/plpython.html)
+- [plpython3](https://www.postgresql.org/docs/current/plpython.html)
 - [plsh](https://github.com/petere/plsh)
 - [pointcloud](https://github.com/pgpointcloud/pointcloud)
 - [powa (archivist)](https://github.com/powa-team/powa-archivist)
