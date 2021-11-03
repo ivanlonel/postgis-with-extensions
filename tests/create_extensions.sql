@@ -140,8 +140,14 @@ CREATE EXTENSION pgtap;
 -- https://github.com/EnterpriseDB/pldebugger
 CREATE EXTENSION pldbgapi;
 
+-- https://github.com/pllua/pllua
+CREATE EXTENSION pllua;
+
 -- https://github.com/okbob/plpgsql_check
 CREATE EXTENSION plpgsql_check;
+
+-- https://github.com/plproxy/plproxy
+CREATE EXTENSION plproxy;
 
 -- https://github.com/petere/plsh
 CREATE EXTENSION plsh;
@@ -152,6 +158,9 @@ CREATE EXTENSION pointcloud_postgis;
 
 -- https://github.com/dimitri/prefix
 CREATE EXTENSION prefix;
+
+-- https://github.com/schmiddy/pg_prioritize
+CREATE EXTENSION prioritize;
 
 -- https://github.com/begriffs/pg_rational
 CREATE EXTENSION pg_rational;

@@ -1,6 +1,7 @@
 #### PostgreSQL image based on [postgis/postgis](https://hub.docker.com/r/postgis/postgis), with quite a few added extensions.
 [![ivanlonel/postgis-with-extensions][docker-pulls-image]][docker-hub-url]
 [![ivanlonel/postgis-with-extensions][github-last-commit-image]][github-url]
+[![ivanlonel/postgis-with-extensions][github-workflow-status-image]][github-url]
 
 ### Available extensions
 - [postgis](https://github.com/postgis/postgis)
@@ -40,12 +41,15 @@
 - [pg_repack](https://github.com/reorg/pg_repack)
 - [pg_similarity](https://github.com/eulerto/pg_similarity)
 - [pldebugger (pldbgapi)](https://github.com/EnterpriseDB/pldebugger)
+- [pllua](https://github.com/pllua/pllua)
 - [plpgsql_check](https://github.com/okbob/plpgsql_check)
+- [plproxy](https://github.com/plproxy/plproxy)
 - [plpython3u](https://www.postgresql.org/docs/current/plpython.html)
 - [plsh](https://github.com/petere/plsh)
 - [pointcloud](https://github.com/pgpointcloud/pointcloud)
 - [powa (archivist)](https://github.com/powa-team/powa-archivist)
 - [prefix](https://github.com/dimitri/prefix)
+- [prioritize](https://github.com/schmiddy/pg_prioritize)
 - [rum](https://github.com/postgrespro/rum)
 - [sqlite_fdw](https://github.com/pgspider/sqlite_fdw)
 - [tdigest](https://github.com/tvondra/tdigest)
@@ -57,3 +61,4 @@
 [github-url]: https://github.com/ivanlonel/postgis-with-extensions/
 [docker-pulls-image]: https://img.shields.io/docker/pulls/ivanlonel/postgis-with-extensions.svg?style=flat
 [github-last-commit-image]: https://img.shields.io/github/last-commit/ivanlonel/postgis-with-extensions.svg?style=flat
+[github-workflow-status-image]: https://img.shields.io/github/workflow/status/ivanlonel/postgis-with-extensions/Create%20and%20publish%20a%20Docker%20image

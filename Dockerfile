@@ -93,6 +93,7 @@ RUN apt-get update && \
 		libsqlite3-mod-spatialite \
 		postgresql-$PG_MAJOR-asn1oid \
 		postgresql-$PG_MAJOR-cron \
+		# postgresql-$PG_MAJOR-dirtyread \
 		postgresql-$PG_MAJOR-extra-window-functions \
 		postgresql-$PG_MAJOR-first-last-agg \
 		postgresql-$PG_MAJOR-hll \
@@ -119,12 +120,16 @@ RUN apt-get update && \
 		# postgresql-$PG_MAJOR-pgsphere \
 		postgresql-$PG_MAJOR-pgtap \
 		postgresql-$PG_MAJOR-pldebugger \
-		# postgresql-$PG_MAJOR-pllua \
+		# postgresql-$PG_MAJOR-pljava \
+		postgresql-$PG_MAJOR-pllua \
 		postgresql-$PG_MAJOR-plpgsql-check \
+		postgresql-$PG_MAJOR-plproxy \
 		# postgresql-$PG_MAJOR-plr \
 		postgresql-$PG_MAJOR-plsh \
 		postgresql-$PG_MAJOR-pointcloud \
 		postgresql-$PG_MAJOR-prefix \
+		# postgresql-$PG_MAJOR-preprepare \
+		postgresql-$PG_MAJOR-prioritize \
 		# postgresql-$PG_MAJOR-python3-multicorn \
 		# postgresql-$PG_MAJOR-q3c \
 		postgresql-$PG_MAJOR-rational \
