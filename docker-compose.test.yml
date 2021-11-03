@@ -6,6 +6,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=postgres
       - TZ=America/Sao_Paulo
+      - PG_CRON_DB=test
     restart: unless-stopped
     networks:
       - pgtest_network

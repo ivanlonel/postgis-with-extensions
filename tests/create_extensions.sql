@@ -1,5 +1,11 @@
+CREATE DATABASE test;
+\c test
+
+
 \set VERBOSITY verbose
 \set ON_ERROR_STOP on
+
+SELECT * FROM pg_available_extensions;
 
 
 -- https://github.com/citusdata/pg_cron
@@ -7,12 +13,6 @@ CREATE EXTENSION pg_cron;
 SELECT cron.schedule('nightly-vacuum', '0 3 * * *', 'VACUUM');
 SELECT cron.unschedule('nightly-vacuum');
 DROP EXTENSION pg_cron;
-
-
-CREATE DATABASE test;
-\c test
-
-SELECT * FROM pg_available_extensions;
 
 
 -- https://github.com/postgis/postgis
