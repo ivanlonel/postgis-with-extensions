@@ -3,7 +3,7 @@ version: "3.8"
 services:
 
   postgres:
-    # image: ghcr.io/ivanlonel/postgis-with-extensions:14-3.1
+    # image: ivanlonel/postgis-with-extensions:14-3.1
     build:
       context: . # Use image from Dockerfile in current dir
       args:
