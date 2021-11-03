@@ -24,10 +24,6 @@ env:
   REGISTRY: ghcr.io
   TEST_TAG: ${{ github.repository }}:test
   COMPOSE_FILE: ./docker-compose.test.yml
-  BUILD_ARGS: |
-    BASE_IMAGE_TAG=${{ matrix.postgis_image_tag }}
-    LOCALE=pt_BR
-    ENCODING=UTF-8
 
 jobs:
   build-and-push-image:
@@ -53,6 +49,12 @@ jobs:
           - 11-3.1
           - 11-3.0
           - 11-2.5
+
+    env:
+      BUILD_ARGS: |
+        BASE_IMAGE_TAG=${{ matrix.postgis_image_tag }}
+        LOCALE=pt_BR
+        ENCODING=UTF-8
 
     steps:
       - name: Checkout repository
