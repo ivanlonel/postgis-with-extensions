@@ -24,64 +24,217 @@ CREATE EXTENSION IF NOT EXISTS postgis_tiger_geocoder;
 
 CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
 CREATE EXTENSION IF NOT EXISTS btree_gist;
+
+
+-- https://github.com/pgaudit/pgaudit
+CREATE EXTENSION IF NOT EXISTS pgaudit;
+SET pgaudit.log = 'all, -misc';
+SET pgaudit.log_level = notice;
+
+
 -- https://github.com/HypoPG/hypopg
 CREATE EXTENSION IF NOT EXISTS hypopg;
+
+CREATE TABLE hypo AS SELECT id, 'line ' || id AS val FROM generate_series(1,10000) id;
+EXPLAIN SELECT * FROM hypo WHERE id = 1;
+
+SELECT * FROM hypopg_create_index('CREATE INDEX ON hypo (id)');
+SELECT * FROM hypopg_list_indexes();
+EXPLAIN SELECT * FROM hypo WHERE id = 1;
+
+DROP TABLE hypo;
+
+
 -- https://github.com/powa-team/pg_qualstats
 CREATE EXTENSION IF NOT EXISTS pg_qualstats;
+SELECT * FROM pg_qualstats;
+
+
 -- https://github.com/powa-team/pg_stat_kcache
 CREATE EXTENSION IF NOT EXISTS pg_stat_kcache;
+SELECT * FROM pg_stat_kcache();
+
+
 -- https://github.com/rjuju/pg_track_settings
 CREATE EXTENSION IF NOT EXISTS pg_track_settings;
+SELECT pg_track_settings_snapshot();
+
+
 -- https://github.com/postgrespro/pg_wait_sampling
 CREATE EXTENSION IF NOT EXISTS pg_wait_sampling;
+WITH t as (SELECT sum(0) FROM pg_wait_sampling_current)
+	SELECT sum(0) FROM generate_series(1, 2), t;
+
+
 -- https://github.com/powa-team/powa-archivist
 CREATE EXTENSION IF NOT EXISTS powa;
+SELECT * FROM powa_functions ORDER BY module, operation;
+
+
+-- https://github.com/pgRouting/pgrouting
+CREATE EXTENSION IF NOT EXISTS pgrouting CASCADE;
+
+CREATE TABLE edge_table (
+    id BIGSERIAL,
+    dir character varying,
+    source BIGINT,
+    target BIGINT,
+    cost FLOAT,
+    reverse_cost FLOAT,
+    capacity BIGINT,
+    reverse_capacity BIGINT,
+    category_id INTEGER,
+    reverse_category_id INTEGER,
+    x1 FLOAT,
+    y1 FLOAT,
+    x2 FLOAT,
+    y2 FLOAT,
+    the_geom geometry
+);
+
+INSERT INTO edge_table (
+    category_id, reverse_category_id,
+    cost, reverse_cost,
+    capacity, reverse_capacity,
+    x1, y1,
+    x2, y2
+) VALUES
+	(3, 1,    1,  1,  80, 130,   2,   0,    2, 1),
+	(3, 2,   -1,  1,  -1, 100,   2,   1,    3, 1),
+	(2, 1,   -1,  1,  -1, 130,   3,   1,    4, 1),
+	(2, 4,    1,  1, 100,  50,   2,   1,    2, 2),
+	(1, 4,    1, -1, 130,  -1,   3,   1,    3, 2),
+	(4, 2,    1,  1,  50, 100,   0,   2,    1, 2),
+	(4, 1,    1,  1,  50, 130,   1,   2,    2, 2),
+	(2, 1,    1,  1, 100, 130,   2,   2,    3, 2),
+	(1, 3,    1,  1, 130,  80,   3,   2,    4, 2),
+	(1, 4,    1,  1, 130,  50,   2,   2,    2, 3),
+	(1, 2,    1, -1, 130,  -1,   3,   2,    3, 3),
+	(2, 3,    1, -1, 100,  -1,   2,   3,    3, 3),
+	(2, 4,    1, -1, 100,  -1,   3,   3,    4, 3),
+	(3, 1,    1,  1,  80, 130,   2,   3,    2, 4),
+	(3, 4,    1,  1,  80,  50,   4,   2,    4, 3),
+	(3, 3,    1,  1,  80,  80,   4,   1,    4, 2),
+	(1, 2,    1,  1, 130, 100,   0.5, 3.5,  1.999999999999,3.5),
+	(4, 1,    1,  1,  50, 130,   3.5, 2.3,  3.5,4);
+
+UPDATE edge_table
+SET the_geom = st_makeline(st_point(x1,y1), st_point(x2,y2)),
+	dir = CASE
+		WHEN (cost>0 AND reverse_cost>0) THEN 'B'   -- both ways
+		WHEN (cost>0 AND reverse_cost<0) THEN 'FT'  -- direction of the LINESSTRING
+		WHEN (cost<0 AND reverse_cost>0) THEN 'TF'  -- reverse direction of the LINESTRING
+		ELSE ''                                     -- unknown
+	END;
+
+SELECT pgr_createTopology('edge_table',0.001);
+
+SELECT pgr_analyzegraph('edge_table', 0.001);
+SELECT pgr_nodeNetwork('edge_table', 0.001);
+
+DROP TABLE edge_table;
 
 
 -- https://github.com/pramsey/pgsql-ogr-fdw
-CREATE EXTENSION ogr_fdw;
+CREATE EXTENSION IF NOT EXISTS ogr_fdw;
+
+CREATE TABLE apostles (
+	fid integer primary key GENERATED ALWAYS AS IDENTITY,
+	geom geometry(point, 4326),
+	joined integer,
+	name text,
+	height numeric,
+	born date,
+	clock time,
+	ts timestamp
+);
+
+INSERT INTO apostles (name, geom, joined, height, born, clock, ts) VALUES
+	('Peter',          'SRID=4326;POINT(30.31 59.93)',   1, 1.6,  '1912-01-10', '10:10:01', '1912-01-10 10:10:01'),
+	('Andrew',         'SRID=4326;POINT(-2.8 56.34)',    2, 1.8,  '1911-02-11', '10:10:02', '1911-02-11 10:10:02'),
+	('James',          'SRID=4326;POINT(-79.23 42.1)',   3, 1.72, '1910-03-12', '10:10:03', '1910-03-12 10:10:03'),
+	('John',           'SRID=4326;POINT(13.2 47.35)',    4, 1.45, '1909-04-01', '10:10:04', '1909-04-01 10:10:04'),
+	('Philip',         'SRID=4326;POINT(-75.19 40.69)',  5, 1.65, '1908-05-02', '10:10:05', '1908-05-02 10:10:05'),
+	('Bartholomew',    'SRID=4326;POINT(-62 18)',        6, 1.69, '1907-06-03', '10:10:06', '1907-06-03 10:10:06'),
+	('Thomas',         'SRID=4326;POINT(-80.08 35.88)',  7, 1.68, '1906-07-04', '10:10:07', '1906-07-04 10:10:07'),
+	('Matthew',        'SRID=4326;POINT(-73.67 20.94)',  8, 1.65, '1905-08-05', '10:10:08', '1905-08-05 10:10:08'),
+	('James Alpheus',  'SRID=4326;POINT(-84.29 34.07)',  9, 1.78, '1904-09-06', '10:10:09', '1904-09-06 10:10:09'),
+	('Thaddaeus',      'SRID=4326;POINT(79.13 10.78)',  10, 1.88, '1903-10-07', '10:10:10', '1903-10-07 10:10:10'),
+	('Simon',          'SRID=4326;POINT(-85.97 41.75)', 11, 1.61, '1902-11-08', '10:10:11', '1902-11-08 10:10:11'),
+	('Judas Iscariot', 'SRID=4326;POINT(35.7 32.4)',    12, 1.71, '1901-12-09', '10:10:12', '1901-12-09 10:10:12');
+
 CREATE SERVER wraparound
 	FOREIGN DATA WRAPPER ogr_fdw
-	OPTIONS (datasource 'Pg:dbname=postgres user=postgres', format 'PostgreSQL');
+	OPTIONS (datasource 'Pg:dbname=test user=postgres', format 'PostgreSQL');
+
+CREATE FOREIGN TABLE apostles_fdw (
+	fid integer,
+	geom geometry(point, 4326),
+	joined integer,
+	name text,
+	height numeric,
+	born date,
+	clock time,
+	ts timestamp
+) SERVER wraparound OPTIONS (layer 'apostles');
+
+SELECT * FROM apostles_fdw;
+
+DROP TABLE apostles;
 
 
 -- https://github.com/EnterpriseDB/mysql_fdw
-CREATE EXTENSION mysql_fdw;
+CREATE EXTENSION IF NOT EXISTS mysql_fdw;
 CREATE SERVER mysql_server
 	FOREIGN DATA WRAPPER mysql_fdw
 	OPTIONS (host '127.0.0.1', port '3306');
+CREATE FOREIGN TABLE mysql_table (
+	id integer,
+	title text
+) SERVER mysql_server OPTIONS (dbname 'db', table_name 'the_table');
 
 
 -- https://github.com/laurenz/oracle_fdw
-CREATE EXTENSION oracle_fdw;
+CREATE EXTENSION IF NOT EXISTS oracle_fdw;
 CREATE SERVER oradb
 	FOREIGN DATA WRAPPER oracle_fdw
 	OPTIONS (dbserver '//dbserver.mydomain.com:1521/ORADB');
+CREATE FOREIGN TABLE oratab (
+	id integer OPTIONS (key 'true') NOT NULL,
+	title text OPTIONS (strip_zeros 'true')
+) SERVER oradb OPTIONS (schema 'ORAUSER', table 'ORATAB');
 
 
 -- https://github.com/pgspider/sqlite_fdw
-CREATE EXTENSION sqlite_fdw;
+CREATE EXTENSION IF NOT EXISTS sqlite_fdw;
 CREATE SERVER sqlite_server
 	FOREIGN DATA WRAPPER sqlite_fdw
 	OPTIONS (database '/tmp/test.db');
-CREATE FOREIGN TABLE t1(a integer, b text)
-	SERVER sqlite_server
-	OPTIONS (table 't1_sqlite');
+CREATE FOREIGN TABLE sqlite_table(
+	id integer OPTIONS (key 'true'),
+	title text OPTIONS(column_name 'nm_title'),
+	modified timestamp OPTIONS (column_type 'INT')
+) SERVER sqlite_server OPTIONS (table 't1_sqlite');
 
 
 -- https://github.com/tds-fdw/tds_fdw
-CREATE EXTENSION tds_fdw;
+CREATE EXTENSION IF NOT EXISTS tds_fdw;
 CREATE SERVER mssql_svr
 	FOREIGN DATA WRAPPER tds_fdw
 	OPTIONS (servername '127.0.0.1', port '1433', database 'tds_fdw_test', tds_version '7.1');
+CREATE FOREIGN TABLE mssql_table (
+	id integer,
+	title text OPTIONS (column_name 'nm_title')
+) SERVER mssql_svr OPTIONS (schema_name 'dbo', table_name 'mytable', row_estimate_method 'showplan_all');
+
 
 -- https://github.com/df7cb/pgsql-asn1oid
-CREATE EXTENSION asn1oid;
+CREATE EXTENSION IF NOT EXISTS asn1oid;
 SELECT '1.3.6.1.4.1'::asn1oid;
 
 
 -- https://github.com/xocolatl/extra_window_functions
-CREATE EXTENSION extra_window_functions;
+CREATE EXTENSION IF NOT EXISTS extra_window_functions;
 
 CREATE TABLE things (
     part integer NOT NULL,
@@ -209,29 +362,29 @@ DROP TABLE things;
 
 
 -- https://github.com/wulczer/first_last_agg
-CREATE EXTENSION first_last_agg;
+CREATE EXTENSION IF NOT EXISTS first_last_agg;
 SELECT last(x order by y) FROM (VALUES (1, 3), (2, 1), (3, 2)) AS v(x, y);
 SELECT first(x order by y) FROM (VALUES (1, 3), (2, 1), (3, 2)) AS v(x, y);
 
 
 -- https://github.com/citusdata/postgresql-hll
-CREATE EXTENSION hll;
+CREATE EXTENSION IF NOT EXISTS hll;
 SELECT hll_empty();
 
 
 -- https://github.com/dverite/icu_ext
-CREATE EXTENSION icu_ext;
+CREATE EXTENSION IF NOT EXISTS icu_ext;
 SELECT * FROM icu_locales_list() where name like 'pt%';
 
 
 -- https://github.com/RhodiumToad/ip4r
-CREATE EXTENSION ip4r;
+CREATE EXTENSION IF NOT EXISTS ip4r;
 SELECT ipaddress '255.255.255.255' / 31;
 SELECT ipaddress 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff' / 127;
 
 
 -- https://github.com/postgrespro/jsquery
-CREATE EXTENSION jsquery;
+CREATE EXTENSION IF NOT EXISTS jsquery;
 SELECT
 	'{"x": true}' @@ 'x IS boolean'::jsquery,
 	'{"x": 0.1}' @@ 'x IS numeric'::jsquery,
@@ -242,87 +395,94 @@ SELECT
 
 
 -- https://github.com/df7cb/postgresql-numeral
-CREATE EXTENSION numeral;
+CREATE EXTENSION IF NOT EXISTS numeral;
 SELECT 'thirty'::numeral + 'twelve'::numeral as sum;
 
 
 -- https://github.com/orafce/orafce
-CREATE EXTENSION orafce;
+CREATE EXTENSION IF NOT EXISTS orafce;
 SELECT oracle.add_months(oracle.date'2021-05-31 10:12:12', 1);
 
 -- https://github.com/xocolatl/periods
-CREATE EXTENSION periods;
+CREATE EXTENSION IF NOT EXISTS periods;
 SELECT * FROM periods.periods;
 
 
 -- https://github.com/enova/pg_fact_loader
-CREATE EXTENSION pg_fact_loader;
+CREATE EXTENSION IF NOT EXISTS pg_fact_loader;
 
-
--- https://github.com/pgaudit/pgaudit
-CREATE EXTENSION pgaudit;
+SELECT *
+FROM fact_loader.queue_deps_all_with_retrieval
+WHERE fact_table_relid = 'test_fact.customers_fact'::REGCLASS
+ORDER BY queue_table_relid::TEXT, queue_table_dep_id, level;
 
 
 -- https://github.com/klando/pgfincore
-CREATE EXTENSION pgfincore;
+CREATE EXTENSION IF NOT EXISTS pgfincore;
 SELECT * FROM pgsysconf_pretty();
 
 
 -- https://github.com/enova/pgl_ddl_deploy
-CREATE EXTENSION pgl_ddl_deploy;
+CREATE EXTENSIONIF NOT EXISTS  pgl_ddl_deploy;
+
+--Setup permissions
+SELECT pgl_ddl_deploy.add_role(oid) FROM pg_roles WHERE rolname in('app_owner', 'replication_role');
+
+--Setup configs
+INSERT INTO pgl_ddl_deploy.set_configs (set_name, include_schema_regex, lock_safe_deployment, allow_multi_statements)
+VALUES ('default', '.*', true, true), ('insert_update', '.*happy.*', true, true);
 
 
 -- https://github.com/2ndQuadrant/pglogical
-CREATE EXTENSION pglogical;
+CREATE EXTENSION IF NOT EXISTS pglogical;
+SELECT * FROM pglogical_regress_variables()
 
 
 -- https://github.com/enova/pglogical_ticker
-CREATE EXTENSION pglogical_ticker;
+CREATE EXTENSION IF NOT EXISTS pglogical_ticker;
+SELECT pglogical_ticker.deploy_ticker_tables();
 
 
 -- https://github.com/ohmu/pgmemcache
-CREATE EXTENSION pgmemcache;
+CREATE EXTENSION IF NOT EXISTS pgmemcache;
 
 
 -- https://github.com/dvarrazzo/pgmp
-CREATE EXTENSION pgmp;
+CREATE EXTENSION IF NOT EXISTS pgmp;
 SELECT 10.1::numeric::mpq;
 SELECT 9223372036854775807::mpz;
 
 
 -- https://github.com/petere/pgpcre
-CREATE EXTENSION pgpcre;
+CREATE EXTENSION IF NOT EXISTS pgpcre;
 SELECT 'foo' ~ pcre 'fo+';
 SELECT pcre 'fo+' ~ 'foo';
 
 
 -- https://github.com/pgq/pgq
-CREATE EXTENSION pgq;
+CREATE EXTENSION IF NOT EXISTS pgq;
 SELECT pgq.create_queue('testqueue1');
+
+-- https://github.com/pgq/pgq-node
+CREATE EXTENSION IF NOT EXISTS pgq_node;
+SELECT * FROM pgq_node.get_queue_locations('testqueue1');
+
 SELECT pgq.drop_queue('testqueue1');
 
 
--- https://github.com/pgq/pgq-node
-CREATE EXTENSION pgq_node;
-
-
--- https://github.com/pgRouting/pgrouting
-CREATE EXTENSION pgrouting CASCADE;
-
-
 -- https://github.com/theory/pgtap
-CREATE EXTENSION pgtap;
+CREATE EXTENSION IF NOT EXISTS pgtap;
 SELECT * FROM no_plan();
 SELECT ok(TRUE);
 SELECT * FROM finish();
 
 
 -- https://github.com/EnterpriseDB/pldebugger
-CREATE EXTENSION pldbgapi;
+CREATE EXTENSION IF NOT EXISTS pldbgapi;
 
 
 -- https://github.com/pllua/pllua
-CREATE EXTENSION pllua;
+CREATE EXTENSION IF NOT EXISTS pllua;
 CREATE FUNCTION hello(person text) RETURNS text AS $$
 	return "Hello, " .. person .. ", from Lua!"
 $$ LANGUAGE pllua;
@@ -330,11 +490,11 @@ SELECT hello('Fred');
 
 
 -- https://github.com/okbob/plpgsql_check
-CREATE EXTENSION plpgsql_check;
+CREATE EXTENSION IF NOT EXISTS plpgsql_check;
 
 SELECT p.proname, tgrelid::regclass, cf.*
 FROM pg_proc p
-    JOIN pg_trigger t ON t.tgfoid = p.oid 
+    JOIN pg_trigger t ON t.tgfoid = p.oid
     JOIN pg_language l ON p.prolang = l.oid
     JOIN pg_namespace n ON p.pronamespace = n.oid,
     LATERAL plpgsql_check_function(p.oid, t.tgrelid) cf
@@ -342,11 +502,27 @@ WHERE n.nspname = 'public' and l.lanname = 'plpgsql';
 
 
 -- https://github.com/plproxy/plproxy
-CREATE EXTENSION plproxy;
+CREATE EXTENSION IF NOT EXISTS plproxy;
+
+CREATE FUNCTION test_target(xuser text, tmp boolean) RETURNS text
+AS $$
+    cluster 'testcluster';
+    run on 0;
+    target test_target_dst;
+$$ LANGUAGE plproxy;
+
+CREATE FUNCTION test_target_dst(xuser text, tmp boolean) RETURNS text
+AS $$
+BEGIN
+    RETURN 'dst';
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT * FROM test_target('foo', true);
 
 
 -- https://github.com/petere/plsh
-CREATE EXTENSION plsh;
+CREATE EXTENSION IF NOT EXISTS plsh;
 CREATE FUNCTION concat_plsh(text, text) RETURNS text AS '
 #!/bin/sh
 echo "$1$2"
@@ -355,31 +531,32 @@ SELECT concat_plsh('It ', 'works!');
 
 
 -- https://github.com/pgpointcloud/pointcloud
-CREATE EXTENSION pointcloud;
-CREATE EXTENSION pointcloud_postgis;
+CREATE EXTENSION IF NOT EXISTS pointcloud;
+CREATE EXTENSION IF NOT EXISTS pointcloud_postgis;
+SELECT PC_AsText(PC_MakePoint(1, ARRAY[-127, 45, 124.0, 4.0]));
 
 
 -- https://github.com/dimitri/prefix
-CREATE EXTENSION prefix;
+CREATE EXTENSION IF NOT EXISTS prefix;
 SELECT '123'::prefix_range @> '123456';
 
 
 -- https://github.com/schmiddy/pg_prioritize
-CREATE EXTENSION prioritize;
+CREATE EXTENSION IF NOT EXISTS prioritize;
 SELECT get_backend_priority(pg_backend_pid());
 
 
 -- https://github.com/begriffs/pg_rational
-CREATE EXTENSION pg_rational;
+CREATE EXTENSION IF NOT EXISTS pg_rational;
 SELECT 0.263157894737::float::rational;
 
 
 -- https://github.com/reorg/pg_repack
-CREATE EXTENSION pg_repack;
+CREATE EXTENSION IF NOT EXISTS pg_repack;
 
 
 -- https://github.com/postgrespro/rum
-CREATE EXTENSION rum;
+CREATE EXTENSION IF NOT EXISTS rum;
 
 CREATE TABLE test_rum(t text, a tsvector);
 
@@ -402,7 +579,7 @@ DROP TABLE test_rum;
 
 
 -- https://github.com/eulerto/pg_similarity
-CREATE EXTENSION pg_similarity;
+CREATE EXTENSION IF NOT EXISTS pg_similarity;
 
 CREATE TABLE foo (a text);
 CREATE TABLE bar (b text);
@@ -419,7 +596,7 @@ DROP TABLE bar;
 
 
 -- https://github.com/tvondra/tdigest
-CREATE EXTENSION tdigest;
+CREATE EXTENSION IF NOT EXISTS tdigest;
 
 CREATE TABLE t (a int, b int, c double precision);  -- table with some random source data
 
@@ -438,7 +615,7 @@ DROP TABLE P;
 
 
 -- https://github.com/credativ/toastinfo
-CREATE EXTENSION toastinfo;
+CREATE EXTENSION IF NOT EXISTS toastinfo;
 
 CREATE TABLE t (
     a text,
@@ -470,19 +647,23 @@ DROP TABLE t;
 
 
 -- https://github.com/df7cb/postgresql-unit
-CREATE EXTENSION unit;
+CREATE EXTENSION IF NOT EXISTS unit;
 SELECT '9.81 N'::unit / 'kg' AS gravity;
 
 
 -- https://www.postgresql.org/docs/current/plpython.html
-CREATE EXTENSION plpython3u;
-CREATE OR REPLACE FUNCTION py_test() RETURNS void AS $$
-with plpy.subtransaction():
-	plpy.info('UPDATE tbl SET {} = {} WHERE key = {}'.format(
-		plpy.quote_ident('Test Column'),
-		plpy.quote_nullable(None),
-		plpy.quote_literal('test value')
-	))
+CREATE EXTENSION IF NOT EXISTS plpython3u;
+CREATE OR REPLACE FUNCTION py_test() RETURNS text AS $$
+	import sys
+
+	with plpy.subtransaction():
+		plpy.info('UPDATE tbl SET {} = {} WHERE key = {}'.format(
+			plpy.quote_ident('Test Column'),
+			plpy.quote_nullable(None),
+			plpy.quote_literal('test value')
+		))
+
+	return f'Python version: {sys.version}'
 $$ LANGUAGE plpython3u;
 SELECT py_test();
 
