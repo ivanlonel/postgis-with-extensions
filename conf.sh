@@ -15,10 +15,10 @@ listen_addresses = '*'
 shared_preload_libraries = '$(echo "$PREVIOUS_PRELOAD_LIBRARIES,$NEW_PRELOAD_LIBRARIES" | sed 's/^,//')'
 
 # pg_cron
-cron.database_name = '${POSTGRES_DB:-${POSTGRES_USER:-postgres}}'
+cron.database_name = '${PG_CRON_DB:-{POSTGRES_DB:-${POSTGRES_USER:-postgres}}}'
 
 ## pg_partman
-#pg_partman_bgw.dbname = '${POSTGRES_DB:-${POSTGRES_USER:-postgres}}'
+#pg_partman_bgw.dbname = '${PG_PARTMAN_DB:-{POSTGRES_DB:-${POSTGRES_USER:-postgres}}}'
 
 # pglogical
 wal_level = 'logical'
