@@ -1,6 +1,7 @@
 # ignore .git and .cache folders
 .git
 .cache
+.dccache
 
 # ignore all markdown files (md) except those that start with README, but including README-secret.md
 *.md
