@@ -15,11 +15,6 @@ on:
     # https://github.com/postgis/docker-postgis/blob/master/.github/workflows/main.yml
     - cron: '15 7 * * 1'
 
-permissions:
-  contents: read
-  packages: write
-  pull-requests: read
-
 env:
   REGISTRY: ghcr.io
   TEST_TAG: ${{ github.repository }}:test
@@ -31,6 +26,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      pull-requests: read
 
     strategy:
       fail-fast: false
