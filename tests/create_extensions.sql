@@ -429,7 +429,7 @@ VALUES ('default', '.*', true, true), ('insert_update', '.*happy.*', true, true)
 
 -- https://github.com/2ndQuadrant/pglogical
 CREATE EXTENSION IF NOT EXISTS pglogical;
-SELECT * FROM pglogical_regress_variables()
+SELECT * FROM pglogical_regress_variables();
 
 
 -- https://github.com/enova/pglogical_ticker
