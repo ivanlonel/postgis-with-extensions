@@ -8,22 +8,24 @@ CREATE DATABASE test;
 SELECT * FROM pg_available_extensions;
 
 
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+CREATE EXTENSION IF NOT EXISTS fuzzystrmatch;
+
+
 -- https://github.com/citusdata/pg_cron
 CREATE EXTENSION pg_cron;
 SELECT cron.schedule('nightly-vacuum', '0 3 * * *', 'VACUUM');
 SELECT cron.unschedule('nightly-vacuum');
-DROP EXTENSION pg_cron;
 
 
 -- https://github.com/postgis/postgis
 CREATE EXTENSION IF NOT EXISTS postgis;
 CREATE EXTENSION IF NOT EXISTS postgis_topology;
-CREATE EXTENSION IF NOT EXISTS fuzzystrmatch;
 CREATE EXTENSION IF NOT EXISTS postgis_tiger_geocoder;
-
-
-CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
-CREATE EXTENSION IF NOT EXISTS btree_gist;
+CREATE EXTENSION IF NOT EXISTS postgis_raster;
+CREATE EXTENSION IF NOT EXISTS postgis_sfcgal;
+CREATE EXTENSION IF NOT EXISTS address_standardizer;
 
 
 -- https://github.com/pgaudit/pgaudit
@@ -713,6 +715,6 @@ SELECT * FROM pg_available_extensions;
 
 \c postgres
 
-SELECT * FROM pg_stat_activity WHERE datname = 'test';
+SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'test' AND pid <> pg_backend_pid();
 
 DROP DATABASE test;
