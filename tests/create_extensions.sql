@@ -410,11 +410,6 @@ SELECT * FROM periods.periods;
 -- https://github.com/enova/pg_fact_loader
 CREATE EXTENSION IF NOT EXISTS pg_fact_loader;
 
-SELECT *
-FROM fact_loader.queue_deps_all_with_retrieval
-WHERE fact_table_relid = 'test_fact.customers_fact'::REGCLASS
-ORDER BY queue_table_relid::TEXT, queue_table_dep_id, level;
-
 
 -- https://github.com/klando/pgfincore
 CREATE EXTENSION IF NOT EXISTS pgfincore;
@@ -422,7 +417,7 @@ SELECT * FROM pgsysconf_pretty();
 
 
 -- https://github.com/enova/pgl_ddl_deploy
-CREATE EXTENSIONIF NOT EXISTS  pgl_ddl_deploy;
+CREATE EXTENSION IF NOT EXISTS pgl_ddl_deploy;
 
 --Setup permissions
 SELECT pgl_ddl_deploy.add_role(oid) FROM pg_roles WHERE rolname in('app_owner', 'replication_role');
