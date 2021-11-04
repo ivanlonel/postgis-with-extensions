@@ -476,11 +476,11 @@ CREATE EXTENSION IF NOT EXISTS pldbgapi;
 
 -- https://github.com/pllua/pllua
 CREATE EXTENSION IF NOT EXISTS plluau;
-CREATE EXTENSION IF NOT EXISTS hstore_plluau;
+CREATE EXTENSION IF NOT EXISTS hstore_plluau CASCADE;
 
 CREATE FUNCTION hello(person text) RETURNS text AS $$
 	return "Hello, " .. person .. ", from Lua!"
-$$ LANGUAGE pllua;
+$$ LANGUAGE plluau;
 SELECT hello('Fred');
 
 
@@ -648,9 +648,9 @@ SELECT '9.81 N'::unit / 'kg' AS gravity;
 
 -- https://www.postgresql.org/docs/current/plpython.html
 CREATE EXTENSION IF NOT EXISTS plpython3u;
-CREATE EXTENSION IF NOT EXISTS ltree_plpython3u;
+CREATE EXTENSION IF NOT EXISTS hstore_plpython3u CASCADE;
+CREATE EXTENSION IF NOT EXISTS ltree_plpython3u CASCADE;
 CREATE EXTENSION IF NOT EXISTS jsonb_plpython3u;
-CREATE EXTENSION IF NOT EXISTS hstore_plpython3u;
 
 CREATE OR REPLACE FUNCTION py_test() RETURNS text AS $$
 	import sys
