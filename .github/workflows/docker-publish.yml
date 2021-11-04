@@ -19,6 +19,7 @@ env:
   REGISTRY: ghcr.io
   TEST_TAG: ${{ github.repository }}:test
   COMPOSE_FILE: ./docker-compose.test.yml
+  LATEST_TAG: 14-3.1
 
 jobs:
   build-and-push-image:
@@ -31,21 +32,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        postgis_image_tag:
-          - latest
-          - 14-3.1
-          - 13-3.1
-          - 13-3.0
-          - 12-3.1
-          - 12-3.0
-          - 12-2.5
-          - 11-3.1
-          - 11-3.0
-          - 11-2.5
+        postgres: [11, 12, 13, 14]
+        postgis: ['3.0', '3.1']
+        exclude:
+          - postgres: 14
+            postgis: '3.0'
+        include:
+          - postgres: 11
+            postgis: '2.5'
+          - postgres: 12
+            postgis: '2.5'
 
     env:
+      BASE_IMAGE_TAG: ${{ matrix.postgres }}-${{ matrix.postgis }}
       BUILD_ARGS: |
-        BASE_IMAGE_TAG=${{ matrix.postgis_image_tag }}
+        BASE_IMAGE_TAG=${{ env.BASE_IMAGE_TAG }}
         LOCALE=pt_BR
         ENCODING=UTF-8
 
@@ -64,7 +65,7 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository }}
-          tags: ${{ matrix.postgis_image_tag }}
+          tags: ${{ env.BASE_IMAGE_TAG }}
           
       - name: Build and export to Docker
         uses: docker/build-push-action@v2
@@ -118,7 +119,16 @@ jobs:
         with:
           src: ${{ steps.meta.outputs.tags }}
           dst: |
-            docker.io/${{ github.repository }}:${{ matrix.postgis_image_tag }}
+            docker.io/${{ github.repository }}:${{ env.BASE_IMAGE_TAG }}
+
+      - name: Push latest tag to both registries
+        if: ${{ github.event_name != 'pull_request' AND env.BASE_IMAGE_TAG == env.LATEST_TAG }}
+        uses: akhilerm/tag-push-action@v2.0.0
+        with:
+          src: ${{ steps.meta.outputs.tags }}
+          dst: |
+            ${{ env.REGISTRY }}/${{ github.repository }}:latest
+            docker.io/${{ github.repository }}:latest
 
       - name: Update Docker Hub description
         if: ${{ github.event_name != 'pull_request' }}
