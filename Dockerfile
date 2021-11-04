@@ -21,10 +21,10 @@ RUN apt-get update && \
 FROM basic-deps as powa-scripts
 
 WORKDIR /tmp/powa
-RUN {curl --fail -LOJ "https://raw.githubusercontent.com/powa-team/powa-docker/master/powa-archivist/$PG_MAJOR/setup_powa-archivist.sh" || \
-	curl --fail -LOJ "https://raw.githubusercontent.com/powa-team/powa-docker/master/powa-archivist-git/setup_powa-archivist.sh";} && \
-	{curl --fail -LOJ "https://raw.githubusercontent.com/powa-team/powa-docker/master/powa-archivist/$PG_MAJOR/install_all_powa_ext.sql" || \
-	curl --fail -LOJ "https://raw.githubusercontent.com/powa-team/powa-docker/master/powa-archivist-git/install_all_powa_ext.sql";}
+RUN (curl --fail -LOJ "https://raw.githubusercontent.com/powa-team/powa-docker/master/powa-archivist/$PG_MAJOR/setup_powa-archivist.sh" || \
+	curl --fail -LOJ "https://raw.githubusercontent.com/powa-team/powa-docker/master/powa-archivist-git/setup_powa-archivist.sh") && \
+	(curl --fail -LOJ "https://raw.githubusercontent.com/powa-team/powa-docker/master/powa-archivist/$PG_MAJOR/install_all_powa_ext.sql" || \
+	curl --fail -LOJ "https://raw.githubusercontent.com/powa-team/powa-docker/master/powa-archivist-git/install_all_powa_ext.sql")
 
 
 
