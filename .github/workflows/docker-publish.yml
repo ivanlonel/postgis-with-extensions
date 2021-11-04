@@ -80,10 +80,10 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: ${{ env.BUILD_ARGS }}
 
-      - name: Create and start test postgres container
+      - name: Build test stack
         env:
           IMAGE_NAME: ${{ env.TEST_TAG }}
-        run: docker compose up --build postgres
+        run: docker compose up --build --no-start
 
       - name: Run tests
         env:
