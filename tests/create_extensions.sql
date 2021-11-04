@@ -39,7 +39,6 @@ CREATE TABLE hypo AS SELECT id, 'line ' || id AS val FROM generate_series(1,1000
 EXPLAIN SELECT * FROM hypo WHERE id = 1;
 
 SELECT * FROM hypopg_create_index('CREATE INDEX ON hypo (id)');
-SELECT * FROM hypopg_list_indexes();
 EXPLAIN SELECT * FROM hypo WHERE id = 1;
 
 DROP TABLE hypo;
