@@ -21,8 +21,10 @@ RUN apt-get update && \
 FROM basic-deps as powa-scripts
 
 WORKDIR /tmp/powa
-RUN curl -LOJ "https://raw.githubusercontent.com/powa-team/powa-docker/master/powa-archivist/$PG_MAJOR/setup_powa-archivist.sh" && \
-	curl -LOJ "https://raw.githubusercontent.com/powa-team/powa-docker/master/powa-archivist/$PG_MAJOR/install_all_powa_ext.sql"
+RUN {curl --fail -LOJ "https://raw.githubusercontent.com/powa-team/powa-docker/master/powa-archivist/$PG_MAJOR/setup_powa-archivist.sh" || \
+	curl --fail -LOJ "https://raw.githubusercontent.com/powa-team/powa-docker/master/powa-archivist-git/setup_powa-archivist.sh";} && \
+	{curl --fail -LOJ "https://raw.githubusercontent.com/powa-team/powa-docker/master/powa-archivist/$PG_MAJOR/install_all_powa_ext.sql" || \
+	curl --fail -LOJ "https://raw.githubusercontent.com/powa-team/powa-docker/master/powa-archivist-git/install_all_powa_ext.sql";}
 
 
 
@@ -44,7 +46,7 @@ FROM common-deps as build-sqlite_fdw
 WORKDIR /tmp/sqlite_fdw
 RUN apt-get install -y --no-install-recommends libsqlite3-dev && \
 	ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/pgspider/sqlite_fdw/releases/latest)) && \
-	curl -L "https://github.com/pgspider/sqlite_fdw/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
+	curl --fail -L "https://github.com/pgspider/sqlite_fdw/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
 	make USE_PGXS=1 && \
 	make USE_PGXS=1 install
 
@@ -60,13 +62,13 @@ ARG ORACLE_SDK_URL=https://download.oracle.com/otn_software/linux/instantclient/
 
 RUN apt-get install -y --no-install-recommends unzip && \
 	# instant client
-	curl -L -o instant_client.zip ${ORACLE_CLIENT_URL} && \
+	curl --fail -L -o instant_client.zip ${ORACLE_CLIENT_URL} && \
 	unzip instant_client.zip && \
 	# sqlplus
-	curl -L -o sqlplus.zip ${ORACLE_SQLPLUS_URL} && \
+	curl --fail -L -o sqlplus.zip ${ORACLE_SQLPLUS_URL} && \
 	unzip sqlplus.zip && \
 	# sdk
-	curl -L -o sdk.zip ${ORACLE_SDK_URL} && \
+	curl --fail -L -o sdk.zip ${ORACLE_SDK_URL} && \
 	unzip sdk.zip && \
 	# install
 	mkdir -p ${ORACLE_HOME} && \
@@ -75,7 +77,7 @@ RUN apt-get install -y --no-install-recommends unzip && \
 # Install oracle_fdw
 WORKDIR /tmp/oracle_fdw
 RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/laurenz/oracle_fdw/releases/latest)) && \
-	curl -L "https://github.com/laurenz/oracle_fdw/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
+	curl --fail -L "https://github.com/laurenz/oracle_fdw/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
 	make && \
 	make install
 

@@ -18,7 +18,7 @@ shared_preload_libraries = '$(echo "$PREVIOUS_PRELOAD_LIBRARIES,$NEW_PRELOAD_LIB
 cron.database_name = '${PG_CRON_DB:-${POSTGRES_DB:-${POSTGRES_USER:-postgres}}}'
 
 ## pg_partman
-#pg_partman_bgw.dbname = '${PG_PARTMAN_DB:-{POSTGRES_DB:-${POSTGRES_USER:-postgres}}}'
+#pg_partman_bgw.dbname = '${PG_PARTMAN_DB:-${POSTGRES_DB:-${POSTGRES_USER:-postgres}}}'
 
 # pglogical
 wal_level = 'logical'
