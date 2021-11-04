@@ -120,7 +120,7 @@ jobs:
             docker.io/${{ github.repository }}:${{ env.BASE_IMAGE_TAG }}
 
       - name: Push latest tag to both registries
-        if: ${{ github.event_name != 'pull_request' AND env.BASE_IMAGE_TAG == env.LATEST_TAG }}
+        if: ${{ (github.event_name != 'pull_request') && (env.BASE_IMAGE_TAG == env.LATEST_TAG) }}
         uses: akhilerm/tag-push-action@v2.0.0
         with:
           src: ${{ steps.meta.outputs.tags }}
