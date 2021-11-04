@@ -512,7 +512,7 @@ SELECT concat_plsh('It ', 'works!');
 -- https://github.com/pgpointcloud/pointcloud
 CREATE EXTENSION IF NOT EXISTS pointcloud;
 CREATE EXTENSION IF NOT EXISTS pointcloud_postgis;
-SELECT PC_AsText(PC_MakePoint(1, ARRAY[-127, 45, 124.0, 4.0]));
+SELECT ST_AsText(PC_MakePoint(1, ARRAY[-127, 45, 124.0, 4.0])::geometry);
 
 
 -- https://github.com/dimitri/prefix
