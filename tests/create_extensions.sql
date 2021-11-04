@@ -708,6 +708,11 @@ $$ LANGUAGE plpython3u;
 SELECT py_test();
 
 
+SELECT * FROM pg_available_extensions;
+
+
 \c postgres
+
+SELECT * FROM pg_stat_activity WHERE datname = 'test';
 
 DROP DATABASE test;
