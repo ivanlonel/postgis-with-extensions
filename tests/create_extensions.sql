@@ -1,9 +1,9 @@
+\set VERBOSITY verbose
+\set ON_ERROR_STOP on
+
 CREATE DATABASE test;
 \c test
 
-
-\set VERBOSITY verbose
-\set ON_ERROR_STOP on
 
 SELECT * FROM pg_available_extensions;
 
@@ -498,22 +498,6 @@ WHERE n.nspname = 'public' and l.lanname = 'plpgsql';
 
 -- https://github.com/plproxy/plproxy
 CREATE EXTENSION IF NOT EXISTS plproxy;
-
-CREATE FUNCTION test_target(xuser text, tmp boolean) RETURNS text
-AS $$
-    cluster 'testcluster';
-    run on 0;
-    target test_target_dst;
-$$ LANGUAGE plproxy;
-
-CREATE FUNCTION test_target_dst(xuser text, tmp boolean) RETURNS text
-AS $$
-BEGIN
-    RETURN 'dst';
-END;
-$$ LANGUAGE plpgsql;
-
-SELECT * FROM test_target('foo', true);
 
 
 -- https://github.com/petere/plsh
