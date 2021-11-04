@@ -180,6 +180,7 @@ CREATE FOREIGN TABLE apostles_fdw (
 SELECT * FROM apostles_fdw;
 
 DROP TABLE apostles;
+DROP SERVER wraparound CASCADE;
 
 
 -- https://github.com/EnterpriseDB/mysql_fdw
@@ -191,6 +192,7 @@ CREATE FOREIGN TABLE mysql_table (
 	id integer,
 	title text
 ) SERVER mysql_server OPTIONS (dbname 'db', table_name 'the_table');
+DROP SERVER mysql_server CASCADE;
 
 
 -- https://github.com/laurenz/oracle_fdw
@@ -202,6 +204,7 @@ CREATE FOREIGN TABLE oratab (
 	id integer OPTIONS (key 'true') NOT NULL,
 	title text OPTIONS (strip_zeros 'true')
 ) SERVER oradb OPTIONS (schema 'ORAUSER', table 'ORATAB');
+DROP SERVER oradb CASCADE;
 
 
 -- https://github.com/pgspider/sqlite_fdw
@@ -214,6 +217,7 @@ CREATE FOREIGN TABLE sqlite_table(
 	title text OPTIONS(column_name 'nm_title'),
 	modified timestamp OPTIONS (column_type 'INT')
 ) SERVER sqlite_server OPTIONS (table 't1_sqlite');
+DROP SERVER sqlite_server CASCADE;
 
 
 -- https://github.com/tds-fdw/tds_fdw
@@ -225,6 +229,7 @@ CREATE FOREIGN TABLE mssql_table (
 	id integer,
 	title text OPTIONS (column_name 'nm_title')
 ) SERVER mssql_svr OPTIONS (schema_name 'dbo', table_name 'mytable', row_estimate_method 'showplan_all');
+DROP SERVER mssql_svr CASCADE;
 
 
 -- https://github.com/df7cb/pgsql-asn1oid
@@ -698,7 +703,7 @@ CREATE OR REPLACE FUNCTION py_test() RETURNS text AS $$
 			plpy.quote_literal('test value')
 		))
 
-	return f'Python version: {sys.version}'
+	return 'Python version: {}'.format(sys.version)
 $$ LANGUAGE plpython3u;
 SELECT py_test();
 
