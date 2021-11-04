@@ -429,6 +429,21 @@ VALUES ('default', '.*', true, true), ('insert_update', '.*happy.*', true, true)
 
 -- https://github.com/2ndQuadrant/pglogical
 CREATE EXTENSION IF NOT EXISTS pglogical;
+
+CREATE OR REPLACE FUNCTION pglogical_regress_variables(
+    OUT orig_provider_dsn text,
+    OUT provider_dsn text,
+    OUT provider1_dsn text,
+    OUT subscriber_dsn text
+) RETURNS record
+AS $$
+	SELECT
+		current_setting('pglogical.orig_provider_dsn'),
+		current_setting('pglogical.provider_dsn'),
+		current_setting('pglogical.provider1_dsn'),
+		current_setting('pglogical.subscriber_dsn')
+$$ LANGUAGE SQL;
+
 SELECT * FROM pglogical_regress_variables();
 
 
