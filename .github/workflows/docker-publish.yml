@@ -11,7 +11,7 @@ on:
   pull_request:
     branches: ['master']
   schedule:
-    # postgis update schedule is '15 5 * * 1'
+    # postgis/postgis update schedule is '15 5 * * 1'
     # https://github.com/postgis/docker-postgis/blob/master/.github/workflows/main.yml
     - cron: '15 7 * * 1'
 
@@ -32,15 +32,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        postgres: [11, 12, 13, 14]
-        postgis: ['3.0', '3.1']
-        exclude:
-          - postgres: 14
-            postgis: '3.0'
+        postgres: [14, 13, 12, 11]
+        postgis: ['3.1']
         include:
           - postgres: 11
-            postgis: '2.5'
-          - postgres: 12
             postgis: '2.5'
 
     env:
