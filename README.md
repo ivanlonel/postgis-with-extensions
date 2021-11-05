@@ -3,7 +3,11 @@
 [![ivanlonel/postgis-with-extensions][github-last-commit-image]][github-url]
 [![ivanlonel/postgis-with-extensions][github-workflow-status-image]][github-url]
 
-### Available extensions
+Tag labels follow the pattern `X-Y.Z`, where `X` is the *major* Postgres version (starting from version 11) and `Y.Z` is the *major.minor* Postgis version.
+
+The `latest` tag currently corresponds to `14-3.1`.
+
+### Available extensions:
 - [postgis](https://github.com/postgis/postgis)
 - [asn1oid](https://github.com/df7cb/pgsql-asn1oid)
 - [extra_window_functions](https://github.com/xocolatl/extra_window_functions)
@@ -19,10 +23,6 @@
 - [oracle_fdw](https://github.com/laurenz/oracle_fdw)
 - [orafce](https://github.com/orafce/orafce)
 - [periods](https://github.com/xocolatl/periods)
-- [pg_qualstats](https://github.com/powa-team/pg_qualstats)
-- [pg_stat_kcache](https://github.com/powa-team/pg_stat_kcache)
-- [pg_track_settings](https://github.com/rjuju/pg_track_settings)
-- [pg_wait_sampling](https://github.com/postgrespro/pg_wait_sampling)
 - [pgaudit](https://github.com/pgaudit/pgaudit)
 - [pgfincore](https://github.com/klando/pgfincore)
 - [pglogical](https://github.com/2ndQuadrant/pglogical)
@@ -37,9 +37,13 @@
 - [pgtap](https://github.com/theory/pgtap)
 - [pg_cron](https://github.com/citusdata/pg_cron)
 - [pg_fact_loader](https://github.com/enova/pg_fact_loader)
+- [pg_qualstats](https://github.com/powa-team/pg_qualstats)
 - [pg_rational](https://github.com/begriffs/pg_rational)
 - [pg_repack](https://github.com/reorg/pg_repack)
 - [pg_similarity](https://github.com/eulerto/pg_similarity)
+- [pg_stat_kcache](https://github.com/powa-team/pg_stat_kcache)
+- [pg_track_settings](https://github.com/rjuju/pg_track_settings)
+- [pg_wait_sampling](https://github.com/postgrespro/pg_wait_sampling)
 - [pldebugger (pldbgapi)](https://github.com/EnterpriseDB/pldebugger)
 - [pllua](https://github.com/pllua/pllua)
 - [plpgsql_check](https://github.com/okbob/plpgsql_check)
