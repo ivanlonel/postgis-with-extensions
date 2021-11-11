@@ -17,7 +17,6 @@ The `latest` tag currently corresponds to `14-3.1`.
 - [icu_ext](https://github.com/dverite/icu_ext)
 - [ip4r](https://github.com/RhodiumToad/ip4r)
 - [jsquery](https://github.com/postgrespro/jsquery)
-- [mimeo](https://github.com/omniti-labs/mimeo)
 - [mysql_fdw](https://github.com/EnterpriseDB/mysql_fdw)
 - [numeral](https://github.com/df7cb/postgresql-numeral)
 - [ogr_fdw](https://github.com/pramsey/pgsql-ogr-fdw)
