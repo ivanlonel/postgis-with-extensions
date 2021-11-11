@@ -95,6 +95,7 @@ RUN apt-get update && \
 		libsqlite3-mod-spatialite \
 		postgresql-$PG_MAJOR-asn1oid \
 		postgresql-$PG_MAJOR-cron \
+		postgresql-$PG_MAJOR-debversion \
 		# postgresql-$PG_MAJOR-dirtyread \
 		postgresql-$PG_MAJOR-extra-window-functions \
 		postgresql-$PG_MAJOR-first-last-agg \
@@ -102,6 +103,7 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-icu-ext \
 		postgresql-$PG_MAJOR-ip4r \
 		postgresql-$PG_MAJOR-jsquery \
+		postgresql-$PG_MAJOR-mimeo \
 		postgresql-$PG_MAJOR-mysql-fdw \
 		postgresql-$PG_MAJOR-numeral \
 		postgresql-$PG_MAJOR-ogr-fdw \
@@ -137,12 +139,14 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-rational \
 		postgresql-$PG_MAJOR-repack \
 		postgresql-$PG_MAJOR-rum \
+		postgresql-$PG_MAJOR-semver \
 		postgresql-$PG_MAJOR-similarity \
 		postgresql-$PG_MAJOR-tdigest \
 		postgresql-$PG_MAJOR-tds-fdw \
 		postgresql-$PG_MAJOR-toastinfo \
 		postgresql-$PG_MAJOR-unit \
 		# postgresql-$PG_MAJOR-wal2json \
+		# postgresql-plperl-$PG_MAJOR \
 		postgresql-plpython3-$PG_MAJOR \
 	# extensions below are all here for PoWA
 		postgresql-$PG_MAJOR-hypopg \

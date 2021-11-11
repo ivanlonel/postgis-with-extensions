@@ -400,6 +400,10 @@ SELECT
 	'{"points": [{"x": 1, "y": 2}, {"x": 3.9, "y": 0.5}]}' @@ 'points.#:(x IS numeric AND y IS numeric)'::jsquery;
 
 
+-- https://github.com/omniti-labs/mimeo
+CREATE EXTENSION IF NOT EXISTS mimeo;
+
+
 -- https://github.com/df7cb/postgresql-numeral
 CREATE EXTENSION IF NOT EXISTS numeral;
 SELECT 'thirty'::numeral + 'twelve'::numeral as sum;
@@ -573,6 +577,30 @@ INSERT INTO pointcloud_formats (pcid, srid, schema) VALUES (1, 4326,
 SELECT ST_AsText(PC_MakePoint(1, ARRAY[-127, 45, 124.0, 4.0])::geometry);
 
 
+-- https://salsa.debian.org/postgresql/postgresql-debversion
+CREATE EXTENSION IF NOT EXISTS debversion;
+
+SELECT v::debversion
+FROM unnest(ARRAY[
+	'4.1.5-2',
+	'4.0.2-1',
+	'4.1.4-1',
+	'4.1.5-1',
+	'4.2.0-1',
+	'4.1.4-2',
+	'4.1.5-2.01',
+	'4.1.99-a2-1',
+	'5.2.1-2',
+	'5.0.0-3',
+	'5.1.98.2-2',
+	'3.1.4-1',
+	'5.2.3-1',
+	'0:5.2.2-1',
+	'0:5.2.4-1',
+	'1:3.2.3-1'
+]) AS v
+
+
 -- https://github.com/dimitri/prefix
 CREATE EXTENSION IF NOT EXISTS prefix;
 SELECT '123'::prefix_range @> '123456';
@@ -608,11 +636,35 @@ INSERT INTO test_rum(t) VALUES ('It looks like a beautiful place');
 CREATE INDEX rumidx ON test_rum USING rum (a rum_tsvector_ops);
 
 SELECT t, a <=> to_tsquery('english', 'beautiful | place') AS rank
-    FROM test_rum
-    WHERE a @@ to_tsquery('english', 'beautiful | place')
-    ORDER BY a <=> to_tsquery('english', 'beautiful | place');
+FROM test_rum
+WHERE a @@ to_tsquery('english', 'beautiful | place')
+ORDER BY a <=> to_tsquery('english', 'beautiful | place');
 
 DROP TABLE test_rum;
+
+
+-- https://github.com/theory/pg-semver
+CREATE EXTENSION IF NOT EXISTS semver;
+
+SELECT v::semver
+FROM unnest(ARRAY[
+	'1.2.2',
+	'0.2.2',
+	'0.0.0',
+	'0.1.999',
+	'9999.9999999.823823',
+	'1.0.0-beta1',
+	'1.0.0-beta2',
+	'1.0.0',
+	'1.0.0-1',
+	'1.0.0-alpha+d34dm34t',
+	'1.0.0+d34dm34t',
+	'20110204.0.0',
+	'1.0.0-alpha.0a',
+	'1.0.0+010',
+	'1.0.0+alpha.010',
+	'1.0.0-0AEF'
+]) AS v
 
 
 -- https://github.com/eulerto/pg_similarity
