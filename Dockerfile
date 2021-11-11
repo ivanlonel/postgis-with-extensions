@@ -103,7 +103,6 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-icu-ext \
 		postgresql-$PG_MAJOR-ip4r \
 		postgresql-$PG_MAJOR-jsquery \
-		postgresql-$PG_MAJOR-mimeo \
 		postgresql-$PG_MAJOR-mysql-fdw \
 		postgresql-$PG_MAJOR-numeral \
 		postgresql-$PG_MAJOR-ogr-fdw \
