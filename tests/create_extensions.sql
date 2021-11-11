@@ -594,7 +594,7 @@ FROM unnest(ARRAY[
 	'0:5.2.2-1',
 	'0:5.2.4-1',
 	'1:3.2.3-1'
-]) AS v
+]) AS v;
 
 
 -- https://github.com/dimitri/prefix
@@ -660,7 +660,7 @@ FROM unnest(ARRAY[
 	'1.0.0+010',
 	'1.0.0+alpha.010',
 	'1.0.0-0AEF'
-]) AS v
+]) AS v;
 
 
 -- https://github.com/eulerto/pg_similarity
