@@ -400,10 +400,6 @@ SELECT
 	'{"points": [{"x": 1, "y": 2}, {"x": 3.9, "y": 0.5}]}' @@ 'points.#:(x IS numeric AND y IS numeric)'::jsquery;
 
 
--- https://github.com/omniti-labs/mimeo
-CREATE EXTENSION IF NOT EXISTS mimeo;
-
-
 -- https://github.com/df7cb/postgresql-numeral
 CREATE EXTENSION IF NOT EXISTS numeral;
 SELECT 'thirty'::numeral + 'twelve'::numeral as sum;
