@@ -15,7 +15,7 @@ In order to run a basic container capable of serving a Postgres database with al
 docker run -e POSTGRES_PASSWORD=mysecretpassword -d ivanlonel/postgis-with-extensions
 ```
 
-[Here](compose_example) is a sample docker-compose stack definition, which includes a [powa-web](https://hub.docker.com/r/powateam/powa-web) container and a [pgadmin](https://hub.docker.com/r/dpage/pgadmin4) container. The Postgres container is built from a Dockerfile that extends this image by running `localedef` in order to ensure Postgres will use the locale specified in docker-compose.yml.
+[Here](https://github.com/ivanlonel/postgis-with-extensions/tree/master/compose_example) is a sample docker-compose stack definition, which includes a [powa-web](https://hub.docker.com/r/powateam/powa-web) container and a [pgadmin](https://hub.docker.com/r/dpage/pgadmin4) container. The Postgres container is built from a Dockerfile that extends this image by running `localedef` in order to ensure Postgres will use the locale specified in docker-compose.yml.
 
 For more detailed instructions about how to start and control your Postgres container, see the documentation for the `postgres` image [here](https://registry.hub.docker.com/_/postgres/).
 
