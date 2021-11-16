@@ -7,7 +7,19 @@ Tag labels follow the pattern `X-Y.Z`, where `X` is the *major* Postgres version
 
 The `latest` tag currently corresponds to `14-3.1`.
 
-### Available extensions:
+## Usage
+
+In order to run a basic container capable of serving a Postgres database with all extensions below available:
+
+```bash
+docker run -e POSTGRES_PASSWORD=mysecretpassword -d ivanlonel/postgis-with-extensions
+```
+
+[Here](compose_example) is a sample docker-compose stack definition, which includes a [powa-web](https://hub.docker.com/r/powateam/powa-web) container and a [pgadmin](https://hub.docker.com/r/dpage/pgadmin4) container. The Postgres container is built from a Dockerfile that extends this image by running `localedef` in order to ensure Postgres will use the locale specified in docker-compose.yml.
+
+For more detailed instructions about how to start and control your Postgres container, see the documentation for the `postgres` image [here](https://registry.hub.docker.com/_/postgres/).
+
+## Available extensions
 - [postgis](https://github.com/postgis/postgis)
 - [asn1oid](https://github.com/df7cb/pgsql-asn1oid)
 - [extra_window_functions](https://github.com/xocolatl/extra_window_functions)
