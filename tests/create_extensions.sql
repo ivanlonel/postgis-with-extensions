@@ -1,8 +1,8 @@
 \set VERBOSITY verbose
 \set ON_ERROR_STOP on
 
-CREATE DATABASE test;
-\c test
+CREATE DATABASE my_test_db;
+\c my_test_db
 
 
 SELECT * FROM pg_available_extensions;
@@ -758,11 +758,39 @@ $$ LANGUAGE plpython3u;
 SELECT py_test();
 
 
+-- https://github.com/timescale/timescaledb
+CREATE EXTENSION IF NOT EXISTS timescaledb;
+
+CREATE TABLE conditions (
+	time TIMESTAMPTZ NOT NULL,
+	location TEXT NOT NULL,
+	temperature DOUBLE,
+	humidity DOUBLE
+);
+
+SELECT create_hypertable('conditions', 'time');
+
+INSERT INTO conditions(time, location, temperature, humidity)
+	VALUES (NOW(), 'office', 70.0, 50.0);
+
+SELECT
+	time_bucket('15 minutes', time) AS fifteen_min,
+    location, COUNT(*),
+    MAX(temperature) AS max_temp,
+    MAX(humidity) AS max_hum
+FROM conditions
+WHERE time > NOW() - interval '3 hours'
+GROUP BY fifteen_min, location
+ORDER BY fifteen_min DESC, max_temp DESC;
+
+DROP TABLE conditions;
+
+
 SELECT * FROM pg_available_extensions;
 
 
 \c postgres
 
-SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'test' AND pid <> pg_backend_pid();
+SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'my_test_db' AND pid <> pg_backend_pid();
 
-DROP DATABASE test;
+DROP DATABASE my_test_db;

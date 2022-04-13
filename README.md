@@ -72,6 +72,7 @@ For more detailed instructions about how to start and control your Postgres cont
 - [sqlite_fdw](https://github.com/pgspider/sqlite_fdw)
 - [tdigest](https://github.com/tvondra/tdigest)
 - [tds_fdw](https://github.com/tds-fdw/tds_fdw)
+- [timescaledb](https://github.com/timescale/timescaledb)
 - [toastinfo](https://github.com/credativ/toastinfo)
 - [unit](https://github.com/df7cb/postgresql-unit)
 
