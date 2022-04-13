@@ -89,7 +89,9 @@ FROM base-image as final-stage
 # libaio1 is a runtime requirement for the Oracle client that oracle_fdw uses
 # libsqlite3-mod-spatialite is a runtime requirement for using spatialite with sqlite_fdw
 RUN curl -L https://packagecloud.io/timescale/timescaledb/gpgkey | apt-key add - && \
+	apt-get install -y --no-install-recommends lsb-release && \
 	sh -c "echo 'deb https://packagecloud.io/timescale/timescaledb/debian/ $(lsb_release -c -s) main' > /etc/apt/sources.list.d/timescaledb.list" && \
+	apt-get --purge remove -y lsb-release && \
 	apt-get update && \
 	apt-get upgrade -y && \
 	apt-get install -y --no-install-recommends \
