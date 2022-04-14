@@ -44,7 +44,7 @@ RUN apt-get install -y --no-install-recommends \
 FROM common-deps as build-timescaledb
 
 WORKDIR /tmp/timescaledb
-RUN apt-get install -y --no-install-recommends libsqlite3-dev && \
+RUN apt-get install -y --no-install-recommends cmake && \
 	ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/timescale/timescaledb/releases/latest)) && \
 	curl --fail -L "https://github.com/timescale/timescaledb/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
 	./bootstrap
