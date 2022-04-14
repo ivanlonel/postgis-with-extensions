@@ -41,6 +41,20 @@ RUN apt-get install -y --no-install-recommends \
 
 
 
+FROM common-deps as build-timescaledb
+
+WORKDIR /tmp/timescaledb
+RUN apt-get install -y --no-install-recommends libsqlite3-dev && \
+	ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/timescale/timescaledb/releases/latest)) && \
+	curl --fail -L "https://github.com/timescale/timescaledb/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
+	./bootstrap
+WORKDIR /tmp/timescaledb/build
+RUN make && \
+	make install
+
+
+
+
 FROM common-deps as build-sqlite_fdw
 
 WORKDIR /tmp/sqlite_fdw
@@ -89,19 +103,6 @@ FROM base-image as final-stage
 # libaio1 is a runtime requirement for the Oracle client that oracle_fdw uses
 # libsqlite3-mod-spatialite is a runtime requirement for using spatialite with sqlite_fdw
 RUN apt-get update && \
-	apt-get install -y --no-install-recommends \
-		apt-transport-https \
-		ca-certificates \
-		curl \
-		lsb-release && \
-	curl -L https://packagecloud.io/timescale/timescaledb/gpgkey | apt-key add - && \
-	sh -c "echo 'deb https://packagecloud.io/timescale/timescaledb/debian/ $(lsb_release -c -s) main' > /etc/apt/sources.list.d/timescaledb.list" && \
-	apt-get --purge remove -y \
-		apt-transport-https \
-		ca-certificates \
-		curl \
-		lsb-release && \
-	apt-get update && \
 	apt-get upgrade -y && \
 	apt-get install -y --no-install-recommends \
 		libaio1 \
@@ -160,7 +161,6 @@ RUN apt-get update && \
 		# postgresql-$PG_MAJOR-wal2json \
 		# postgresql-plperl-$PG_MAJOR \
 		postgresql-plpython3-$PG_MAJOR \
-		timescaledb-2-postgresql-$PG_MAJOR \
 	# extensions below are all here for PoWA
 		postgresql-$PG_MAJOR-hypopg \
 		postgresql-$PG_MAJOR-pg-qualstats \
@@ -177,6 +177,13 @@ COPY --from=powa-scripts \
 COPY --from=powa-scripts \
 	/tmp/powa/install_all_powa_ext.sql \
 	/usr/local/src/install_all_powa_ext.sql
+
+COPY --from=build-timescaledb \
+	/usr/share/postgresql/$PG_MAJOR/extension/timescaledb* \
+	/usr/share/postgresql/$PG_MAJOR/extension/
+COPY --from=build-timescaledb \
+	/usr/lib/postgresql/$PG_MAJOR/lib/timescaledb.so \
+	/usr/lib/postgresql/$PG_MAJOR/lib/timescaledb.so
 
 COPY --from=build-sqlite_fdw \
 	/usr/share/postgresql/$PG_MAJOR/extension/sqlite_fdw* \
