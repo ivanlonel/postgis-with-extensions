@@ -182,8 +182,8 @@ COPY --from=build-timescaledb \
 	/usr/share/postgresql/$PG_MAJOR/extension/timescaledb* \
 	/usr/share/postgresql/$PG_MAJOR/extension/
 COPY --from=build-timescaledb \
-	/usr/lib/postgresql/$PG_MAJOR/lib/timescaledb.so \
-	/usr/lib/postgresql/$PG_MAJOR/lib/timescaledb.so
+	/usr/lib/postgresql/$PG_MAJOR/lib/timescaledb* \
+	/usr/lib/postgresql/$PG_MAJOR/lib/
 
 COPY --from=build-sqlite_fdw \
 	/usr/share/postgresql/$PG_MAJOR/extension/sqlite_fdw* \
