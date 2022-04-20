@@ -1,8 +1,8 @@
 \set VERBOSITY verbose
 \set ON_ERROR_STOP on
 
-CREATE DATABASE test_db;
-\c test_db
+CREATE DATABASE test;
+\c test
 
 
 SELECT * FROM pg_available_extensions;
@@ -166,7 +166,7 @@ INSERT INTO apostles (name, geom, joined, height, born, clock, ts) VALUES
 
 CREATE SERVER wraparound
 	FOREIGN DATA WRAPPER ogr_fdw
-	OPTIONS (datasource 'Pg:dbname=test_db user=postgres', format 'PostgreSQL');
+	OPTIONS (datasource 'Pg:dbname=test user=postgres', format 'PostgreSQL');
 
 CREATE FOREIGN TABLE apostles_fdw (
 	fid integer,
@@ -791,6 +791,6 @@ SELECT * FROM pg_available_extensions;
 
 \c postgres
 
-SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'test_db' AND pid <> pg_backend_pid();
+SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'test' AND pid <> pg_backend_pid();
 
-DROP DATABASE test_db;
+DROP DATABASE test;
