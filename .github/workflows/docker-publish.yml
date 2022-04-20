@@ -78,7 +78,7 @@ jobs:
       - name: Run tests
         env:
           IMAGE_NAME: ${{ env.TEST_TAG }}
-        run: docker compose run sut
+        run: docker compose start sut
 
       - name: Log in to container registry
         if: ${{ github.event_name != 'pull_request' }}
