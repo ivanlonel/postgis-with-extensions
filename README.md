@@ -3,7 +3,7 @@
 [![ivanlonel/postgis-with-extensions][github-last-commit-image]][github-url]
 [![ivanlonel/postgis-with-extensions][github-workflow-status-image]][github-url]
 
-Tag labels follow the pattern `X-Y.Z`, where `X` is the *major* Postgres version (starting from version 11) and `Y.Z` is the *major.minor* Postgis version.
+Tag labels follow the pattern `X-Y.Z`, where `X` is the *major* Postgres version (starting from version 12) and `Y.Z` is the *major.minor* Postgis version.
 
 The `latest` tag currently corresponds to `14-3.2`.
 
