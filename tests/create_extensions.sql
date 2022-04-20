@@ -239,6 +239,10 @@ CREATE EXTENSION IF NOT EXISTS asn1oid;
 SELECT '1.3.6.1.4.1'::asn1oid;
 
 
+-- https://github.com/df7cb/pg_dirtyread
+CREATE EXTENSION pg_dirtyread;
+
+
 -- https://github.com/xocolatl/extra_window_functions
 CREATE EXTENSION IF NOT EXISTS extra_window_functions;
 

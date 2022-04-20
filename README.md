@@ -48,6 +48,7 @@ For more detailed instructions about how to start and control your Postgres cont
 - [pgrouting](https://github.com/pgRouting/pgrouting)
 - [pgtap](https://github.com/theory/pgtap)
 - [pg_cron](https://github.com/citusdata/pg_cron)
+- [pg_dirtyread](https://github.com/df7cb/pg_dirtyread)
 - [pg_fact_loader](https://github.com/enova/pg_fact_loader)
 - [pg_qualstats](https://github.com/powa-team/pg_qualstats)
 - [pg_rational](https://github.com/begriffs/pg_rational)

@@ -109,6 +109,7 @@ RUN apt-get update && \
 		libsqlite3-mod-spatialite \
 		postgresql-$PG_MAJOR-asn1oid \
 		postgresql-$PG_MAJOR-cron \
+		postgresql-$PG_MAJOR-dirtyread \
 		postgresql-$PG_MAJOR-debversion \
 		# postgresql-$PG_MAJOR-dirtyread \
 		postgresql-$PG_MAJOR-extra-window-functions \
