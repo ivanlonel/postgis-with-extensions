@@ -32,11 +32,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        postgres: [14, 13, 12, 11]
+        postgres: [14, 13, 12]
         postgis: ['3.2']
-        include:
-          - postgres: 11
-            postgis: '2.5'
 
     env:
       BASE_IMAGE_TAG: ${{ matrix.postgres }}-${{ matrix.postgis }}

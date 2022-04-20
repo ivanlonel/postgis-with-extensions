@@ -41,6 +41,20 @@ RUN apt-get install -y --no-install-recommends \
 
 
 
+FROM common-deps as build-timescaledb
+
+WORKDIR /tmp/timescaledb
+RUN apt-get install -y --no-install-recommends cmake libkrb5-dev && \
+	ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/timescale/timescaledb/releases/latest)) && \
+	curl --fail -L "https://github.com/timescale/timescaledb/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
+	./bootstrap
+WORKDIR /tmp/timescaledb/build
+RUN make && \
+	make install
+
+
+
+
 FROM common-deps as build-sqlite_fdw
 
 WORKDIR /tmp/sqlite_fdw
@@ -163,6 +177,13 @@ COPY --from=powa-scripts \
 COPY --from=powa-scripts \
 	/tmp/powa/install_all_powa_ext.sql \
 	/usr/local/src/install_all_powa_ext.sql
+
+COPY --from=build-timescaledb \
+	/usr/share/postgresql/$PG_MAJOR/extension/timescaledb* \
+	/usr/share/postgresql/$PG_MAJOR/extension/
+COPY --from=build-timescaledb \
+	/usr/lib/postgresql/$PG_MAJOR/lib/timescaledb* \
+	/usr/lib/postgresql/$PG_MAJOR/lib/
 
 COPY --from=build-sqlite_fdw \
 	/usr/share/postgresql/$PG_MAJOR/extension/sqlite_fdw* \
