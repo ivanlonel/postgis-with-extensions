@@ -685,6 +685,34 @@ DROP TABLE bar;
 
 
 -- https://github.com/tvondra/tdigest
+CREATE EXTENSION IF NOT EXISTS table_log;
+
+BEGIN;
+
+CREATE TABLE drop_test (
+  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  col1 text NOT NULL DEFAULT '',
+  col2 text NOT NULL DEFAULT '',
+  col3 text NOT NULL DEFAULT ''
+);
+
+SELECT table_log_init(5, 'public', 'drop_test', 'public', 'drop_test_log');
+
+INSERT INTO drop_test (col1, col2, col3) VALUES ('a1', 'b1', 'c1');
+SELECT * FROM drop_test;
+SELECT * FROM drop_test_log;
+
+ALTER TABLE drop_test DROP COLUMN col2;
+ALTER TABLE drop_test_log DROP COLUMN col2;
+
+INSERT INTO drop_test (col1, col3) VALUES ('a2', 'c2');
+SELECT * FROM drop_test;
+SELECT * FROM drop_test_log;
+
+ROLLBACK;
+
+
+-- https://github.com/tvondra/tdigest
 CREATE EXTENSION IF NOT EXISTS tdigest;
 
 CREATE TABLE t (a int, b int, c double precision);  -- table with some random source data
