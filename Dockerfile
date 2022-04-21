@@ -155,6 +155,7 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-rum \
 		postgresql-$PG_MAJOR-semver \
 		postgresql-$PG_MAJOR-similarity \
+		postgresql-$PG_MAJOR-tablelog \
 		postgresql-$PG_MAJOR-tdigest \
 		postgresql-$PG_MAJOR-tds-fdw \
 		postgresql-$PG_MAJOR-toastinfo \

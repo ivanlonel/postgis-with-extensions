@@ -71,6 +71,7 @@ For more detailed instructions about how to start and control your Postgres cont
 - [rum](https://github.com/postgrespro/rum)
 - [semver](https://github.com/theory/pg-semver)
 - [sqlite_fdw](https://github.com/pgspider/sqlite_fdw)
+- [table_log](https://github.com/credativ/table_log)
 - [tdigest](https://github.com/tvondra/tdigest)
 - [tds_fdw](https://github.com/tds-fdw/tds_fdw)
 - [timescaledb](https://github.com/timescale/timescaledb)
