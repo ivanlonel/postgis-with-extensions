@@ -103,7 +103,6 @@ FROM base-image as final-stage
 # libaio1 is a runtime requirement for the Oracle client that oracle_fdw uses
 # libsqlite3-mod-spatialite is a runtime requirement for using spatialite with sqlite_fdw
 RUN apt-get update && \
-	apt-get upgrade -y && \
 	apt-get install -y --no-install-recommends \
 		libaio1 \
 		libsqlite3-mod-spatialite \
