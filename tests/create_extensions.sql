@@ -485,16 +485,6 @@ SELECT * FROM finish();
 CREATE EXTENSION IF NOT EXISTS pldbgapi;
 
 
--- https://github.com/pllua/pllua
-CREATE EXTENSION IF NOT EXISTS plluau;
-CREATE EXTENSION IF NOT EXISTS hstore_plluau CASCADE;
-
-CREATE FUNCTION hello(person text) RETURNS text AS $$
-	return "Hello, " .. person .. ", from Lua!"
-$$ LANGUAGE plluau;
-SELECT hello('Fred');
-
-
 -- https://github.com/okbob/plpgsql_check
 CREATE EXTENSION IF NOT EXISTS plpgsql_check;
 

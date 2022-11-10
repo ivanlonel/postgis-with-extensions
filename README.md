@@ -60,7 +60,6 @@ For more detailed instructions about how to start and control your Postgres cont
 - [pg_track_settings](https://github.com/rjuju/pg_track_settings)
 - [pg_wait_sampling](https://github.com/postgrespro/pg_wait_sampling)
 - [pldebugger (pldbgapi)](https://github.com/EnterpriseDB/pldebugger)
-- [pllua](https://github.com/pllua/pllua)
 - [plpgsql_check](https://github.com/okbob/plpgsql_check)
 - [plproxy](https://github.com/plproxy/plproxy)
 - [plpython3](https://www.postgresql.org/docs/current/plpython.html)
