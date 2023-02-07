@@ -83,4 +83,4 @@ For more detailed instructions about how to start and control your Postgres cont
 [github-url]: https://github.com/ivanlonel/postgis-with-extensions/
 [docker-pulls-image]: https://img.shields.io/docker/pulls/ivanlonel/postgis-with-extensions.svg?style=flat
 [github-last-commit-image]: https://img.shields.io/github/last-commit/ivanlonel/postgis-with-extensions.svg?style=flat
-[github-workflow-status-image]: https://img.shields.io/github/workflow/status/ivanlonel/postgis-with-extensions/Create%20and%20publish%20a%20Docker%20image
+[github-workflow-status-image]: https://img.shields.io/github/actions/workflow/status/ivanlonel/postgis-with-extensions/docker-publish.yml?branch=master
