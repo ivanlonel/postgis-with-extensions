@@ -111,7 +111,6 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-cron \
 		postgresql-$PG_MAJOR-dirtyread \
 		postgresql-$PG_MAJOR-debversion \
-		# postgresql-$PG_MAJOR-dirtyread \
 		postgresql-$PG_MAJOR-extra-window-functions \
 		postgresql-$PG_MAJOR-first-last-agg \
 		postgresql-$PG_MAJOR-hll \
