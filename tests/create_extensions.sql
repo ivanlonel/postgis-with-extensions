@@ -842,6 +842,27 @@ CREATE EXTENSION IF NOT EXISTS unit;
 SELECT '9.81 N'::unit / 'kg' AS gravity;
 
 
+-- https://www.postgresql.org/docs/current/plperl.html
+CREATE EXTENSION IF NOT EXISTS plperl;
+CREATE OR REPLACE FUNCTION concat_array_elements(text[]) RETURNS TEXT AS $$
+    my $arg = shift;
+    my $result = "";
+    return undef if (!defined $arg);
+
+    # as an array reference
+    for (@$arg) {
+        $result .= $_;
+    }
+
+    # also works as a string
+    $result .= $arg;
+
+    return $result;
+$$ LANGUAGE plperl;
+
+SELECT concat_array_elements(ARRAY['PL','/','Perl']);
+
+
 -- https://www.postgresql.org/docs/current/plpython.html
 CREATE EXTENSION IF NOT EXISTS plpython3u;
 CREATE EXTENSION IF NOT EXISTS hstore_plpython3u CASCADE;
