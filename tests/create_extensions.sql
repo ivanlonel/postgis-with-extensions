@@ -13,6 +13,83 @@ CREATE EXTENSION IF NOT EXISTS btree_gist;
 CREATE EXTENSION IF NOT EXISTS fuzzystrmatch;
 
 
+-- https://github.com/pgadmin-org/pgagent
+CREATE EXTENSION pgagent;
+
+/* Create pgAgent job - https://karatejb.blogspot.com/2020/04/postgresql-pgagent-scheduling-agent.html */
+DO $$
+DECLARE
+    jid integer;
+    scid integer;
+BEGIN
+-- Creating a new job
+INSERT INTO pgagent.pga_job(
+    jobjclid, jobname, jobdesc, jobhostagent, jobenabled
+) VALUES (
+    1::integer, 'Routine Clean'::text, ''::text, ''::text, true
+) RETURNING jobid INTO jid;
+
+-- Steps
+-- Inserting a step (jobid: NULL)
+INSERT INTO pgagent.pga_jobstep (
+    jstjobid, jstname, jstenabled, jstkind,
+    jstconnstr, jstdbname, jstonerror,
+    jstcode, jstdesc
+) VALUES (
+    jid, 'Clean_News'::text, true, 's'::character(1),
+    'host=localhost port=5432 dbname=postgres connect_timeout=10 user=''postgres'''::text, ''::name, 'f'::character(1),
+    'DELETE FROM public."News"'::text, ''::text
+) ;
+
+-- Schedules
+-- Inserting a schedule
+INSERT INTO pgagent.pga_schedule(
+    jscjobid, jscname, jscdesc, jscenabled,
+    jscstart, jscend,    jscminutes, jschours, jscweekdays, jscmonthdays, jscmonths
+) VALUES (
+    jid, 'Daily'::text, ''::text, true,
+    '2020-04-24 06:14:44+00'::timestamp with time zone, '2020-04-30 05:51:17+00'::timestamp with time zone,
+    -- Minutes
+    ARRAY[false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false]::boolean[],
+    -- Hours
+    ARRAY[false,false,false,false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,false,false]::boolean[],
+    -- Week days
+    ARRAY[false,false,false,false,false,false,false]::boolean[],
+    -- Month days
+    ARRAY[false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false]::boolean[],
+    -- Months
+    ARRAY[false,false,false,false,false,false,false,false,false,false,false,false]::boolean[]
+) RETURNING jscid INTO scid;
+END
+$$;
+
+SELECT * from pgagent."pga_job";
+SELECT * from pgagent."pga_jobstep";
+SELECT * from pgagent."pga_schedule";
+
+/* Delete pgAgent job - https://karatejb.blogspot.com/2020/04/postgresql-pgagent-scheduling-agent.html */
+DO $$
+DECLARE
+    jname VARCHAR(50) :='Routine Clean';
+    jid INTEGER;
+BEGIN
+
+SELECT "jobid" INTO jid from pgagent."pga_job"
+WHERE "jobname"=jname;
+
+DELETE FROM pgagent."pga_schedule"
+WHERE "jscjobid"=jid;
+
+DELETE FROM pgagent.pga_jobstep
+WHERE "jstjobid"=jid;
+
+DELETE FROM pgagent."pga_job"
+WHERE "jobid"=jid;
+
+END
+$$;
+
+
 -- https://github.com/citusdata/pg_cron
 CREATE EXTENSION pg_cron;
 SELECT cron.schedule('nightly-vacuum', '0 3 * * *', 'VACUUM');

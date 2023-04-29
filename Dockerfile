@@ -106,6 +106,7 @@ RUN apt-get update && \
 	apt-get install -y --no-install-recommends \
 		libaio1 \
 		libsqlite3-mod-spatialite \
+		pgagent \
 		postgresql-$PG_MAJOR-asn1oid \
 		postgresql-$PG_MAJOR-cron \
 		postgresql-$PG_MAJOR-dirtyread \
