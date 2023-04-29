@@ -14,7 +14,7 @@ CREATE EXTENSION IF NOT EXISTS fuzzystrmatch;
 
 
 -- https://github.com/pgadmin-org/pgagent
-CREATE EXTENSION pgagent;
+CREATE EXTENSION IF NOT EXISTS pgagent;
 
 /* Create pgAgent job - https://karatejb.blogspot.com/2020/04/postgresql-pgagent-scheduling-agent.html */
 DO $$
@@ -109,6 +109,12 @@ CREATE EXTENSION IF NOT EXISTS address_standardizer;
 CREATE EXTENSION IF NOT EXISTS pgaudit;
 SET pgaudit.log = 'all, -misc';
 SET pgaudit.log_level = notice;
+
+-- https://github.com/fmbiete/pgauditlogtofile
+CREATE EXTENSION IF NOT EXISTS pgauditlogtofile;
+SHOW pgaudit.log_directory;
+SHOW pgaudit.log_filename;
+SHOW pgaudit.log_rotation_age;
 
 
 -- https://github.com/HypoPG/hypopg

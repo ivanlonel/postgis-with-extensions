@@ -125,6 +125,7 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-periods \
 		postgresql-$PG_MAJOR-pg-fact-loader \
 		postgresql-$PG_MAJOR-pgaudit \
+		postgresql-$PG_MAJOR-pgauditlogtofile \
 		postgresql-$PG_MAJOR-pgfincore \
 		postgresql-$PG_MAJOR-pgl-ddl-deploy \
 		postgresql-$PG_MAJOR-pglogical \
