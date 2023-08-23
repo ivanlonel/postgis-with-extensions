@@ -26,6 +26,7 @@ For more detailed instructions about how to start and control your Postgres cont
 - [asn1oid](https://github.com/df7cb/pgsql-asn1oid)
 - [extra_window_functions](https://github.com/xocolatl/extra_window_functions)
 - [first_last_agg](https://github.com/wulczer/first_last_agg)
+- [h3-pg](https://github.com/zachasme/h3-pg)
 - [hll](https://github.com/citusdata/postgresql-hll)
 - [hypopg](https://github.com/HypoPG/hypopg)
 - [icu_ext](https://github.com/dverite/icu_ext)

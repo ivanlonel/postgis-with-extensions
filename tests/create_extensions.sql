@@ -460,6 +460,13 @@ SELECT last(x order by y) FROM (VALUES (1, 3), (2, 1), (3, 2)) AS v(x, y);
 SELECT first(x order by y) FROM (VALUES (1, 3), (2, 1), (3, 2)) AS v(x, y);
 
 
+-- https://github.com/zachasme/h3-pg
+CREATE EXTENSION h3;
+CREATE EXTENSION h3_postgis;
+SELECT h3_lat_lng_to_cell(ST_Point(-46.629055, -23.559378), 6);
+SELECT ST_AsText(h3_cell_to_boundary_geometry('86a8100c7ffffff'));
+
+
 -- https://github.com/citusdata/postgresql-hll
 CREATE EXTENSION IF NOT EXISTS hll;
 SELECT hll_empty();

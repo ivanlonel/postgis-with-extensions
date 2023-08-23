@@ -41,10 +41,34 @@ RUN apt-get install -y --no-install-recommends \
 
 
 
-FROM common-deps as build-timescaledb
+FROM common-deps as cmake-deps
+
+RUN apt-get install -y --no-install-recommends build-essential checkinstall zlib1g-dev libssl-dev && \
+	ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/Kitware/CMake/releases/latest)) && \
+	curl --fail -L "https://github.com/Kitware/CMake/archive/v3.27.3.tar.gz" | tar -zx --strip-components=1 -C . && \
+	./bootstrap && \
+	make && \
+	make install
+
+
+
+
+FROM cmake-deps as build-h3
+
+WORKDIR /tmp/h3
+RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/zachasme/h3-pg/releases/latest)) && \
+	curl --fail -L "https://github.com/zachasme/h3-pg/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
+	cmake -B build -DCMAKE_BUILD_TYPE=Release && \
+	cmake --build build && \
+	cmake --install build --component h3-pg
+
+
+
+
+FROM cmake-deps as build-timescaledb
 
 WORKDIR /tmp/timescaledb
-RUN apt-get install -y --no-install-recommends cmake libkrb5-dev && \
+RUN apt-get install -y --no-install-recommends libkrb5-dev && \
 	ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/timescale/timescaledb/releases/latest)) && \
 	curl --fail -L "https://github.com/timescale/timescaledb/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
 	./bootstrap
@@ -193,6 +217,13 @@ COPY --from=powa-scripts \
 COPY --from=powa-scripts \
 	/tmp/powa/install_all_powa_ext.sql \
 	/usr/local/src/install_all_powa_ext.sql
+
+COPY --from=build-h3 \
+	/usr/share/postgresql/$PG_MAJOR/extension/h3* \
+	/usr/share/postgresql/$PG_MAJOR/extension/
+COPY --from=build-h3 \
+	/usr/lib/postgresql/$PG_MAJOR/lib/h3* \
+	/usr/lib/postgresql/$PG_MAJOR/lib/
 
 COPY --from=build-timescaledb \
 	/usr/share/postgresql/$PG_MAJOR/extension/timescaledb* \
