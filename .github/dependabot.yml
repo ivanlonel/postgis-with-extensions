@@ -1,12 +1,19 @@
 version: 2
 updates:
   - package-ecosystem: docker
-    directory: "/"
+    directory: /
     schedule:
-      interval: daily
-    open-pull-requests-limit: 10
+      interval: weekly
+    groups:
+      img-dependencies:
+        patterns:
+          - "*"
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: daily
+      interval: weekly
+    groups:
+      ci-dependencies:
+        patterns:
+          - "*"
