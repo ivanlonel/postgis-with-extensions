@@ -147,8 +147,8 @@ RUN apt-get update && \
 		pgagent \
 		postgresql-$PG_MAJOR-asn1oid \
 		postgresql-$PG_MAJOR-cron \
-		postgresql-$PG_MAJOR-dirtyread \
 		postgresql-$PG_MAJOR-debversion \
+		postgresql-$PG_MAJOR-dirtyread \
 		postgresql-$PG_MAJOR-extra-window-functions \
 		postgresql-$PG_MAJOR-first-last-agg \
 		postgresql-$PG_MAJOR-hll \
@@ -173,6 +173,7 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-pgpcre \
 		postgresql-$PG_MAJOR-pgq-node \
 		postgresql-$PG_MAJOR-pgrouting \
+        postgresql-$PG_MAJOR-pgrouting-scripts \
 		# postgresql-$PG_MAJOR-pgsphere \
 		postgresql-$PG_MAJOR-pgtap \
 		postgresql-$PG_MAJOR-pldebugger \
