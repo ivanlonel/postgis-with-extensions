@@ -707,6 +707,12 @@ SELECT 0.263157894737::float::rational;
 CREATE EXTENSION IF NOT EXISTS pg_repack;
 
 
+-- https://github.com/segasai/q3c
+CREATE EXTENSION q3c;
+SELECT q3c_version();
+SELECT q3c_ang2ipix(0, 0);
+
+
 -- https://github.com/postgrespro/rum
 CREATE EXTENSION IF NOT EXISTS rum;
 

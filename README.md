@@ -74,6 +74,7 @@ For more detailed instructions about how to start and control your Postgres cont
 - [powa (archivist)](https://github.com/powa-team/powa-archivist)
 - [prefix](https://github.com/dimitri/prefix)
 - [prioritize](https://github.com/schmiddy/pg_prioritize)
+- [q3c](https://github.com/segasai/q3c)
 - [rum](https://github.com/postgrespro/rum)
 - [semver](https://github.com/theory/pg-semver)
 - [sqlite_fdw](https://github.com/pgspider/sqlite_fdw)

@@ -188,7 +188,7 @@ RUN apt-get update && \
 		# postgresql-$PG_MAJOR-preprepare \
 		postgresql-$PG_MAJOR-prioritize \
 		# postgresql-$PG_MAJOR-python3-multicorn \
-		# postgresql-$PG_MAJOR-q3c \
+		postgresql-$PG_MAJOR-q3c \
 		postgresql-$PG_MAJOR-rational \
 		postgresql-$PG_MAJOR-repack \
 		postgresql-$PG_MAJOR-rum \
