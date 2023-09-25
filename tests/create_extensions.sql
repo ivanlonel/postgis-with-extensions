@@ -760,6 +760,11 @@ FROM unnest(ARRAY[
 ]) AS v;
 
 
+-- https://github.com/cybertec-postgresql/pg_show_plans
+CREATE EXTENSION pg_show_plans;
+SELECT * FROM pg_show_plans;
+
+
 -- https://github.com/eulerto/pg_similarity
 CREATE EXTENSION IF NOT EXISTS pg_similarity;
 
