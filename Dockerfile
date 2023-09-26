@@ -79,6 +79,14 @@ RUN make && \
 
 
 
+FROM common-deps as pgxn
+
+RUN apt-get install -y --no-install-recommends pgxnclient && \
+	pgxn install pg_uuidv7
+
+
+
+
 FROM common-deps as build-sqlite_fdw
 
 WORKDIR /tmp/sqlite_fdw
@@ -206,6 +214,13 @@ COPY --from=powa-scripts \
 COPY --from=powa-scripts \
 	/tmp/powa/install_all_powa_ext.sql \
 	/usr/local/src/install_all_powa_ext.sql
+
+COPY --from=pgxn \
+	/usr/share/postgresql/$PG_MAJOR/extension/ \
+	/usr/share/postgresql/$PG_MAJOR/extension/
+COPY --from=pgxn \
+	/usr/lib/postgresql/$PG_MAJOR/lib \
+	/usr/lib/postgresql/$PG_MAJOR/lib
 
 COPY --from=build-h3 \
 	/usr/share/postgresql/$PG_MAJOR/extension/h3* \

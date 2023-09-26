@@ -867,6 +867,11 @@ CREATE EXTENSION IF NOT EXISTS unit;
 SELECT '9.81 N'::unit / 'kg' AS gravity;
 
 
+-- https://github.com/fboulnois/pg_uuidv7
+CREATE EXTENSION IF NOT EXISTS pg_uuidv7;
+SELECT uuid_generate_v7();
+
+
 -- https://www.postgresql.org/docs/current/plperl.html
 CREATE EXTENSION IF NOT EXISTS plperl;
 CREATE OR REPLACE FUNCTION concat_array_elements(text[]) RETURNS TEXT AS $$

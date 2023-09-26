@@ -63,6 +63,7 @@ For more detailed instructions about how to start and control your Postgres cont
 - [pg_similarity](https://github.com/eulerto/pg_similarity)
 - [pg_stat_kcache](https://github.com/powa-team/pg_stat_kcache)
 - [pg_track_settings](https://github.com/rjuju/pg_track_settings)
+- [pg_uuidv7](https://github.com/fboulnois/pg_uuidv7)
 - [pg_wait_sampling](https://github.com/postgrespro/pg_wait_sampling)
 - [pldebugger (pldbgapi)](https://github.com/EnterpriseDB/pldebugger)
 - [PL/Perl](https://www.postgresql.org/docs/current/plperl.html)
