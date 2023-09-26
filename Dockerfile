@@ -79,20 +79,6 @@ RUN make && \
 
 
 
-FROM common-deps as build-pgvector
-
-WORKDIR /tmp
-ARG REPO=https://github.com/pgvector/pgvector.git
-RUN apt-get install -y --no-install-recommends git && \
-	git clone $REPO --single-branch --branch $(git ls-remote --tags --refs $REPO | tail -n1 | cut -d/ -f3)
-WORKDIR /tmp/pgvector
-RUN make clean && \
-		make OPTFLAGS="" && \
-		make install
-
-
-
-
 FROM common-deps as build-sqlite_fdw
 
 WORKDIR /tmp/sqlite_fdw
@@ -176,6 +162,7 @@ RUN apt-get update && \
         postgresql-$PG_MAJOR-pgrouting-scripts \
 		# postgresql-$PG_MAJOR-pgsphere \
 		postgresql-$PG_MAJOR-pgtap \
+		postgresql-$PG_MAJOR-pgvector \
 		postgresql-$PG_MAJOR-pldebugger \
 		# postgresql-$PG_MAJOR-pljava \
 		# postgresql-$PG_MAJOR-pllua \
@@ -232,13 +219,6 @@ COPY --from=build-timescaledb \
 	/usr/share/postgresql/$PG_MAJOR/extension/
 COPY --from=build-timescaledb \
 	/usr/lib/postgresql/$PG_MAJOR/lib/timescaledb* \
-	/usr/lib/postgresql/$PG_MAJOR/lib/
-
-COPY --from=build-pgvector \
-	/usr/share/postgresql/$PG_MAJOR/extension/vector* \
-	/usr/share/postgresql/$PG_MAJOR/extension/
-COPY --from=build-pgvector \
-	/usr/lib/postgresql/$PG_MAJOR/lib/vector* \
 	/usr/lib/postgresql/$PG_MAJOR/lib/
 
 COPY --from=build-sqlite_fdw \
