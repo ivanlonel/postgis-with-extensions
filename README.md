@@ -24,6 +24,7 @@ For more detailed instructions about how to start and control your Postgres cont
 
 - [postgis](https://github.com/postgis/postgis)
 - [asn1oid](https://github.com/df7cb/pgsql-asn1oid)
+- [ddlx](https://github.com/lacanoid/pgddl)
 - [extra_window_functions](https://github.com/xocolatl/extra_window_functions)
 - [first_last_agg](https://github.com/wulczer/first_last_agg)
 - [h3-pg](https://github.com/zachasme/h3-pg)

@@ -82,6 +82,7 @@ RUN make && \
 FROM common-deps as pgxn
 
 RUN apt-get install -y --no-install-recommends pgxnclient && \
+	pgxn install ddlx && \
 	pgxn install pg_uuidv7
 
 

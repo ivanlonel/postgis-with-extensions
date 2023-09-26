@@ -322,6 +322,11 @@ CREATE EXTENSION IF NOT EXISTS asn1oid;
 SELECT '1.3.6.1.4.1'::asn1oid;
 
 
+-- https://github.com/lacanoid/pgddl
+CREATE EXTENSION ddlx SCHEMA pg_catalog;
+SELECT ddlx_create(oid) FROM pg_database WHERE datname=current_database();
+
+
 -- https://github.com/df7cb/pg_dirtyread
 CREATE EXTENSION pg_dirtyread;
 
