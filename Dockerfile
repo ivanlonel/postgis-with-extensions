@@ -69,7 +69,8 @@ FROM cmake-deps as build-timescaledb
 
 WORKDIR /tmp/timescaledb
 RUN apt-get install -y --no-install-recommends libkrb5-dev && \
-	ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/timescale/timescaledb/releases/latest)) && \
+	URL_END=$([ "$PG_MAJOR" = "12" ] && echo "tag/2.11.2" || echo "latest") && \
+	ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/timescale/timescaledb/releases/${URL_END})) && \
 	curl --fail -L "https://github.com/timescale/timescaledb/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
 	./bootstrap
 WORKDIR /tmp/timescaledb/build
