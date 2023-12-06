@@ -53,6 +53,7 @@ For more detailed instructions about how to start and control your Postgres cont
 - [pgq_node](https://github.com/pgq/pgq-node)
 - [pgrouting](https://github.com/pgRouting/pgrouting)
 - [pgtap](https://github.com/theory/pgtap)
+- [pguint](https://github.com/petere/pguint)
 - [pgvector](https://github.com/pgvector/pgvector)
 - [pg_cron](https://github.com/citusdata/pg_cron)
 - [pg_dirtyread](https://github.com/df7cb/pg_dirtyread)
