@@ -89,6 +89,17 @@ RUN apt-get install -y --no-install-recommends pgxnclient && \
 
 
 
+FROM common-deps as build-pguint
+
+WORKDIR /tmp/pguint
+RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/petere/pguint/releases/latest)) && \
+	curl --fail -L "https://github.com/petere/pguint/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
+	make && \
+	make install
+
+
+
+
 FROM common-deps as build-sqlite_fdw
 
 WORKDIR /tmp/sqlite_fdw
@@ -236,6 +247,13 @@ COPY --from=build-timescaledb \
 	/usr/share/postgresql/$PG_MAJOR/extension/
 COPY --from=build-timescaledb \
 	/usr/lib/postgresql/$PG_MAJOR/lib/timescaledb* \
+	/usr/lib/postgresql/$PG_MAJOR/lib/
+
+COPY --from=build-pguint \
+	/usr/share/postgresql/$PG_MAJOR/extension/uint* \
+	/usr/share/postgresql/$PG_MAJOR/extension/
+COPY --from=build-pguint \
+	/usr/lib/postgresql/$PG_MAJOR/lib/uint* \
 	/usr/lib/postgresql/$PG_MAJOR/lib/
 
 COPY --from=build-sqlite_fdw \

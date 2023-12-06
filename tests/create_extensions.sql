@@ -576,6 +576,18 @@ SELECT ok(TRUE);
 SELECT * FROM finish();
 
 
+-- https://github.com/petere/pguint
+CREATE EXTENSION uint;
+CREATE TABLE uint_test (
+    i1 int1,  -- signed 8-bit integer
+	u1 uint1,  -- unsigned 8-bit integer
+	u2 uint2,  -- unsigned 16-bit integer
+	u4 uint4,  -- unsigned 32-bit integer
+	u8 uint8  -- unsigned 64-bit integer
+);
+INSERT INTO uint_test VALUES (-128, 0, 0, 0, 0), (127, 255, 65535, 4294967295, 18446744073709551615);
+
+
 -- https://github.com/pgvector/pgvector
 CREATE EXTENSION vector;
 CREATE TABLE items (id bigserial PRIMARY KEY, embedding vector(3));
