@@ -45,7 +45,7 @@ FROM common-deps as cmake-deps
 
 RUN apt-get install -y --no-install-recommends build-essential checkinstall zlib1g-dev libssl-dev && \
 	ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/Kitware/CMake/releases/latest)) && \
-	curl --fail -L "https://github.com/Kitware/CMake/archive/v3.27.3.tar.gz" | tar -zx --strip-components=1 -C . && \
+	curl --fail -L "https://github.com/Kitware/CMake/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
 	./bootstrap && \
 	make && \
 	make install
