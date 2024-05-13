@@ -122,16 +122,16 @@ ARG ORACLE_SDK_URL=https://download.oracle.com/otn_software/linux/instantclient/
 RUN apt-get install -y --no-install-recommends unzip && \
 	# instant client
 	curl --fail -L -o instant_client.zip ${ORACLE_CLIENT_URL} && \
-	unzip instant_client.zip && \
+	unzip instant_client.zip -x META-INF/* && \
 	# sqlplus
 	curl --fail -L -o sqlplus.zip ${ORACLE_SQLPLUS_URL} && \
-	unzip sqlplus.zip && \
+	unzip sqlplus.zip -x META-INF/* && \
 	# sdk
 	curl --fail -L -o sdk.zip ${ORACLE_SDK_URL} && \
-	unzip sdk.zip && \
+	unzip sdk.zip -x META-INF/* && \
 	# install
 	mkdir -p ${ORACLE_HOME} && \
-	mv ./instantclient*/* ${ORACLE_HOME}
+	mv ./instantclient_*/* ${ORACLE_HOME}
 
 # Install oracle_fdw
 WORKDIR /tmp/oracle_fdw
