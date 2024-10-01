@@ -1,6 +1,6 @@
 ARG BASE_IMAGE_TAG=latest
 
-FROM postgis/postgis:$BASE_IMAGE_TAG as base-image
+FROM postgis/postgis:$BASE_IMAGE_TAG AS base-image
 
 ENV ORACLE_HOME /usr/lib/oracle/client
 ENV PATH $PATH:${ORACLE_HOME}
@@ -8,7 +8,7 @@ ENV PATH $PATH:${ORACLE_HOME}
 
 
 
-FROM base-image as basic-deps
+FROM base-image AS basic-deps
 
 RUN apt-get update && \
 	apt-get install -y --no-install-recommends \
@@ -18,7 +18,7 @@ RUN apt-get update && \
 
 
 
-FROM basic-deps as powa-scripts
+FROM basic-deps AS powa-scripts
 
 WORKDIR /tmp/powa
 RUN (curl --fail -LOJ "https://raw.githubusercontent.com/powa-team/powa-podman/master/powa-archivist/$PG_MAJOR/setup_powa-archivist.sh" || \
@@ -29,7 +29,7 @@ RUN (curl --fail -LOJ "https://raw.githubusercontent.com/powa-team/powa-podman/m
 
 
 
-FROM basic-deps as common-deps
+FROM basic-deps AS common-deps
 
 # /var/lib/apt/lists/ still has the indexes from parent stage, so there's no need to run apt-get update again.
 # (unless the parent stage cache is not invalidated...)
@@ -41,7 +41,7 @@ RUN apt-get install -y --no-install-recommends \
 
 
 
-FROM common-deps as cmake-deps
+FROM common-deps AS cmake-deps
 
 RUN apt-get install -y --no-install-recommends build-essential checkinstall zlib1g-dev libssl-dev && \
 	ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/Kitware/CMake/releases/latest)) && \
@@ -53,7 +53,7 @@ RUN apt-get install -y --no-install-recommends build-essential checkinstall zlib
 
 
 
-FROM cmake-deps as build-h3
+FROM cmake-deps AS build-h3
 
 WORKDIR /tmp/h3
 RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/zachasme/h3-pg/releases/latest)) && \
@@ -65,7 +65,7 @@ RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://g
 
 
 
-FROM cmake-deps as build-timescaledb
+FROM cmake-deps AS build-timescaledb
 
 WORKDIR /tmp/timescaledb
 RUN apt-get install -y --no-install-recommends libkrb5-dev && \
@@ -80,7 +80,7 @@ RUN make && \
 
 
 
-FROM common-deps as pgxn
+FROM common-deps AS pgxn
 
 RUN apt-get install -y --no-install-recommends pgxnclient && \
 	pgxn install ddlx && \
@@ -89,7 +89,7 @@ RUN apt-get install -y --no-install-recommends pgxnclient && \
 
 
 
-FROM common-deps as build-pguint
+FROM common-deps AS build-pguint
 
 WORKDIR /tmp/pguint
 RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/petere/pguint/releases/latest)) && \
@@ -100,7 +100,7 @@ RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://g
 
 
 
-FROM common-deps as build-sqlite_fdw
+FROM common-deps AS build-sqlite_fdw
 
 WORKDIR /tmp/sqlite_fdw
 RUN apt-get install -y --no-install-recommends libsqlite3-dev && \
@@ -112,7 +112,7 @@ RUN apt-get install -y --no-install-recommends libsqlite3-dev && \
 
 
 
-FROM common-deps as build-oracle_fdw
+FROM common-deps AS build-oracle_fdw
 
 # Latest version
 ARG ORACLE_CLIENT_URL=https://download.oracle.com/otn_software/linux/instantclient/instantclient-basic-linuxx64.zip
@@ -143,7 +143,7 @@ RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://g
 
 
 
-FROM base-image as final-stage
+FROM base-image AS final-stage
 
 # libaio1 is a runtime requirement for the Oracle client that oracle_fdw uses
 # libsqlite3-mod-spatialite is a runtime requirement for using spatialite with sqlite_fdw
