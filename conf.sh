@@ -7,7 +7,7 @@ PREVIOUS_PRELOAD_LIBRARIES=$(sed -nE "$(sed -n '/^\s*shared_preload_libraries\s*
 
 # https://github.com/soycacan/pldebugger says '$libdir/plugin_debugger' should be added to shared_preload_libraries.
 # TO-DO: Test it this way to see if $libdir/ is actually necessary.
-NEW_PRELOAD_LIBRARIES="pg_cron,pgaudit,pgauditlogtofile,pglogical,pglogical_ticker,pgmemcache,plugin_debugger,pg_show_plans,pg_similarity,timescaledb"  # ,pg_partman_bgw
+NEW_PRELOAD_LIBRARIES="pgaudit,pgauditlogtofile,pglogical,pglogical_ticker,pgmemcache,pg_cron,pg_show_plans,pg_similarity,pg_stat_statements,plugin_debugger,postgis-3,timescaledb"  # ,pg_partman_bgw
 
 cat >> ${PGDATA}/postgresql.conf << EOT
 listen_addresses = '*'
@@ -19,6 +19,10 @@ cron.database_name = '${PG_CRON_DB:-${POSTGRES_DB:-${POSTGRES_USER:-postgres}}}'
 
 ## pg_partman
 #pg_partman_bgw.dbname = '${PG_PARTMAN_DB:-${POSTGRES_DB:-${POSTGRES_USER:-postgres}}}'
+
+# MobilityDB recomendation
+max_locks_per_transaction = 128
+timescaledb.telemetry_level = off
 
 # pglogical
 wal_level = 'logical'

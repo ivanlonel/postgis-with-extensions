@@ -74,7 +74,22 @@ RUN apt-get install -y --no-install-recommends libkrb5-dev && \
 	curl --fail -L "https://github.com/timescale/timescaledb/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
 	./bootstrap
 WORKDIR /tmp/timescaledb/build
-RUN make && \
+RUN make -j$(nproc) && \
+	make install
+
+
+
+
+FROM cmake-deps AS build-mobilitydb
+
+WORKDIR /tmp/mobilitydb
+RUN apt-get install -y --no-install-recommends libgeos++-dev libgsl-dev libjson-c-dev libproj-dev && \
+	URL_END=$(case "$PG_MAJOR" in ("12") echo "tag/v1.1.2";; (*) echo "latest";; esac) && \
+	ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/MobilityDB/MobilityDB/releases/${URL_END})) && \
+	curl --fail -L "https://github.com/MobilityDB/MobilityDB/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C .
+WORKDIR /tmp/mobilitydb/build
+RUN cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON -DCMAKE_POLICY_DEFAULT_CMP0069=NEW .. && \
+	make -j$(nproc) && \
 	make install
 
 
@@ -145,11 +160,13 @@ RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://g
 
 FROM base-image AS final-stage
 
-# libaio1 is a runtime requirement for the Oracle client that oracle_fdw uses
-# libsqlite3-mod-spatialite is a runtime requirement for using spatialite with sqlite_fdw
 RUN apt-get update && \
 	apt-get install -y --no-install-recommends \
+		# runtime requirement for the Oracle client that oracle_fdw uses
 		libaio1 \
+        # MobilityDB missing runtime dependency from libgsl-dev
+        libgsl25 \
+		# runtime requirement for using spatialite with sqlite_fdw
 		libsqlite3-mod-spatialite \
 		pgagent \
 		postgresql-$PG_MAJOR-asn1oid \
@@ -247,6 +264,13 @@ COPY --from=build-timescaledb \
 	/usr/share/postgresql/$PG_MAJOR/extension/
 COPY --from=build-timescaledb \
 	/usr/lib/postgresql/$PG_MAJOR/lib/timescaledb* \
+	/usr/lib/postgresql/$PG_MAJOR/lib/
+
+COPY --from=build-mobilitydb \
+	/usr/share/postgresql/$PG_MAJOR/extension/ \
+	/usr/share/postgresql/$PG_MAJOR/extension/
+COPY --from=build-mobilitydb \
+	/usr/lib/postgresql/$PG_MAJOR/lib/ \
 	/usr/lib/postgresql/$PG_MAJOR/lib/
 
 COPY --from=build-pguint \
