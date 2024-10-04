@@ -187,7 +187,7 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-pgq-node \
 		postgresql-$PG_MAJOR-pgrouting \
         postgresql-$PG_MAJOR-pgrouting-scripts \
-		# postgresql-$PG_MAJOR-pgsphere \
+		postgresql-$PG_MAJOR-pgsphere \
 		postgresql-$PG_MAJOR-pgtap \
 		postgresql-$PG_MAJOR-pgvector \
 		postgresql-$PG_MAJOR-pldebugger \
