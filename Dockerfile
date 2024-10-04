@@ -175,6 +175,7 @@ RUN apt-get update && \
 		# postgresql-$PG_MAJOR-partman \
 		postgresql-$PG_MAJOR-periods \
 		postgresql-$PG_MAJOR-pg-fact-loader \
+		postgresql-$PG_MAJOR-pg-rrule \
 		postgresql-$PG_MAJOR-pgaudit \
 		postgresql-$PG_MAJOR-pgauditlogtofile \
 		postgresql-$PG_MAJOR-pgfincore \

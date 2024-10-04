@@ -63,6 +63,7 @@ For more detailed instructions about how to start and control your Postgres cont
 - [pg_qualstats](https://github.com/powa-team/pg_qualstats)
 - [pg_rational](https://github.com/begriffs/pg_rational)
 - [pg_repack](https://github.com/reorg/pg_repack)
+- [pg_rrule](https://github.com/petropavel13/pg_rrule)
 - [pg_show_plans](https://github.com/cybertec-postgresql/pg_show_plans)
 - [pg_similarity](https://github.com/eulerto/pg_similarity)
 - [pg_stat_kcache](https://github.com/powa-team/pg_stat_kcache)

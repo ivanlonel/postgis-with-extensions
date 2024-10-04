@@ -743,6 +743,19 @@ SELECT 0.263157894737::float::rational;
 CREATE EXTENSION IF NOT EXISTS pg_repack;
 
 
+-- https://github.com/petropavel13/pg_rrule
+CREATE EXTENSION pg_rrule;
+SELECT get_freq('FREQ=WEEKLY;INTERVAL=1;WKST=MO;UNTIL=20200101T045102Z'::rrule);
+SELECT get_byday('FREQ=WEEKLY;INTERVAL=1;WKST=MO;UNTIL=20200101T045102Z;BYDAY=MO,TH,SU'::rrule);
+SELECT * FROM
+	unnest(
+		get_occurrences(
+			'FREQ=WEEKLY;INTERVAL=1;WKST=MO;UNTIL=20200101T045102Z;BYDAY=SA;BYHOUR=10;BYMINUTE=51;BYSECOND=2'::rrule,
+			'2019-12-07 10:51:02+00'::timestamp
+		)
+	);
+
+
 -- https://github.com/segasai/q3c
 CREATE EXTENSION q3c;
 SELECT q3c_version();
