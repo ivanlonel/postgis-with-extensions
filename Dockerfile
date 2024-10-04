@@ -53,18 +53,6 @@ RUN apt-get install -y --no-install-recommends build-essential checkinstall zlib
 
 
 
-FROM cmake-deps AS build-h3
-
-WORKDIR /tmp/h3
-RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/zachasme/h3-pg/releases/latest)) && \
-	curl --fail -L "https://github.com/zachasme/h3-pg/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
-	cmake -B build -DCMAKE_BUILD_TYPE=Release && \
-	cmake --build build && \
-	cmake --install build --component h3-pg
-
-
-
-
 FROM cmake-deps AS build-timescaledb
 
 WORKDIR /tmp/timescaledb
@@ -175,6 +163,7 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-dirtyread \
 		postgresql-$PG_MAJOR-extra-window-functions \
 		postgresql-$PG_MAJOR-first-last-agg \
+		postgresql-$PG_MAJOR-h3 \
 		postgresql-$PG_MAJOR-hll \
 		postgresql-$PG_MAJOR-icu-ext \
 		postgresql-$PG_MAJOR-ip4r \
@@ -251,13 +240,6 @@ COPY --from=pgxn \
 COPY --from=pgxn \
 	/usr/lib/postgresql/$PG_MAJOR/lib \
 	/usr/lib/postgresql/$PG_MAJOR/lib
-
-COPY --from=build-h3 \
-	/usr/share/postgresql/$PG_MAJOR/extension/h3* \
-	/usr/share/postgresql/$PG_MAJOR/extension/
-COPY --from=build-h3 \
-	/usr/lib/postgresql/$PG_MAJOR/lib/h3* \
-	/usr/lib/postgresql/$PG_MAJOR/lib/
 
 COPY --from=build-timescaledb \
 	/usr/share/postgresql/$PG_MAJOR/extension/timescaledb* \
