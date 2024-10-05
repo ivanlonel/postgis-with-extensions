@@ -734,6 +734,17 @@ CREATE EXTENSION IF NOT EXISTS prioritize;
 SELECT get_backend_priority(pg_backend_pid());
 
 
+-- https://github.com/cybertec-postgresql/pg_permissions
+CREATE EXTENSION pg_permissions;
+SELECT * FROM database_permissions LIMIT 5;
+SELECT * FROM schema_permissions LIMIT 5;
+SELECT * FROM table_permissions LIMIT 5;
+SELECT * FROM view_permissions LIMIT 5;
+SELECT * FROM column_permissions LIMIT 5;
+SELECT * FROM function_permissions LIMIT 5;
+SELECT * FROM sequence_permissions LIMIT 5;
+
+
 -- https://github.com/begriffs/pg_rational
 CREATE EXTENSION IF NOT EXISTS pg_rational;
 SELECT 0.263157894737::float::rational;
