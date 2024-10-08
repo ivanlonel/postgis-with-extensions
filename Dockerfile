@@ -197,6 +197,7 @@ RUN apt-get update && \
 		# postgresql-$PG_MAJOR-pljava \
 		# postgresql-$PG_MAJOR-pllua \
 		postgresql-$PG_MAJOR-plpgsql-check \
+		postgresql-$PG_MAJOR-plprofiler \
 		postgresql-$PG_MAJOR-plproxy \
 		# postgresql-$PG_MAJOR-plr \
 		postgresql-$PG_MAJOR-plsh \

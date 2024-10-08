@@ -75,6 +75,7 @@ For more detailed instructions about how to start and control your Postgres cont
 - [pldebugger (pldbgapi)](https://github.com/EnterpriseDB/pldebugger)
 - [PL/Perl](https://www.postgresql.org/docs/current/plperl.html)
 - [plpgsql_check](https://github.com/okbob/plpgsql_check)
+- [plProfiler](https://github.com/bigsql/plprofiler)
 - [PL/Proxy](https://github.com/plproxy/plproxy)
 - [PL/Python](https://www.postgresql.org/docs/current/plpython.html)
 - [PL/sh](https://github.com/petere/plsh)

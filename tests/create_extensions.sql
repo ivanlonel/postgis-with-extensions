@@ -668,6 +668,10 @@ FROM pg_proc p
 WHERE n.nspname = 'public' and l.lanname = 'plpgsql';
 
 
+-- https://github.com/bigsql/plprofiler
+CREATE EXTENSION IF NOT EXISTS plprofiler;
+
+
 -- https://github.com/plproxy/plproxy
 CREATE EXTENSION IF NOT EXISTS plproxy;
 
