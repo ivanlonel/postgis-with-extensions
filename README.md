@@ -86,6 +86,7 @@ For more detailed instructions about how to start and control your Postgres cont
 - [q3c](https://github.com/segasai/q3c)
 - [rum](https://github.com/postgrespro/rum)
 - [semver](https://github.com/theory/pg-semver)
+- [set_user](https://github.com/pgaudit/set_user)
 - [sqlite_fdw](https://github.com/pgspider/sqlite_fdw)
 - [table_log](https://github.com/credativ/table_log)
 - [tdigest](https://github.com/tvondra/tdigest)

@@ -210,6 +210,7 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-repack \
 		postgresql-$PG_MAJOR-rum \
 		postgresql-$PG_MAJOR-semver \
+		postgresql-$PG_MAJOR-set-user \
 		postgresql-$PG_MAJOR-show-plans \
 		postgresql-$PG_MAJOR-similarity \
 		postgresql-$PG_MAJOR-tablelog \

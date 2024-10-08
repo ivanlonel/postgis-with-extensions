@@ -858,6 +858,16 @@ FROM unnest(ARRAY[
 ]) AS v;
 
 
+-- https://github.com/pgaudit/set_user
+CREATE EXTENSION set_user;
+
+SELECT set_user('pg_monitor');
+SELECT CURRENT_USER, SESSION_USER;
+
+SELECT reset_user();
+SELECT CURRENT_USER, SESSION_USER;
+
+
 -- https://github.com/cybertec-postgresql/pg_show_plans
 CREATE EXTENSION pg_show_plans;
 SELECT * FROM pg_show_plans;
