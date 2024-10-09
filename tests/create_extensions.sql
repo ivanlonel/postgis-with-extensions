@@ -90,6 +90,22 @@ END
 $$;
 
 
+-- https://github.com/MigOpsRepos/credcheck
+\set ON_ERROR_STOP off
+
+SET credcheck.username_min_length = 4;
+CREATE USER abc WITH PASSWORD 'pass';
+
+SET credcheck.password_min_special = 1;
+CREATE USER abcd WITH PASSWORD 'pass';
+
+SET credcheck.password_contain_username = on;
+SET credcheck.password_ignore_case = on;
+CREATE USER abcd$ WITH PASSWORD 'ABCD$xyz';
+
+\set ON_ERROR_STOP on
+
+
 -- https://github.com/citusdata/pg_cron
 CREATE EXTENSION pg_cron;
 SELECT cron.schedule('nightly-vacuum', '0 3 * * *', 'VACUUM');
