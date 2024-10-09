@@ -214,6 +214,7 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-set-user \
 		postgresql-$PG_MAJOR-show-plans \
 		postgresql-$PG_MAJOR-similarity \
+		postgresql-$PG_MAJOR-squeeze \
 		postgresql-$PG_MAJOR-tablelog \
 		postgresql-$PG_MAJOR-tdigest \
 		postgresql-$PG_MAJOR-tds-fdw \

@@ -68,6 +68,7 @@ For more detailed instructions about how to start and control your Postgres cont
 - [pg_rrule](https://github.com/petropavel13/pg_rrule)
 - [pg_show_plans](https://github.com/cybertec-postgresql/pg_show_plans)
 - [pg_similarity](https://github.com/eulerto/pg_similarity)
+- [pg_squeeze](https://github.com/cybertec-postgresql/pg_squeeze)
 - [pg_stat_kcache](https://github.com/powa-team/pg_stat_kcache)
 - [pg_track_settings](https://github.com/rjuju/pg_track_settings)
 - [pg_uuidv7](https://github.com/fboulnois/pg_uuidv7)

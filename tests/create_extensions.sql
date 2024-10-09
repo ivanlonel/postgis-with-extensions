@@ -894,6 +894,13 @@ DROP TABLE foo;
 DROP TABLE bar;
 
 
+-- https://github.com/cybertec-postgresql/pg_squeeze
+CREATE EXTENSION pg_squeeze;
+SELECT * FROM squeeze.tables;
+SELECT squeeze.start_worker();
+SELECT squeeze.stop_worker();
+
+
 -- https://github.com/credativ/table_log
 CREATE EXTENSION IF NOT EXISTS table_log;
 
