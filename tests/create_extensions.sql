@@ -894,7 +894,7 @@ DROP TABLE foo;
 DROP TABLE bar;
 
 
--- https://github.com/tvondra/tdigest
+-- https://github.com/credativ/table_log
 CREATE EXTENSION IF NOT EXISTS table_log;
 
 BEGIN;
