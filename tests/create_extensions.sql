@@ -5,7 +5,8 @@ CREATE DATABASE test;
 \c test
 
 
-SELECT * FROM pg_available_extensions;
+SELECT version();
+SELECT * FROM pg_available_extensions ORDER BY name;
 
 
 CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
@@ -116,9 +117,11 @@ SELECT cron.unschedule('nightly-vacuum');
 CREATE EXTENSION IF NOT EXISTS postgis;
 CREATE EXTENSION IF NOT EXISTS postgis_topology;
 CREATE EXTENSION IF NOT EXISTS postgis_tiger_geocoder;
-CREATE EXTENSION IF NOT EXISTS postgis_raster;  -- Unavailable in postgis 2.5
+CREATE EXTENSION IF NOT EXISTS postgis_raster;
 CREATE EXTENSION IF NOT EXISTS postgis_sfcgal;
 CREATE EXTENSION IF NOT EXISTS address_standardizer;
+
+SELECT PostGIS_Full_Version();
 
 
 -- https://github.com/pgaudit/pgaudit
@@ -1113,7 +1116,7 @@ SELECT shift(intspanset '{[1,2),[3,4),[5,6)}', 2);
 SELECT shiftScale(tstzspanset '{[2000-01-01,2000-01-02),(2000-01-03,2000-01-04),(2000-01-05,2000-01-06)}', '5 min', '1 hour');
 
 
-SELECT * FROM pg_available_extensions;
+SELECT * FROM pg_available_extensions ORDER BY name;
 
 
 \c postgres
