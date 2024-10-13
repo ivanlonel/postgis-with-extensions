@@ -115,44 +115,11 @@ RUN apt-get install -y --no-install-recommends libsqlite3-dev && \
 
 
 
-FROM common-deps AS build-oracle_fdw
-
-# Latest version
-ARG ORACLE_CLIENT_URL=https://download.oracle.com/otn_software/linux/instantclient/instantclient-basic-linuxx64.zip
-ARG ORACLE_SQLPLUS_URL=https://download.oracle.com/otn_software/linux/instantclient/instantclient-sqlplus-linuxx64.zip
-ARG ORACLE_SDK_URL=https://download.oracle.com/otn_software/linux/instantclient/instantclient-sdk-linuxx64.zip
-
-RUN apt-get install -y --no-install-recommends unzip && \
-	# instant client
-	curl --fail -L -o instant_client.zip ${ORACLE_CLIENT_URL} && \
-	unzip instant_client.zip -x META-INF/* && \
-	# sqlplus
-	curl --fail -L -o sqlplus.zip ${ORACLE_SQLPLUS_URL} && \
-	unzip sqlplus.zip -x META-INF/* && \
-	# sdk
-	curl --fail -L -o sdk.zip ${ORACLE_SDK_URL} && \
-	unzip sdk.zip -x META-INF/* && \
-	# install
-	mkdir -p ${ORACLE_HOME} && \
-	mv ./instantclient_*/* ${ORACLE_HOME}
-
-# Install oracle_fdw
-WORKDIR /tmp/oracle_fdw
-RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/laurenz/oracle_fdw/releases/latest)) && \
-	curl --fail -L "https://github.com/laurenz/oracle_fdw/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
-	make && \
-	make install
-
-
-
-
 FROM base-image AS final-stage
 
 RUN apt-get update && \
 	apt-get install -y --no-install-recommends \
-		# runtime requirement for the Oracle client that oracle_fdw uses
-		libaio1 \
-        # MobilityDB missing runtime dependency from libgsl-dev
+		# MobilityDB missing runtime dependency from libgsl-dev
         libgsl25 \
 		# runtime requirement for using spatialite with sqlite_fdw
 		libsqlite3-mod-spatialite \
@@ -172,6 +139,7 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-mysql-fdw \
 		postgresql-$PG_MAJOR-numeral \
 		postgresql-$PG_MAJOR-ogr-fdw \
+		postgresql-$PG_MAJOR-oracle-fdw \
 		postgresql-$PG_MAJOR-orafce \
 		# postgresql-$PG_MAJOR-partman \
 		postgresql-$PG_MAJOR-periods \
@@ -281,19 +249,5 @@ COPY --from=build-sqlite_fdw \
 COPY --from=build-sqlite_fdw \
 	/usr/lib/postgresql/$PG_MAJOR/lib/sqlite_fdw.so \
 	/usr/lib/postgresql/$PG_MAJOR/lib/sqlite_fdw.so
-
-COPY --from=build-oracle_fdw \
-	/usr/share/postgresql/$PG_MAJOR/extension/oracle_fdw* \
-	/usr/share/postgresql/$PG_MAJOR/extension/
-COPY --from=build-oracle_fdw \
-	/usr/share/doc/postgresql-doc-$PG_MAJOR/extension/README.oracle_fdw \
-	/usr/share/doc/postgresql-doc-$PG_MAJOR/extension/README.oracle_fdw
-COPY --from=build-oracle_fdw \
-	/usr/lib/postgresql/$PG_MAJOR/lib/oracle_fdw.so \
-	/usr/lib/postgresql/$PG_MAJOR/lib/oracle_fdw.so
-COPY --from=build-oracle_fdw  ${ORACLE_HOME}  ${ORACLE_HOME}
-
-RUN echo ${ORACLE_HOME} > /etc/ld.so.conf.d/oracle_instantclient.conf && \
-	ldconfig
 
 COPY ./conf.sh  /docker-entrypoint-initdb.d/z_conf.sh
