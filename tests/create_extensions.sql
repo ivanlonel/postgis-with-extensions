@@ -532,6 +532,19 @@ CREATE EXTENSION IF NOT EXISTS periods;
 SELECT * FROM periods.periods;
 
 
+-- https://github.com/dverite/permuteseq
+CREATE EXTENSION IF NOT EXISTS permuteseq;
+
+CREATE SEQUENCE s MINVALUE -10000 MAXVALUE 15000;
+
+\set secret_key 123456789012345
+
+SELECT permute_nextval('s'::regclass, :secret_key) FROM generate_series(-10000, -9990);
+SELECT reverse_permute('s'::regclass, -545, :secret_key);
+SELECT range_encrypt_element(91919191919, 1e10::bigint, 1e11::bigint, :secret_key);
+SELECT range_decrypt_element(83028080992, 1e10::bigint, 1e11::bigint, :secret_key);
+
+
 -- https://github.com/enova/pg_fact_loader
 CREATE EXTENSION IF NOT EXISTS pg_fact_loader;
 

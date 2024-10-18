@@ -41,6 +41,7 @@ For more detailed instructions about how to start and control your Postgres cont
 - [oracle_fdw](https://github.com/laurenz/oracle_fdw)
 - [orafce](https://github.com/orafce/orafce)
 - [periods](https://github.com/xocolatl/periods)
+- [permuteseq](https://github.com/dverite/permuteseq)
 - [pgagent](https://github.com/pgadmin-org/pgagent)
 - [pgaudit](https://github.com/pgaudit/pgaudit)
 - [pgauditlogtofile](https://github.com/fmbiete/pgauditlogtofile)
