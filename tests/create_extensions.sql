@@ -527,6 +527,16 @@ SELECT 'thirty'::numeral + 'twelve'::numeral as sum;
 CREATE EXTENSION IF NOT EXISTS orafce;
 SELECT oracle.add_months(oracle.date'2021-05-31 10:12:12', 1);
 
+
+-- https://github.com/theirix/parray_gin
+CREATE EXTENSION IF NOT EXISTS parray_gin;
+
+BEGIN;
+CREATE TABLE parray_gin_test_table(id integer GENERATED ALWAYS AS IDENTITY, val text[]);
+CREATE INDEX test_val_idx on parray_gin_test_table using gin (val parray_gin_ops);
+ROLLBACK;
+
+
 -- https://github.com/xocolatl/periods
 CREATE EXTENSION IF NOT EXISTS periods;
 SELECT * FROM periods.periods;

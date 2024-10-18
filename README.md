@@ -40,6 +40,7 @@ For more detailed instructions about how to start and control your Postgres cont
 - [ogr_fdw](https://github.com/pramsey/pgsql-ogr-fdw)
 - [oracle_fdw](https://github.com/laurenz/oracle_fdw)
 - [orafce](https://github.com/orafce/orafce)
+- [parray_gin](https://github.com/theirix/parray_gin)
 - [periods](https://github.com/xocolatl/periods)
 - [permuteseq](https://github.com/dverite/permuteseq)
 - [pgagent](https://github.com/pgadmin-org/pgagent)
