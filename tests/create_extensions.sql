@@ -1031,6 +1031,22 @@ CREATE EXTENSION IF NOT EXISTS pg_uuidv7;
 SELECT uuid_generate_v7();
 
 
+-- https://github.com/hatarist/pg_xxhash
+CREATE EXTENSION IF NOT EXISTS xxhash;
+
+SELECT
+	url,
+	xxh32(url),
+	xxh64(url),
+	xxh3_64(url),
+	xxh128(url),
+	xxh32b(url),
+	xxh64b(url),
+	xxh3_64b(url),
+	xxh128b(url)
+FROM (SELECT 'https://example.com' AS url) x;
+
+
 -- https://www.postgresql.org/docs/current/plperl.html
 CREATE EXTENSION IF NOT EXISTS plperl;
 CREATE OR REPLACE FUNCTION concat_array_elements(text[]) RETURNS TEXT AS $$
