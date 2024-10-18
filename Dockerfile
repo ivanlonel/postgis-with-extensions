@@ -88,6 +88,7 @@ FROM common-deps AS pgxn
 RUN apt-get install -y --no-install-recommends pgxnclient && \
 	pgxn install --verbose ddlx && \
 	pgxn install --verbose pg_uuidv7 && \
+	pgxn install --verbose pg_xenophile && \
 	pgxn install --verbose pg_xxhash && \
 	pgxn install --verbose pgsql_tweaks
 

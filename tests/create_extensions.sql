@@ -1031,6 +1031,16 @@ CREATE EXTENSION IF NOT EXISTS pg_uuidv7;
 SELECT uuid_generate_v7();
 
 
+-- https://github.com/bigsmoke/pg_xenophile
+DO $$
+BEGIN
+	IF current_setting('server_version_num')::int >= 140000 THEN
+		CREATE EXTENSION IF NOT EXISTS pg_xenophile CASCADE;
+		CALL xeno.test__l10n_table();
+	END IF;
+END $$;
+
+
 -- https://github.com/hatarist/pg_xxhash
 CREATE EXTENSION IF NOT EXISTS xxhash;
 
