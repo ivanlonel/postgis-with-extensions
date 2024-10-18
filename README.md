@@ -55,6 +55,7 @@ For more detailed instructions about how to start and control your Postgres cont
 - [pgq_node](https://github.com/pgq/pgq-node)
 - [pgrouting](https://github.com/pgRouting/pgrouting)
 - [pgsphere](https://github.com/postgrespro/pgsphere)
+- [pgsql_tweaks](https://github.com/sjstoelting/pgsql-tweaks)
 - [pgtap](https://github.com/theory/pgtap)
 - [pguint](https://github.com/petere/pguint)
 - [pgvector](https://github.com/pgvector/pgvector)

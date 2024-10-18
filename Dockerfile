@@ -86,8 +86,9 @@ RUN cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON -DC
 FROM common-deps AS pgxn
 
 RUN apt-get install -y --no-install-recommends pgxnclient && \
-	pgxn install ddlx && \
-	pgxn install pg_uuidv7
+	pgxn install --verbose ddlx && \
+	pgxn install --verbose pg_uuidv7 && \
+	pgxn install --verbose pgsql_tweaks
 
 
 
