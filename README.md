@@ -33,6 +33,7 @@ For more detailed instructions about how to start and control your Postgres cont
 - [hypopg](https://github.com/HypoPG/hypopg)
 - [icu_ext](https://github.com/dverite/icu_ext)
 - [ip4r](https://github.com/RhodiumToad/ip4r)
+- [json_accessors](https://github.com/theirix/json_accessors)
 - [jsquery](https://github.com/postgrespro/jsquery)
 - [MobilityDB](https://github.com/MobilityDB/MobilityDB)
 - [mysql_fdw](https://github.com/EnterpriseDB/mysql_fdw)

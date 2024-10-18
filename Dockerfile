@@ -87,6 +87,7 @@ FROM common-deps AS pgxn
 
 RUN apt-get install -y --no-install-recommends pgxnclient && \
 	pgxn install --verbose ddlx && \
+	pgxn install --verbose json_accessors && \
 	pgxn install --verbose parray_gin && \
 	pgxn install --verbose permuteseq && \
 	pgxn install --verbose pg_rowalesce && \
