@@ -836,6 +836,16 @@ SELECT 0.263157894737::float::rational;
 CREATE EXTENSION IF NOT EXISTS pg_repack;
 
 
+-- https://github.com/bigsmoke/pg_rowalesce
+DO $$
+BEGIN
+	IF current_setting('server_version_num')::int >= 140000 THEN
+		CREATE EXTENSION IF NOT EXISTS pg_rowalesce CASCADE;
+		CALL test__pg_rowalesce();
+	END IF;
+END $$;
+
+
 -- https://github.com/petropavel13/pg_rrule
 CREATE EXTENSION pg_rrule;
 SELECT get_freq('FREQ=WEEKLY;INTERVAL=1;WKST=MO;UNTIL=20200101T045102Z'::rrule);
