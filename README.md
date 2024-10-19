@@ -47,6 +47,7 @@ For more detailed instructions about how to start and control your Postgres cont
 - [pgagent](https://github.com/pgadmin-org/pgagent)
 - [pgaudit](https://github.com/pgaudit/pgaudit)
 - [pgauditlogtofile](https://github.com/fmbiete/pgauditlogtofile)
+- [pgfaceting](https://github.com/cybertec-postgresql/pgfaceting)
 - [pgfincore](https://github.com/klando/pgfincore)
 - [pglogical](https://github.com/2ndQuadrant/pglogical)
 - [pglogical_ticker](https://github.com/enova/pglogical_ticker)

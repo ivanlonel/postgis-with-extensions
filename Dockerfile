@@ -207,6 +207,9 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-pg-track-settings \
 		postgresql-$PG_MAJOR-pg-wait-sampling \
 		postgresql-$PG_MAJOR-powa && \
+	if [ "$PG_MAJOR" -ge 14 ]; then \
+		apt-get install -y --no-install-recommends postgresql-$PG_MAJOR-pgfaceting; \
+	fi && \
 	apt-get purge -y --auto-remove && \
 	rm -rf /var/lib/apt/lists/*
 
