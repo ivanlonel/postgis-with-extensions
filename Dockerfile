@@ -137,6 +137,7 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-first-last-agg \
 		postgresql-$PG_MAJOR-h3 \
 		postgresql-$PG_MAJOR-hll \
+		postgresql-$PG_MAJOR-hypopg \
 		postgresql-$PG_MAJOR-icu-ext \
 		postgresql-$PG_MAJOR-ip4r \
 		postgresql-$PG_MAJOR-jsquery \
@@ -150,7 +151,11 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-pg-fact-loader \
 		postgresql-$PG_MAJOR-pg-hint-plan \
 		postgresql-$PG_MAJOR-pg-permissions \
+		postgresql-$PG_MAJOR-pg-qualstats \
 		postgresql-$PG_MAJOR-pg-rrule \
+		postgresql-$PG_MAJOR-pg-stat-kcache \
+		postgresql-$PG_MAJOR-pg-track-settings \
+		postgresql-$PG_MAJOR-pg-wait-sampling \
 		postgresql-$PG_MAJOR-pgaudit \
 		postgresql-$PG_MAJOR-pgauditlogtofile \
 		postgresql-$PG_MAJOR-pgfincore \
@@ -162,23 +167,19 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-pgpcre \
 		postgresql-$PG_MAJOR-pgq-node \
 		postgresql-$PG_MAJOR-pgrouting \
-        postgresql-$PG_MAJOR-pgrouting-scripts \
+		postgresql-$PG_MAJOR-pgrouting-scripts \
 		postgresql-$PG_MAJOR-pgsphere \
 		postgresql-$PG_MAJOR-pgtap \
 		postgresql-$PG_MAJOR-pgvector \
 		postgresql-$PG_MAJOR-pldebugger \
-		# postgresql-$PG_MAJOR-pljava \
-		# postgresql-$PG_MAJOR-pllua \
 		postgresql-$PG_MAJOR-plpgsql-check \
 		postgresql-$PG_MAJOR-plprofiler \
 		postgresql-$PG_MAJOR-plproxy \
-		# postgresql-$PG_MAJOR-plr \
 		postgresql-$PG_MAJOR-plsh \
 		postgresql-$PG_MAJOR-pointcloud \
+		postgresql-$PG_MAJOR-powa \
 		postgresql-$PG_MAJOR-prefix \
-		# postgresql-$PG_MAJOR-preprepare \
 		postgresql-$PG_MAJOR-prioritize \
-		# postgresql-$PG_MAJOR-python3-multicorn \
 		postgresql-$PG_MAJOR-q3c \
 		postgresql-$PG_MAJOR-rational \
 		postgresql-$PG_MAJOR-repack \
@@ -196,14 +197,7 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-unit \
 		# postgresql-$PG_MAJOR-wal2json \
 		postgresql-plperl-$PG_MAJOR \
-		postgresql-plpython3-$PG_MAJOR \
-	# extensions below are all here for PoWA
-		postgresql-$PG_MAJOR-hypopg \
-		postgresql-$PG_MAJOR-pg-qualstats \
-		postgresql-$PG_MAJOR-pg-stat-kcache \
-		postgresql-$PG_MAJOR-pg-track-settings \
-		postgresql-$PG_MAJOR-pg-wait-sampling \
-		postgresql-$PG_MAJOR-powa && \
+		postgresql-plpython3-$PG_MAJOR && \
 	if [ "$PG_MAJOR" -ge 14 ]; then \
 		apt-get install -y --no-install-recommends postgresql-$PG_MAJOR-pgfaceting; \
 	fi && \
