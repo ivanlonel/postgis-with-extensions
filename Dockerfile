@@ -2,9 +2,6 @@ ARG BASE_IMAGE_TAG=latest
 
 FROM postgis/postgis:$BASE_IMAGE_TAG AS base-image
 
-ENV ORACLE_HOME /usr/lib/oracle/client
-ENV PATH $PATH:${ORACLE_HOME}
-
 
 
 
