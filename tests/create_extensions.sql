@@ -519,6 +519,11 @@ EXPLAIN (costs off, timing off)
 ROLLBACK;
 
 
+-- https://github.com/omniti-labs/pg_jobmon
+CREATE EXTENSION IF NOT EXISTS pg_jobmon CASCADE;  -- requires dblink
+SELECT * FROM check_job_status();
+
+
 -- https://github.com/cybertec-postgresql/pg_permissions
 CREATE EXTENSION IF NOT EXISTS pg_permissions;
 SELECT * FROM database_permissions LIMIT 5;

@@ -47,6 +47,7 @@ For more detailed instructions about how to start and control your Postgres cont
 - [pg_dirtyread](https://github.com/df7cb/pg_dirtyread)
 - [pg_fact_loader](https://github.com/enova/pg_fact_loader)
 - [pg_hint_plan](https://github.com/ossc-db/pg_hint_plan)
+- [pg_jobmon](https://github.com/omniti-labs/pg_jobmon)
 - [pg_permissions](https://github.com/cybertec-postgresql/pg_permissions)
 - [pg_qualstats](https://github.com/powa-team/pg_qualstats)
 - [pg_rational](https://github.com/begriffs/pg_rational)

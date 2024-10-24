@@ -87,6 +87,7 @@ RUN apt-get install -y --no-install-recommends pgxnclient && \
 	pgxn install --verbose json_accessors && \
 	pgxn install --verbose parray_gin && \
 	pgxn install --verbose permuteseq && \
+	pgxn install --verbose pg_jobmon && \
 	pgxn install --verbose pg_rowalesce && \
 	pgxn install --verbose pg_uuidv7 && \
 	pgxn install --verbose pg_xenophile && \
