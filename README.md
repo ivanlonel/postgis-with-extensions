@@ -75,6 +75,7 @@ For more detailed instructions about how to start and control your Postgres cont
 - [pglogical_ticker](https://github.com/enova/pglogical_ticker)
 - [pgmemcache](https://github.com/ohmu/pgmemcache)
 - [pgmp](https://github.com/dvarrazzo/pgmp)
+- [pgmq](https://github.com/tembo-io/pgmq)
 - [pgpcre](https://github.com/petere/pgpcre)
 - [pgq](https://github.com/pgq/pgq)
 - [pgq_node](https://github.com/pgq/pgq-node)

@@ -852,6 +852,26 @@ SELECT 10.1::numeric::mpq;
 SELECT 9223372036854775807::mpz;
 
 
+-- https://github.com/tembo-io/pgmq
+CREATE EXTENSION IF NOT EXISTS pgmq;
+SELECT pgmq.create('my_queue');
+SELECT * from pgmq.send(queue_name => 'my_queue', msg => '{"foo": "bar1"}');
+SELECT * from pgmq.send(queue_name => 'my_queue', msg => '{"foo": "bar2"}', delay => 1);
+SELECT * FROM pgmq.read(queue_name => 'my_queue', vt => 30, qty => 2);
+SELECT * FROM pgmq.read(queue_name => 'my_queue', vt => 30, qty => 1);
+SELECT * FROM pgmq.pop('my_queue');
+SELECT pgmq.archive(queue_name => 'my_queue', msg_id => 2);
+SELECT pgmq.send_batch(
+	queue_name => 'my_queue',
+	msgs       => ARRAY['{"foo": "bar3"}','{"foo": "bar4"}','{"foo": "bar5"}']::jsonb[]
+);
+SELECT pgmq.archive(queue_name => 'my_queue', msg_ids => ARRAY[3, 4, 5]);
+SELECT * FROM pgmq.a_my_queue;
+SELECT pgmq.send('my_queue', '{"foo": "bar6"}');
+SELECT pgmq.delete('my_queue', 6);
+SELECT pgmq.drop_queue('my_queue');
+
+
 -- https://github.com/petere/pgpcre
 CREATE EXTENSION IF NOT EXISTS pgpcre;
 SELECT 'foo' ~ pcre 'fo+';

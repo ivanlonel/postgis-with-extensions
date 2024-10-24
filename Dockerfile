@@ -92,6 +92,7 @@ RUN apt-get install -y --no-install-recommends pgxnclient && \
 	pgxn install --verbose pg_uuidv7 && \
 	pgxn install --verbose pg_xenophile && \
 	pgxn install --verbose pg_xxhash && \
+	pgxn install --verbose pgmq && \
 	pgxn install --verbose pgsql_tweaks && \
 	pgxn install --verbose temporal_tables
 
