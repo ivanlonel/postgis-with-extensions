@@ -103,6 +103,7 @@ For more detailed instructions about how to start and control your Postgres cont
 - [table_log](https://github.com/credativ/table_log)
 - [tdigest](https://github.com/tvondra/tdigest)
 - [tds_fdw](https://github.com/tds-fdw/tds_fdw)
+- [temporal_tables](https://github.com/arkhipov/temporal_tables)
 - [timescaledb](https://github.com/timescale/timescaledb)
 - [toastinfo](https://github.com/credativ/toastinfo)
 - [unit](https://github.com/df7cb/postgresql-unit)
