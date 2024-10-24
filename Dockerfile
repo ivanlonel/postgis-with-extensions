@@ -148,7 +148,7 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-ogr-fdw \
 		postgresql-$PG_MAJOR-oracle-fdw \
 		postgresql-$PG_MAJOR-orafce \
-		# postgresql-$PG_MAJOR-partman \
+		postgresql-$PG_MAJOR-partman \
 		postgresql-$PG_MAJOR-periods \
 		postgresql-$PG_MAJOR-pg-fact-loader \
 		postgresql-$PG_MAJOR-pg-hint-plan \

@@ -524,6 +524,73 @@ CREATE EXTENSION IF NOT EXISTS pg_jobmon CASCADE;  -- requires dblink
 SELECT * FROM check_job_status();
 
 
+-- https://github.com/pgpartman/pg_partman
+CREATE SCHEMA partman;
+CREATE EXTENSION pg_partman SCHEMA partman;
+
+CREATE TABLE public.employees (
+	id integer,
+	fname text,
+	lname text,
+	dob date NOT NULL,
+	joined date NOT NULL
+) PARTITION BY RANGE (joined);
+
+CREATE TABLE partman.employees_template (LIKE public.employees);
+ALTER TABLE partman.employees_template ADD PRIMARY KEY (id);
+
+SELECT partman.create_parent(
+	'public.employees',
+	p_control := 'joined',
+	p_type := CASE WHEN current_setting('server_version_num')::int >= 140000 THEN 'range' ELSE 'native' END,
+	p_interval := CASE WHEN current_setting('server_version_num')::int >= 140000 THEN '1 year' ELSE 'yearly' END,
+	p_template_table := 'partman.employees_template',
+	p_premake := 2,
+	p_start_partition := (CURRENT_TIMESTAMP + '1 hour'::interval)::text
+);
+
+CREATE OR REPLACE VIEW v_part_employees AS
+	SELECT c.oid::pg_catalog.regclass, c.relkind, pg_catalog.pg_get_expr(c.relpartbound, c.oid)
+	FROM pg_catalog.pg_class c
+	WHERE EXISTS (
+		SELECT FROM pg_catalog.pg_inherits i
+			JOIN pg_catalog.pg_class c0
+				ON c0.oid = i.inhparent
+			JOIN pg_catalog.pg_namespace n
+				ON n.oid = c0.relnamespace
+		WHERE i.inhrelid = c.oid
+			AND n.nspname = 'public'
+			AND c0.relname = 'employees'
+	)
+	ORDER BY pg_catalog.pg_get_expr(c.relpartbound, c.oid) = 'DEFAULT', c.oid::pg_catalog.regclass::pg_catalog.text;
+
+SELECT * FROM v_part_employees;
+
+INSERT INTO public.employees (id ,fname,lname,dob ,joined)
+VALUES(
+	generate_series(1,10000),
+	(array['Oswald', 'Henry', 'Bob', 'Vennie'])[floor(random() * 4 + 1)],
+	(array['Leo', 'Jack', 'Den', 'Daisy' ,'Woody'])[floor(random() * 5 + 1)],
+	'1995-01-01'::date + trunc(random() * 366 * 3)::int,
+	'2023-01-01'::date + trunc(random() * 366 * 3)::int
+);
+
+CALL partman.partition_data_proc ('public.employees');
+VACUUM ANALYZE public.employees;
+
+SELECT * FROM v_part_employees;
+
+UPDATE partman.part_config SET premake = '4' WHERE parent_table ='public.employees';
+
+CALL partman.run_maintenance_proc();
+
+SELECT * FROM v_part_employees;
+
+DROP VIEW v_part_employees;
+DROP TABLE partman.employees_template;
+DROP TABLE public.employees;
+
+
 -- https://github.com/cybertec-postgresql/pg_permissions
 CREATE EXTENSION IF NOT EXISTS pg_permissions;
 SELECT * FROM database_permissions LIMIT 5;
