@@ -31,26 +31,14 @@ FROM basic-deps AS common-deps
 # /var/lib/apt/lists/ still has the indexes from parent stage, so there's no need to run apt-get update again.
 # (unless the parent stage cache is not invalidated...)
 RUN apt-get install -y --no-install-recommends \
-	gcc \
-	make \
+	build-essential \
+	cmake \
 	postgresql-server-dev-$PG_MAJOR
 
 
 
 
-FROM common-deps AS cmake-deps
-
-RUN apt-get install -y --no-install-recommends build-essential checkinstall zlib1g-dev libssl-dev && \
-	ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/Kitware/CMake/releases/latest)) && \
-	curl --fail -L "https://github.com/Kitware/CMake/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
-	./bootstrap && \
-	make && \
-	make install
-
-
-
-
-FROM cmake-deps AS build-timescaledb
+FROM common-deps AS build-timescaledb
 
 WORKDIR /tmp/timescaledb
 RUN apt-get install -y --no-install-recommends libkrb5-dev && \
@@ -65,7 +53,7 @@ RUN make -j$(nproc) && \
 
 
 
-FROM cmake-deps AS build-mobilitydb
+FROM common-deps AS build-mobilitydb
 
 WORKDIR /tmp/mobilitydb
 RUN apt-get install -y --no-install-recommends libgeos++-dev libgsl-dev libjson-c-dev libproj-dev && \
