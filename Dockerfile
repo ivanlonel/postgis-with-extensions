@@ -198,7 +198,7 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-tds-fdw \
 		postgresql-$PG_MAJOR-toastinfo \
 		postgresql-$PG_MAJOR-unit \
-		# postgresql-$PG_MAJOR-wal2json \
+		postgresql-$PG_MAJOR-wal2json \
 		postgresql-plperl-$PG_MAJOR \
 		postgresql-plpython3-$PG_MAJOR && \
 	if [ "$PG_MAJOR" -ge 14 ]; then \
