@@ -6,7 +6,7 @@
 
 Tag labels follow the pattern `X-Y.Z`, where `X` is the *major* Postgres version (starting from version 12) and `Y.Z` is the *major.minor* Postgis version.
 
-The `latest` tag currently corresponds to `16-3.5`.
+The `latest` tag currently corresponds to `17-3.5`.
 
 ## Usage
 
