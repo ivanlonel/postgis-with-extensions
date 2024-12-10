@@ -32,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        postgres: [17, 16, 15, 14, 13, 12]
+        postgres: [17, 16, 15, 14, 13]
         postgis: ['3.5']
 
     env:
