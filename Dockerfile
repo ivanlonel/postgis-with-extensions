@@ -102,6 +102,7 @@ RUN apt-get update && \
 		# runtime requirement for using spatialite with sqlite_fdw
 		libsqlite3-mod-spatialite \
 		pgagent \
+		postgresql-$PG_MAJOR-age \
 		postgresql-$PG_MAJOR-asn1oid \
 		postgresql-$PG_MAJOR-credcheck \
 		postgresql-$PG_MAJOR-cron \

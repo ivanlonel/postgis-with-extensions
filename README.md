@@ -22,6 +22,7 @@ For more detailed instructions about how to start and control your Postgres cont
 
 ## Available extensions
 
+- [age](https://github.com/apache/age)
 - [asn1oid](https://github.com/df7cb/pgsql-asn1oid)
 - [credcheck](https://github.com/MigOpsRepos/credcheck)
 - [ddlx](https://github.com/lacanoid/pgddl)

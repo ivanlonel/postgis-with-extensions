@@ -20,6 +20,43 @@ CREATE EXTENSION IF NOT EXISTS postgis_sfcgal;
 SELECT PostGIS_Full_Version();
 
 
+-- https://github.com/apache/age
+CREATE EXTENSION age;
+LOAD 'age';
+
+BEGIN;
+
+SET search_path = ag_catalog, "$user", public;
+
+SELECT create_graph('graph_name');
+
+-- create vertices
+SELECT * FROM cypher('graph_name', $$CREATE (:label {property:"Node A"})$$) as (v agtype);
+SELECT * FROM cypher('graph_name', $$CREATE (:label {property:"Node B"})$$) as (v agtype);
+
+-- create an edge between two nodes and set its properties
+SELECT * FROM cypher(
+	'graph_name',
+	$$
+		MATCH (a:label), (b:label)
+		WHERE a.property = 'Node A' AND b.property = 'Node B'
+		CREATE (a)-[e:RELTYPE {property:a.property + '<->' + b.property}]->(b)
+		RETURN e
+	$$
+) as (e agtype);
+
+-- query the connected nodes
+SELECT * from cypher(
+	'graph_name',
+	$$
+        MATCH (V)-[R]-(V2)
+        RETURN V,R,V2
+	$$
+) as (V agtype, R agtype, V2 agtype);
+
+ROLLBACK;
+
+
 -- https://github.com/df7cb/pgsql-asn1oid
 CREATE EXTENSION IF NOT EXISTS asn1oid;
 SELECT '1.3.6.1.4.1'::asn1oid;
