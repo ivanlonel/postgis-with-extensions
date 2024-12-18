@@ -1142,7 +1142,7 @@ SELECT ST_AsText(PC_MakePoint(1, ARRAY[-127, 45, 124.0, 4.0])::geometry);
 
 -- https://github.com/powa-team/powa-archivist
 CREATE EXTENSION IF NOT EXISTS powa;
-SELECT * FROM powa_functions ORDER BY module, operation;
+SELECT * FROM powa_functions;
 
 
 -- https://github.com/dimitri/prefix
