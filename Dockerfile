@@ -53,21 +53,6 @@ RUN make -j$(nproc) && \
 
 
 
-FROM common-deps AS build-mobilitydb
-
-WORKDIR /tmp/mobilitydb
-RUN apt-get install -y --no-install-recommends libgeos++-dev libgsl-dev libjson-c-dev libproj-dev && \
-	URL_END=$(case "$PG_MAJOR" in ("12") echo "tag/v1.1.2";; (*) echo "latest";; esac) && \
-	ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/MobilityDB/MobilityDB/releases/${URL_END})) && \
-	curl --fail -L "https://github.com/MobilityDB/MobilityDB/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C .
-WORKDIR /tmp/mobilitydb/build
-RUN cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON -DCMAKE_POLICY_DEFAULT_CMP0069=NEW .. && \
-	make -j$(nproc) && \
-	make install
-
-
-
-
 FROM common-deps AS pgxn
 
 RUN apt-get install -y --no-install-recommends pgxnclient && \
@@ -114,8 +99,6 @@ FROM base-image AS final-stage
 
 RUN apt-get update && \
 	apt-get install -y --no-install-recommends \
-		# MobilityDB missing runtime dependency from libgsl-dev
-        libgsl25 \
 		# runtime requirement for using spatialite with sqlite_fdw
 		libsqlite3-mod-spatialite \
 		pgagent \
@@ -132,6 +115,7 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-icu-ext \
 		postgresql-$PG_MAJOR-ip4r \
 		postgresql-$PG_MAJOR-jsquery \
+		postgresql-$PG_MAJOR-mobilitydb \
 		postgresql-$PG_MAJOR-mysql-fdw \
 		postgresql-$PG_MAJOR-numeral \
 		postgresql-$PG_MAJOR-ogr-fdw \
@@ -214,13 +198,6 @@ COPY --from=build-timescaledb \
 	/usr/share/postgresql/$PG_MAJOR/extension/
 COPY --from=build-timescaledb \
 	/usr/lib/postgresql/$PG_MAJOR/lib/timescaledb* \
-	/usr/lib/postgresql/$PG_MAJOR/lib/
-
-COPY --from=build-mobilitydb \
-	/usr/share/postgresql/$PG_MAJOR/extension/ \
-	/usr/share/postgresql/$PG_MAJOR/extension/
-COPY --from=build-mobilitydb \
-	/usr/lib/postgresql/$PG_MAJOR/lib/ \
 	/usr/lib/postgresql/$PG_MAJOR/lib/
 
 COPY --from=build-pguint \
