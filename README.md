@@ -4,7 +4,7 @@
 [![ivanlonel/postgis-with-extensions][github-last-commit-image]][github-url]
 [![ivanlonel/postgis-with-extensions][github-workflow-status-image]][github-url]
 
-Tag labels follow the pattern `X-Y.Z`, where `X` is the *major* Postgres version (starting from version 12) and `Y.Z` is the *major.minor* Postgis version.
+Tag labels follow the pattern `X-Y.Z`, where `X` is the *major* Postgres version (starting from version 13) and `Y.Z` is the *major.minor* Postgis version.
 
 The `latest` tag currently corresponds to `17-3.5`.
 
@@ -18,7 +18,7 @@ docker run -e POSTGRES_PASSWORD=mysecretpassword -d ivanlonel/postgis-with-exten
 
 [Here](https://github.com/ivanlonel/postgis-with-extensions/tree/master/compose_example) is a sample docker-compose stack definition, which includes a [powa-web](https://hub.docker.com/r/powateam/powa-web) container and a [pgadmin](https://hub.docker.com/r/dpage/pgadmin4) container. The Postgres container is built from a Dockerfile that extends this image by running `localedef` in order to ensure Postgres will use the locale specified in docker-compose.yml.
 
-For more detailed instructions about how to start and control your Postgres container, see the documentation for the `postgres` image [here](https://registry.hub.docker.com/_/postgres/).
+For more detailed instructions about how to start and control your Postgres container, see the documentation for the `postgres` image [here](https://hub.docker.com/_/postgres/).
 
 ## Available extensions
 
