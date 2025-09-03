@@ -18,15 +18,6 @@ docker run -e POSTGRES_PASSWORD=mysecretpassword -d ivanlonel/postgis-with-exten
 
 [Here](https://github.com/ivanlonel/postgis-with-extensions/tree/master/compose_example) is a sample docker-compose stack definition, which includes a [powa-web](https://hub.docker.com/r/powateam/powa-web) container and a [pgadmin](https://hub.docker.com/r/dpage/pgadmin4) container. The Postgres container is built from a Dockerfile that extends this image by running `localedef` in order to ensure Postgres will use the locale specified in docker-compose.yml.
 
-## Platform Support
-
-This image supports both AMD64 and ARM64 architectures. Docker will automatically pull the correct image for your platform:
-
-- **linux/amd64** - for x86_64 systems  
-- **linux/arm64** - for ARM64 systems (Apple Silicon, AWS Graviton, etc.)
-
-For more detailed instructions about how to start and control your Postgres container, see the documentation for the `postgres` image [here](https://hub.docker.com/_/postgres/).
-
 ## Available extensions
 
 - [age](https://github.com/apache/age)
