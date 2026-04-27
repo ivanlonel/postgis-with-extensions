@@ -583,8 +583,8 @@ ALTER TABLE partman.employees_template ADD PRIMARY KEY (id);
 SELECT partman.create_parent(
 	'public.employees',
 	p_control := 'joined',
-	p_type := CASE WHEN current_setting('server_version_num')::int >= 140000 THEN 'range' ELSE 'native' END,
-	p_interval := CASE WHEN current_setting('server_version_num')::int >= 140000 THEN '1 year' ELSE 'yearly' END,
+	p_type := 'range',
+	p_interval := '1 year',
 	p_template_table := 'partman.employees_template',
 	p_premake := 2,
 	p_start_partition := '2023-01-01'
@@ -664,13 +664,8 @@ SELECT repack.version(), repack.version_sql();
 
 
 -- https://github.com/bigsmoke/pg_rowalesce
-DO $$
-BEGIN
-	IF current_setting('server_version_num')::int >= 140000 THEN
-		CREATE EXTENSION IF NOT EXISTS pg_rowalesce CASCADE;
-		CALL test__pg_rowalesce();
-	END IF;
-END $$;
+CREATE EXTENSION IF NOT EXISTS pg_rowalesce CASCADE;
+CALL test__pg_rowalesce();
 
 
 -- https://github.com/petropavel13/pg_rrule
@@ -757,13 +752,8 @@ WITH t as (SELECT sum(0) FROM pg_wait_sampling_current)
 
 
 -- https://github.com/bigsmoke/pg_xenophile
-DO $$
-BEGIN
-	IF current_setting('server_version_num')::int >= 140000 THEN
-		CREATE EXTENSION IF NOT EXISTS pg_xenophile CASCADE;
-		CALL xeno.test__l10n_table();
-	END IF;
-END $$;
+CREATE EXTENSION IF NOT EXISTS pg_xenophile CASCADE;
+CALL xeno.test__l10n_table();
 
 
 -- https://github.com/pgadmin-org/pgagent
@@ -1298,66 +1288,61 @@ CREATE TABLE test_faceting(
 	cardinality_sum integer
 );
 
-DO $$
-BEGIN
-	IF current_setting('server_version_num')::int >= 140000 THEN
-		CREATE EXTENSION IF NOT EXISTS pgfaceting;  -- needs roaringbitmap
+CREATE EXTENSION IF NOT EXISTS pgfaceting;  -- needs roaringbitmap
 
-		CREATE TYPE mimetype AS ENUM (
-			'application/pdf',
-			'text/html',
-			'image/jpeg',
-			'image/png',
-			'application/msword',
-			'text/csv',
-			'application/zip',
-			'application/vnd.ms-powerpoint'
-		);
+CREATE TYPE mimetype AS ENUM (
+	'application/pdf',
+	'text/html',
+	'image/jpeg',
+	'image/png',
+	'application/msword',
+	'text/csv',
+	'application/zip',
+	'application/vnd.ms-powerpoint'
+);
 
-		CREATE TABLE documents (
-			id int4 primary key,
-			created timestamptz not null,
-			finished timestamptz,
-			category_id int4,
-			tags text[],
-			type mimetype,
-			size int8,
-			title text
-		);
+CREATE TABLE documents (
+	id int4 primary key,
+	created timestamptz not null,
+	finished timestamptz,
+	category_id int4,
+	tags text[],
+	type mimetype,
+	size int8,
+	title text
+);
 
-		INSERT INTO documents (id, created, finished, category_id, tags, type, size, title) VALUES
-			(1, '2010-01-01 00:00:42+02', '2010-01-01 09:45:29+02', 8, '{blue,burlywood,antiquewhite,olive}', 'application/pdf', 71205, 'Interracial marriage Science Research'),
-			(2, '2010-01-01 00:00:37+02', '2010-01-01 03:55:08+02', 12, '{lightcoral,bisque,blue,"aqua blue","red purple",aqua}', 'text/html', 682069, 'Odour and trials helped to improve the country''s history through the public'),
-			(3, '2010-01-01 00:00:33+02', '2010-01-02 18:29:15+02', 9, '{"mustard brown","very light pink"}', 'application/pdf', 143708, 'Have technical scale, ordinary, commonsense notions of absolute time and length independent of the'),
-			(4, '2010-01-01 00:00:35+02', '2010-01-02 01:12:08+02', 24, '{orange,green,blue}', 'text/html', 280663, 'Database of (/ˈdɛnmɑːrk/; Danish: Danmark [ˈd̥ænmɑɡ̊]) is a spiral'),
-			(5, '2010-01-01 00:01:06+02', '2010-01-01 23:18:56+02', 24, '{orange,chocolate}', 'image/jpeg', 111770, 'Passage to now resumed'),
-			(6, '2010-01-01 00:01:05+02', '2010-01-01 10:25:29+02', 8, '{blue,aquamarine}', 'application/pdf', 110809, 'East. Mesopotamia, BCE – 480 BCE), when determining a value that'),
-			(7, '2010-01-01 00:00:57+02', '2010-01-02 00:41:01+02', NULL, '{}', 'application/pdf', 230803, 'Bahía de It has also conquered 13 South American finds and another'),
-			(8, '2010-01-01 00:01:11+02', '2010-01-01 14:22:11+02', 24, '{blue,burlywood,"dirt brown",orange,ivory,brown,green,olive,lightpink}', 'image/jpeg', 1304196, '15-fold: from the mid- to late-20th'),
-			(9, '2010-01-01 00:01:47+02', '2010-01-01 09:59:57+02', 9, '{green,blue,orange}', 'application/pdf', 142410, 'Popular Western localized function model. Psychiatric interventions such as local businesses, but also'),
-			(10, '2010-01-01 00:01:31+02', '2010-01-01 05:49:47+02', 24, '{green,lavender,blue,orange,red,darkslateblue}', 'text/html', 199703, 'Rapidly expanding Large Interior Form, 1953-54, Man Enters the Cosmos and Nuclear Energy.');
+INSERT INTO documents (id, created, finished, category_id, tags, type, size, title) VALUES
+	(1, '2010-01-01 00:00:42+02', '2010-01-01 09:45:29+02', 8, '{blue,burlywood,antiquewhite,olive}', 'application/pdf', 71205, 'Interracial marriage Science Research'),
+	(2, '2010-01-01 00:00:37+02', '2010-01-01 03:55:08+02', 12, '{lightcoral,bisque,blue,"aqua blue","red purple",aqua}', 'text/html', 682069, 'Odour and trials helped to improve the country''s history through the public'),
+	(3, '2010-01-01 00:00:33+02', '2010-01-02 18:29:15+02', 9, '{"mustard brown","very light pink"}', 'application/pdf', 143708, 'Have technical scale, ordinary, commonsense notions of absolute time and length independent of the'),
+	(4, '2010-01-01 00:00:35+02', '2010-01-02 01:12:08+02', 24, '{orange,green,blue}', 'text/html', 280663, 'Database of (/ˈdɛnmɑːrk/; Danish: Danmark [ˈd̥ænmɑɡ̊]) is a spiral'),
+	(5, '2010-01-01 00:01:06+02', '2010-01-01 23:18:56+02', 24, '{orange,chocolate}', 'image/jpeg', 111770, 'Passage to now resumed'),
+	(6, '2010-01-01 00:01:05+02', '2010-01-01 10:25:29+02', 8, '{blue,aquamarine}', 'application/pdf', 110809, 'East. Mesopotamia, BCE – 480 BCE), when determining a value that'),
+	(7, '2010-01-01 00:00:57+02', '2010-01-02 00:41:01+02', NULL, '{}', 'application/pdf', 230803, 'Bahía de It has also conquered 13 South American finds and another'),
+	(8, '2010-01-01 00:01:11+02', '2010-01-01 14:22:11+02', 24, '{blue,burlywood,"dirt brown",orange,ivory,brown,green,olive,lightpink}', 'image/jpeg', 1304196, '15-fold: from the mid- to late-20th'),
+	(9, '2010-01-01 00:01:47+02', '2010-01-01 09:59:57+02', 9, '{green,blue,orange}', 'application/pdf', 142410, 'Popular Western localized function model. Psychiatric interventions such as local businesses, but also'),
+	(10, '2010-01-01 00:01:31+02', '2010-01-01 05:49:47+02', 24, '{green,lavender,blue,orange,red,darkslateblue}', 'text/html', 199703, 'Rapidly expanding Large Interior Form, 1953-54, Man Enters the Cosmos and Nuclear Energy.');
 
-		PERFORM faceting.add_faceting_to_table(
-			'documents',
-			key => 'id',
-			facets => array[
-				faceting.datetrunc_facet('created', 'month'),
-				faceting.datetrunc_facet('finished', 'month'),
-				faceting.plain_facet('category_id'),
-				faceting.plain_facet('type'),
-				faceting.bucket_facet('size', buckets => array[0,1000,5000,10000,50000,100000,500000])
-			]
-		);
+SELECT faceting.add_faceting_to_table(
+	'documents',
+	key => 'id',
+	facets => array[
+		faceting.datetrunc_facet('created', 'month'),
+		faceting.datetrunc_facet('finished', 'month'),
+		faceting.plain_facet('category_id'),
+		faceting.plain_facet('type'),
+		faceting.bucket_facet('size', buckets => array[0,1000,5000,10000,50000,100000,500000])
+	]
+);
 
-		INSERT INTO test_faceting
-			SELECT facet_name, count(distinct facet_value), sum(cardinality)
-			FROM faceting.count_results(
-				'documents'::regclass,
-				filters => array[row('category_id', 24)]::faceting.facet_filter[]
-			)
-			GROUP BY 1;
-	END IF;
-END $$;
+INSERT INTO test_faceting
+	SELECT facet_name, count(distinct facet_value), sum(cardinality)
+	FROM faceting.count_results(
+		'documents'::regclass,
+		filters => array[row('category_id', 24)]::faceting.facet_filter[]
+	)
+	GROUP BY 1;
 
 SELECT * FROM test_faceting;
 DROP TABLE test_faceting;

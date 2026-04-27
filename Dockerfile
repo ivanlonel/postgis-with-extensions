@@ -133,6 +133,7 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-pg-wait-sampling \
 		postgresql-$PG_MAJOR-pgaudit \
 		postgresql-$PG_MAJOR-pgauditlogtofile \
+		postgresql-$PG_MAJOR-pgfaceting \
 		postgresql-$PG_MAJOR-pgfincore \
 		postgresql-$PG_MAJOR-pglogical \
 		postgresql-$PG_MAJOR-pgmemcache \
@@ -171,9 +172,6 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-wal2json \
 		postgresql-plperl-$PG_MAJOR \
 		postgresql-plpython3-$PG_MAJOR && \
-	if [ "$PG_MAJOR" -ge 14 ]; then \
-		apt-get install -y --no-install-recommends postgresql-$PG_MAJOR-pgfaceting; \
-	fi && \
 	if [ "$PG_MAJOR" -le 17 ]; then \
 		apt-get install -y --no-install-recommends \
 			libsqlite3-mod-spatialite \
