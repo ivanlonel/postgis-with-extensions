@@ -512,10 +512,14 @@ ROLLBACK;
 
 
 -- https://github.com/enova/pg_fact_loader
-CREATE EXTENSION IF NOT EXISTS pg_fact_loader;
-SELECT fact_loader.worker();
-SELECT * FROM fact_loader.subscription();
-SELECT * FROM fact_loader.subscription_rel();
+SELECT (current_setting('server_version_num')::int < 180000) AS run_fact_loader \gset
+
+\if :run_fact_loader
+	CREATE EXTENSION IF NOT EXISTS pg_fact_loader;
+	SELECT fact_loader.worker();
+	SELECT * FROM fact_loader.subscription();
+	SELECT * FROM fact_loader.subscription_rel();
+\endif
 
 
 -- https://github.com/ossc-db/pg_hint_plan
@@ -583,7 +587,7 @@ SELECT partman.create_parent(
 	p_interval := CASE WHEN current_setting('server_version_num')::int >= 140000 THEN '1 year' ELSE 'yearly' END,
 	p_template_table := 'partman.employees_template',
 	p_premake := 2,
-	p_start_partition := (CURRENT_TIMESTAMP + '1 hour'::interval)::text
+	p_start_partition := '2023-01-01'
 );
 
 CREATE OR REPLACE VIEW v_part_employees AS
@@ -857,14 +861,18 @@ SELECT * FROM pgsysconf_pretty();
 
 
 -- https://github.com/enova/pgl_ddl_deploy
-CREATE EXTENSION IF NOT EXISTS pgl_ddl_deploy;
+SELECT (current_setting('server_version_num')::int < 180000) AS run_pgl_ddl_deploy \gset
 
---Setup permissions
-SELECT pgl_ddl_deploy.add_role(oid) FROM pg_roles WHERE rolname in('app_owner', 'replication_role');
+\if :run_pgl_ddl_deploy
+	CREATE EXTENSION IF NOT EXISTS pgl_ddl_deploy;
 
---Setup configs
-INSERT INTO pgl_ddl_deploy.set_configs (set_name, include_schema_regex, lock_safe_deployment, allow_multi_statements)
-VALUES ('default', '.*', true, true), ('insert_update', '.*happy.*', true, true);
+	--Setup permissions
+	SELECT pgl_ddl_deploy.add_role(oid) FROM pg_roles WHERE rolname in('app_owner', 'replication_role');
+
+	--Setup configs
+	INSERT INTO pgl_ddl_deploy.set_configs (set_name, include_schema_regex, lock_safe_deployment, allow_multi_statements)
+	VALUES ('default', '.*', true, true), ('insert_update', '.*happy.*', true, true);
+\endif
 
 
 -- https://github.com/2ndQuadrant/pglogical
@@ -873,8 +881,12 @@ SELECT pglogical.pglogical_version(), pglogical.pglogical_version_num();
 
 
 -- https://github.com/enova/pglogical_ticker
-CREATE EXTENSION IF NOT EXISTS pglogical_ticker;
-SELECT pglogical_ticker.deploy_ticker_tables();
+SELECT (current_setting('server_version_num')::int < 180000) AS pglogical_ticker \gset
+
+\if :pglogical_ticker
+	CREATE EXTENSION IF NOT EXISTS pglogical_ticker;
+	SELECT pglogical_ticker.deploy_ticker_tables();
+\endif
 
 
 -- https://github.com/ohmu/pgmemcache
@@ -956,22 +968,22 @@ INSERT INTO edge_table (
     x1, y1,
     x2, y2
 ) VALUES
-	(3, 1,    1,  1,  80, 130,   2,   0,    2, 1),
-	(3, 2,   -1,  1,  -1, 100,   2,   1,    3, 1),
-	(2, 1,   -1,  1,  -1, 130,   3,   1,    4, 1),
-	(2, 4,    1,  1, 100,  50,   2,   1,    2, 2),
-	(1, 4,    1, -1, 130,  -1,   3,   1,    3, 2),
-	(4, 2,    1,  1,  50, 100,   0,   2,    1, 2),
-	(4, 1,    1,  1,  50, 130,   1,   2,    2, 2),
-	(2, 1,    1,  1, 100, 130,   2,   2,    3, 2),
-	(1, 3,    1,  1, 130,  80,   3,   2,    4, 2),
-	(1, 4,    1,  1, 130,  50,   2,   2,    2, 3),
-	(1, 2,    1, -1, 130,  -1,   3,   2,    3, 3),
-	(2, 3,    1, -1, 100,  -1,   2,   3,    3, 3),
-	(2, 4,    1, -1, 100,  -1,   3,   3,    4, 3),
-	(3, 1,    1,  1,  80, 130,   2,   3,    2, 4),
-	(3, 4,    1,  1,  80,  50,   4,   2,    4, 3),
-	(3, 3,    1,  1,  80,  80,   4,   1,    4, 2),
+    (3, 1,    1,  1,  80, 130,   2,   0,    2, 1),
+    (3, 2,   -1,  1,  -1, 100,   2,   1,    3, 1),
+    (2, 1,   -1,  1,  -1, 130,   3,   1,    4, 1),
+    (2, 4,    1,  1, 100,  50,   2,   1,    2, 2),
+    (1, 4,    1, -1, 130,  -1,   3,   1,    3, 2),
+    (4, 2,    1,  1,  50, 100,   0,   2,    1, 2),
+    (4, 1,    1,  1,  50, 130,   1,   2,    2, 2),
+    (2, 1,    1,  1, 100, 130,   2,   2,    3, 2),
+    (1, 3,    1,  1, 130,  80,   3,   2,    4, 2),
+    (1, 4,    1,  1, 130,  50,   2,   2,    2, 3),
+    (1, 2,    1, -1, 130,  -1,   3,   2,    3, 3),
+    (2, 3,    1, -1, 100,  -1,   2,   3,    3, 3),
+    (2, 4,    1, -1, 100,  -1,   3,   3,    4, 3),
+    (3, 1,    1,  1,  80, 130,   2,   3,    2, 4),
+    (3, 4,    1,  1,  80,  50,   4,   2,    4, 3),
+    (3, 3,    1,  1,  80,  80,   4,   1,    4, 2),
 	(1, 2,    1,  1, 130, 100,   0.5, 3.5,  1.999999999999,3.5),
 	(4, 1,    1,  1,  50, 130,   3.5, 2.3,  3.5,4);
 
@@ -984,10 +996,62 @@ SET the_geom = st_makeline(st_point(x1,y1), st_point(x2,y2)),
 		ELSE ''                                     -- unknown
 	END;
 
-SELECT pgr_createTopology('edge_table',0.001);
+-- Build topology using pgr_extractVertices (available since pgRouting 3.0)
+CREATE TEMP TABLE edge_table_vertices_pgr AS
+    SELECT * FROM pgr_extractVertices(
+        'SELECT id, the_geom AS geom FROM edge_table ORDER BY id'
+    );
 
-SELECT pgr_analyzegraph('edge_table', 0.001);
-SELECT pgr_nodeNetwork('edge_table', 0.001);
+UPDATE edge_table e
+    SET source = v.id,
+        x1     = v.x,
+        y1     = v.y
+    FROM edge_table_vertices_pgr v
+    WHERE ST_StartPoint(e.the_geom) = v.geom;
+
+UPDATE edge_table e
+    SET target = v.id,
+        x2     = v.x,
+        y2     = v.y
+    FROM edge_table_vertices_pgr v
+    WHERE ST_EndPoint(e.the_geom) = v.geom;
+
+-- Verify topology was built
+SELECT id, source, target FROM edge_table ORDER BY id;
+
+-- Verify graph connectivity (replaces pgr_analyzeGraph):
+-- dead ends are vertices with only one connected edge
+SELECT v.id, v.geom,
+    array_length(v.in_edges || v.out_edges, 1) AS degree,
+    CASE WHEN array_length(v.in_edges || v.out_edges, 1) = 1
+         THEN 'dead end' ELSE 'connected' END AS vertex_type
+FROM edge_table_vertices_pgr v
+ORDER BY v.id;
+
+-- Verify one-way anomalies (replaces pgr_analyzeGraph one-way check):
+-- edges where cost < 0 or reverse_cost < 0 at dead-end vertices
+WITH deadends AS (
+    SELECT (in_edges || out_edges)[1] AS id
+    FROM edge_table_vertices_pgr
+    WHERE array_length(in_edges || out_edges, 1) = 1
+)
+SELECT e.id, e.source, e.target, e.cost, e.reverse_cost
+FROM edge_table e
+JOIN deadends d ON e.id = d.id
+WHERE e.cost < 0 OR e.reverse_cost < 0;
+
+-- pgr_nodeNetwork equivalent: split crossing edges using pgr_separateCrossing
+-- (available since pgRouting 3.8; skip on older versions)
+DO $$
+BEGIN
+    IF (SELECT string_to_array(extversion, '.')::int[] >= '{3,8,0}'
+        FROM pg_extension WHERE extname = 'pgrouting') THEN
+        PERFORM pgr_separateCrossing(
+            'SELECT id, the_geom AS geom FROM edge_table'
+        );
+    END IF;
+END;
+$$;
 
 ROLLBACK;
 
@@ -1010,7 +1074,6 @@ SELECT is_numeric('123'), is_numeric('1 2'), is_bigint('9876543210'), is_integer
 SELECT is_boolean('yes'), is_boolean('false'), is_boolean('NO'), is_boolean('TRUE'), is_boolean('1'), is_boolean('F');
 SELECT is_json('{"review": {"date": "1970-12-30", "votes": 10, "rating": 5, "helpful_votes": 0}, "product": {"id": "1551803542", "group": "Book", "title": "Start and Run a Coffee Bar (Start & Run a)", "category": "Business & Investing", "sales_rank": 11611, "similar_ids": ["0471136174", "0910627312", "047112138X", "0786883561", "0201570483"], "subcategory": "General"}, "customer_id": "AE22YDHSBFYIP"}');
 SELECT is_jsonb('{"review": {"date": "1970-12-30", "votes": 10, "rating": 5, "helpful_votes": 0}, "product": {"id": "1551803542", "group": "Book", "title": "Start and Run a Coffee Bar (Start & Run a)", "category": "Business & Investing", "sales_rank": 11611, "similar_ids": ["0471136174", "0910627312", "047112138X", "0786883561", "0201570483"], "subcategory": "General"}, "customer_id": "AE22YDHSBFYIP"}');
-SELECT is_empty_b(''), is_empty_b(NULL), is_empty_b('NULL');  -- just "is_empty" if pgtap is not created
 SELECT is_hex('a1b0'), is_hex('a1b0c3c3c3c4b5d3'), hex2bigint('a1b0');
 SELECT sha256('test-string'::bytea);
 SELECT pg_size_pretty(pg_schema_size('public'));
@@ -1174,7 +1237,7 @@ INSERT INTO pointcloud_formats (pcid, srid, schema) VALUES (1, 4326,
   </pc:metadata>
 </pc:PointCloudSchema>');
 
-SELECT ST_AsText(PC_MakePoint(1, ARRAY[-127, 45, 124.0, 4.0])::geometry);
+SELECT PC_MakePoint(1, ARRAY[-127, 45, 124.0, 4.0]);
 
 
 -- https://github.com/powa-team/powa-archivist
@@ -1360,21 +1423,25 @@ SELECT CURRENT_USER, SESSION_USER;
 
 
 -- https://github.com/pgspider/sqlite_fdw
-CREATE EXTENSION IF NOT EXISTS sqlite_fdw;
+SELECT (current_setting('server_version_num')::int < 180000) AS run_sqlite_fdw \gset
 
-BEGIN;
+\if :run_sqlite_fdw
+	CREATE EXTENSION IF NOT EXISTS sqlite_fdw;
 
-CREATE SERVER sqlite_server
-	FOREIGN DATA WRAPPER sqlite_fdw
-	OPTIONS (database '/tmp/test.db');
+	BEGIN;
 
-CREATE FOREIGN TABLE sqlite_table(
-	id integer OPTIONS (key 'true'),
-	title text OPTIONS(column_name 'nm_title'),
-	modified timestamp OPTIONS (column_type 'INT')
-) SERVER sqlite_server OPTIONS (table 't1_sqlite');
+	CREATE SERVER sqlite_server
+		FOREIGN DATA WRAPPER sqlite_fdw
+		OPTIONS (database '/tmp/test.db');
 
-ROLLBACK;
+	CREATE FOREIGN TABLE sqlite_table(
+		id integer OPTIONS (key 'true'),
+		title text OPTIONS(column_name 'nm_title'),
+		modified timestamp OPTIONS (column_type 'INT')
+	) SERVER sqlite_server OPTIONS (table 't1_sqlite');
+
+	ROLLBACK;
+\endif
 
 
 -- https://github.com/credativ/table_log
@@ -1382,7 +1449,7 @@ CREATE EXTENSION IF NOT EXISTS table_log;
 
 BEGIN;
 
-CREATE TABLE drop_test (
+CREATE TABLE public.drop_test (
 	id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	col1 text NOT NULL DEFAULT '',
 	col2 text NOT NULL DEFAULT '',

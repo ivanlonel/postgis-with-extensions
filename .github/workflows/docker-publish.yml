@@ -19,7 +19,7 @@ env:
   REGISTRY: ghcr.io
   TEST_TAG: ${{ github.repository }}:test
   COMPOSE_FILE: ./docker-compose.test.yml
-  LATEST_TAG: 17-3.5
+  LATEST_TAG: 18-3.6
 
 jobs:
   build-and-push-image:
@@ -34,6 +34,9 @@ jobs:
       matrix:
         postgres: [17, 16, 15, 14, 13]
         postgis: ['3.5']
+        include:
+          - postgres: 18
+            postgis: '3.6'
 
     env:
       BASE_IMAGE_TAG: ${{ matrix.postgres }}-${{ matrix.postgis }}

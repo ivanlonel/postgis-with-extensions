@@ -41,7 +41,7 @@ RUN apt-get install -y --no-install-recommends \
 FROM common-deps AS build-timescaledb
 
 WORKDIR /tmp/timescaledb
-RUN apt-get install -y --no-install-recommends libkrb5-dev && \
+RUN apt-get install -y --no-install-recommends libicu-dev libkrb5-dev && \
 	URL_END=$(case "$PG_MAJOR" in ("14") echo "tag/2.19.3";; ("13") echo "tag/2.15.3";; (*) echo "latest";; esac) && \
 	ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/timescale/timescaledb/releases/${URL_END})) && \
 	curl --fail -L "https://github.com/timescale/timescaledb/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
@@ -55,7 +55,7 @@ RUN make -j$(nproc) && \
 
 FROM common-deps AS pgxn
 
-RUN apt-get install -y --no-install-recommends pgxnclient && \
+RUN apt-get install -y --no-install-recommends pgxnclient libicu-dev && \
 	pgxn install --verbose ddlx && \
 	pgxn install --verbose json_accessors && \
 	pgxn install --verbose parray_gin && \
@@ -86,11 +86,13 @@ RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://g
 FROM common-deps AS build-sqlite_fdw
 
 WORKDIR /tmp/sqlite_fdw
-RUN apt-get install -y --no-install-recommends libsqlite3-dev && \
-	ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/pgspider/sqlite_fdw/releases/latest)) && \
-	curl --fail -L "https://github.com/pgspider/sqlite_fdw/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
-	make USE_PGXS=1 && \
-	make USE_PGXS=1 install
+RUN if [ "$PG_MAJOR" -le 17 ]; then \
+		apt-get install -y --no-install-recommends libsqlite3-dev && \
+		ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/pgspider/sqlite_fdw/releases/latest)) && \
+		curl --fail -L "https://github.com/pgspider/sqlite_fdw/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
+		make USE_PGXS=1 && \
+		make USE_PGXS=1 install; \
+	fi
 
 
 
@@ -99,8 +101,6 @@ FROM base-image AS final-stage
 
 RUN apt-get update && \
 	apt-get install -y --no-install-recommends \
-		# runtime requirement for using spatialite with sqlite_fdw
-		libsqlite3-mod-spatialite \
 		pgagent \
 		postgresql-$PG_MAJOR-age \
 		postgresql-$PG_MAJOR-asn1oid \
@@ -124,7 +124,6 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-orafce \
 		postgresql-$PG_MAJOR-partman \
 		postgresql-$PG_MAJOR-periods \
-		postgresql-$PG_MAJOR-pg-fact-loader \
 		postgresql-$PG_MAJOR-pg-hint-plan \
 		postgresql-$PG_MAJOR-pg-permissions \
 		postgresql-$PG_MAJOR-pg-qualstats \
@@ -135,9 +134,7 @@ RUN apt-get update && \
 		postgresql-$PG_MAJOR-pgaudit \
 		postgresql-$PG_MAJOR-pgauditlogtofile \
 		postgresql-$PG_MAJOR-pgfincore \
-		postgresql-$PG_MAJOR-pgl-ddl-deploy \
 		postgresql-$PG_MAJOR-pglogical \
-		postgresql-$PG_MAJOR-pglogical-ticker \
 		postgresql-$PG_MAJOR-pgmemcache \
 		postgresql-$PG_MAJOR-pgmp \
 		postgresql-$PG_MAJOR-pgpcre \
@@ -177,6 +174,13 @@ RUN apt-get update && \
 	if [ "$PG_MAJOR" -ge 14 ]; then \
 		apt-get install -y --no-install-recommends postgresql-$PG_MAJOR-pgfaceting; \
 	fi && \
+	if [ "$PG_MAJOR" -le 17 ]; then \
+		apt-get install -y --no-install-recommends \
+			libsqlite3-mod-spatialite \
+			postgresql-$PG_MAJOR-pg-fact-loader \
+			postgresql-$PG_MAJOR-pgl-ddl-deploy \
+			postgresql-$PG_MAJOR-pglogical-ticker; \
+	fi && \
 	apt-get purge -y --auto-remove && \
 	rm -rf /var/lib/apt/lists/*
 
@@ -212,13 +216,13 @@ COPY --from=build-sqlite_fdw \
 	/usr/share/postgresql/$PG_MAJOR/extension/sqlite_fdw* \
 	/usr/share/postgresql/$PG_MAJOR/extension/
 COPY --from=build-sqlite_fdw \
-	/usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw.index.bc \
+	/usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw.index.b[c] \
 	/usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw.index.bc
 COPY --from=build-sqlite_fdw \
-	/usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw \
+	/usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fd[w] \
 	/usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw
 COPY --from=build-sqlite_fdw \
-	/usr/lib/postgresql/$PG_MAJOR/lib/sqlite_fdw.so \
+	/usr/lib/postgresql/$PG_MAJOR/lib/sqlite_fdw.s[o] \
 	/usr/lib/postgresql/$PG_MAJOR/lib/sqlite_fdw.so
 
 COPY ./conf.sh  /docker-entrypoint-initdb.d/z_conf.sh

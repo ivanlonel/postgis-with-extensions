@@ -6,7 +6,7 @@
 
 Tag labels follow the pattern `X-Y.Z`, where `X` is the *major* Postgres version (starting from version 13) and `Y.Z` is the *major.minor* Postgis version.
 
-The `latest` tag currently corresponds to `17-3.5`.
+The `latest` tag currently corresponds to `18-3.6`.
 
 ## Usage
 
@@ -46,7 +46,7 @@ For more detailed instructions about how to start and control your Postgres cont
 - [permuteseq](https://github.com/dverite/permuteseq)
 - [pg_cron](https://github.com/citusdata/pg_cron)
 - [pg_dirtyread](https://github.com/df7cb/pg_dirtyread)
-- [pg_fact_loader](https://github.com/enova/pg_fact_loader)
+- [pg_fact_loader](https://github.com/enova/pg_fact_loader) (only up to Postgres 17)
 - [pg_hint_plan](https://github.com/ossc-db/pg_hint_plan)
 - [pg_jobmon](https://github.com/omniti-labs/pg_jobmon)
 - [pg_partman](https://github.com/pgpartman/pg_partman)
@@ -71,9 +71,9 @@ For more detailed instructions about how to start and control your Postgres cont
 - [pgauditlogtofile](https://github.com/fmbiete/pgauditlogtofile)
 - [pgfaceting](https://github.com/cybertec-postgresql/pgfaceting)
 - [pgfincore](https://github.com/klando/pgfincore)
-- [pgl_ddl_deploy](https://github.com/enova/pgl_ddl_deploy)
+- [pgl_ddl_deploy](https://github.com/enova/pgl_ddl_deploy) (only up to Postgres 17)
 - [pglogical](https://github.com/2ndQuadrant/pglogical)
-- [pglogical_ticker](https://github.com/enova/pglogical_ticker)
+- [pglogical_ticker](https://github.com/enova/pglogical_ticker) (only up to Postgres 17)
 - [pgmemcache](https://github.com/ohmu/pgmemcache)
 - [pgmp](https://github.com/dvarrazzo/pgmp)
 - [pgmq](https://github.com/tembo-io/pgmq)
@@ -103,7 +103,7 @@ For more detailed instructions about how to start and control your Postgres cont
 - [rum](https://github.com/postgrespro/rum)
 - [semver](https://github.com/theory/pg-semver)
 - [set_user](https://github.com/pgaudit/set_user)
-- [sqlite_fdw](https://github.com/pgspider/sqlite_fdw)
+- [sqlite_fdw](https://github.com/pgspider/sqlite_fdw) (only up to Postgres 17)
 - [table_log](https://github.com/credativ/table_log)
 - [tdigest](https://github.com/tvondra/tdigest)
 - [tds_fdw](https://github.com/tds-fdw/tds_fdw)

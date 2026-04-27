@@ -5,7 +5,11 @@ set -Eeuo pipefail
 # The outer sed, operating on that line alone, extracts the text between single quotes after the equals sign
 PREVIOUS_PRELOAD_LIBRARIES=$(sed -nE "$(sed -n '/^\s*shared_preload_libraries\s*=/ =' ${PGDATA}/postgresql.conf | tail -n 1) s/^\s*shared_preload_libraries\s*=\s*'(.*?)'/\1/p" ${PGDATA}/postgresql.conf)
 
-NEW_PRELOAD_LIBRARIES="credcheck,pg_cron,pg_partman_bgw,pg_show_plans,pg_similarity,pg_squeeze,pg_stat_statements,pg_stat_kcache,pg_wait_sampling,pgaudit,pgauditlogtofile,pglogical,pglogical_ticker,pgmemcache,plprofiler,plugin_debugger,postgis-3,set_user,timescaledb"
+NEW_PRELOAD_LIBRARIES="credcheck,pg_cron,pg_partman_bgw,pg_show_plans,pg_similarity,pg_squeeze,pg_stat_statements,pg_stat_kcache,pg_wait_sampling,pgaudit,pgauditlogtofile,pglogical,pgmemcache,plprofiler,plugin_debugger,postgis-3,set_user,timescaledb"
+
+if [ "$PG_MAJOR" -le 17 ]; then
+    NEW_PRELOAD_LIBRARIES="$NEW_PRELOAD_LIBRARIES,pglogical_ticker"
+fi
 
 cat >> ${PGDATA}/postgresql.conf << EOT
 listen_addresses = '*'

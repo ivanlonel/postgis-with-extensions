@@ -1,11 +1,11 @@
 services:
 
   postgres:
-    # image: ivanlonel/postgis-with-extensions:17-3.5
+    # image: ivanlonel/postgis-with-extensions:18-3.6
     build:
       context: . # Use image from Dockerfile in current dir
       args:
-        - BASE_IMAGE_TAG=17-3.5
+        - BASE_IMAGE_TAG=18-3.6
         - LOCALE=pt_BR
         - ENCODING=UTF-8
     command:
