@@ -108,7 +108,7 @@ jobs:
 
       - name: Push to Docker Hub
         if: ${{ github.event_name != 'pull_request' }}
-        uses: akhilerm/tag-push-action@v2.2.0
+        uses: akhilerm/tag-push-action@v2.3.0
         with:
           src: ${{ steps.meta.outputs.tags }}
           dst: |
@@ -116,7 +116,7 @@ jobs:
 
       - name: Push latest tag to both registries
         if: ${{ (github.event_name != 'pull_request') && (env.BASE_IMAGE_TAG == env.LATEST_TAG) }}
-        uses: akhilerm/tag-push-action@v2.2.0
+        uses: akhilerm/tag-push-action@v2.3.0
         with:
           src: ${{ steps.meta.outputs.tags }}
           dst: |
