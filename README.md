@@ -57,7 +57,7 @@ For more detailed instructions about how to start and control your Postgres cont
 - [pg_roaringbitmap](https://github.com/ChenHuajun/pg_roaringbitmap)
 - [pg_rowalesce](https://github.com/bigsmoke/pg_rowalesce)
 - [pg_rrule](https://github.com/petropavel13/pg_rrule)
-- [pg_show_plans](https://github.com/cybertec-postgresql/pg_show_plans)
+- [pg_show_plans](https://github.com/cybertec-postgresql/pg_show_plans) (off by default, as it [crashes INSERTs into TimescaleDB hypertables](https://github.com/timescale/timescaledb/pull/10417); enable with `pg_show_plans.is_enabled = on`)
 - [pg_similarity](https://github.com/eulerto/pg_similarity)
 - [pg_squeeze](https://github.com/cybertec-postgresql/pg_squeeze)
 - [pg_stat_kcache](https://github.com/powa-team/pg_stat_kcache)
