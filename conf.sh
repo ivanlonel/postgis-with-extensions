@@ -22,6 +22,10 @@ cron.database_name = '${PG_CRON_DB:-${POSTGRES_DB:-${POSTGRES_USER:-postgres}}}'
 # pg_partman
 pg_partman_bgw.dbname = '${PG_PARTMAN_DB:-${POSTGRES_DB:-${POSTGRES_USER:-postgres}}}'
 
+# pg_show_plans: explaining each query before it runs crashes INSERTs into TimescaleDB hypertables
+# (https://github.com/timescale/timescaledb/pull/10417). Set to on to use it anyway.
+pg_show_plans.is_enabled = off
+
 # MobilityDB recomendation
 max_locks_per_transaction = 128
 timescaledb.telemetry_level = off
