@@ -26,6 +26,9 @@ pg_partman_bgw.dbname = '${PG_PARTMAN_DB:-${POSTGRES_DB:-${POSTGRES_USER:-postgr
 # (https://github.com/timescale/timescaledb/pull/10417). Set to on to use it anyway.
 pg_show_plans.is_enabled = off
 
+# Logical decoding output plugins shipped in this image (PostgreSQL only trusts pgoutput and test_decoding by default)
+output_plugin_libraries = 'pgoutput, test_decoding, wal2json, pglogical_output, pg_squeeze'
+
 # MobilityDB recomendation
 max_locks_per_transaction = 128
 timescaledb.telemetry_level = off
