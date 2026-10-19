@@ -73,6 +73,8 @@ jobs:
         run: docker compose up --build --no-start
 
       - name: Run tests
+        # ponytail: bounds wait-for-postgres.sh's endless retry loop and any hung test; a compose healthcheck would fail faster
+        timeout-minutes: 10
         env:
           IMAGE_NAME: ${{ env.TEST_TAG }}
         run: docker compose up --exit-code-from sut
