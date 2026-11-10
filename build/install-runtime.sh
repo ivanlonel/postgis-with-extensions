@@ -56,14 +56,19 @@ apt-get update
 apt-get install -y --no-install-recommends "${packages[@]}" "$@"
 
 if dpkg --compare-versions "$postgis_series" ge 3.7; then
-	# PGDG packages the standalone tiger geocoder for PG 16+ only. It is pure SQL (arch: all),
-	# so the PG 16 build's extension files serve older majors too.
+	# PGDG packages the standalone tiger geocoder for PG 16+ only. It is pure SQL (arch: all), so
+	# the PG 16 build's extension files serve older majors too, once stripped of what those majors
+	# predate (the @extschema:<extension>@ references and no_relocate), as PostGIS's own build does.
 	if [[ ! -e "$extdir/postgis_tiger_geocoder.control" ]]; then
 		workdir="$(mktemp -d)"
 		(cd "$workdir" && apt-get download postgresql-16-postgis-tiger-geocoder)
 		dpkg-deb -x "$workdir"/postgresql-16-postgis-tiger-geocoder_*.deb "$workdir/root"
 		cp -a "$workdir/root/usr/share/postgresql/16/extension/." "$extdir/"
 		rm -rf "$workdir"
+		if ((PG_MAJOR < 16)); then
+			sed -i -E 's/@extschema:[^@]+@\.//g' "$extdir"/postgis_tiger_geocoder*.sql
+			sed -i '/^no_relocate/d' "$extdir/postgis_tiger_geocoder.control"
+		fi
 	fi
 
 	# Functions created by PostGIS 3.6's address_standardizer reference $libdir/address_standardizer-3.
