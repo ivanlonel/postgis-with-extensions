@@ -34,6 +34,12 @@ STARTUP_TIMEOUT: Final = 600.0
 COMMAND_TIMEOUT: Final = 900.0
 """Seconds to wait for a single docker command."""
 
+STARTED_MARKERS: Final = (
+    "PostgreSQL init process complete; ready for start up.",
+    "PostgreSQL Database directory appears to contain a database; Skipping initialization",
+)
+"""What docker-entrypoint.sh prints once initialization is over (or skipped)."""
+
 
 class DockerError(RuntimeError):
     """A docker command failed."""
@@ -245,7 +251,10 @@ class Server:
 
     def wait_ready(self, timeout: float = STARTUP_TIMEOUT) -> None:
         """
-        Wait until the server accepts TCP connections, which only happens after initialization.
+        Wait until initialization is over and the server accepts TCP connections.
+
+        TCP alone isn't proof: init scripts of earlier images restarted the temporary server
+        with TCP enabled, so the entrypoint's own message is awaited too.
 
         :param timeout: Seconds to wait.
         :raise ServerExitedError: If the container stops first.
@@ -258,7 +267,9 @@ class Server:
                 msg = f"{self.name} exited before accepting connections:\n{self.logs()}"
                 raise ServerExitedError(msg)
             if self.exec("pg_isready", "--host", "127.0.0.1", "--quiet").returncode == 0:
-                return
+                logs = self.logs()
+                if any(marker in logs for marker in STARTED_MARKERS):
+                    return
             time.sleep(1)
         msg = f"{self.name} didn't accept connections within {timeout:.0f}s:\n{self.logs()}"
         raise TimeoutError(msg)
