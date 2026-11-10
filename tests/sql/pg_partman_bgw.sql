@@ -13,9 +13,10 @@ SELECT count(*) AS partitions FROM partman.show_partitions('public.bgw_events');
 UPDATE partman.part_config SET premake = 5
 WHERE parent_table = 'public.bgw_events';
 
--- Have the worker run every second, as the superuser, then put the settings back.
-ALTER SYSTEM SET pg_partman_bgw.interval = 1;
-ALTER SYSTEM SET pg_partman_bgw.role = 'postgres';
+-- Have the worker run every second, as the superuser, then put the settings back. (sqlfluff
+-- can't parse ALTER SYSTEM.)
+ALTER SYSTEM SET pg_partman_bgw.interval = 1;  -- noqa: PRS
+ALTER SYSTEM SET pg_partman_bgw.role = 'postgres';  -- noqa: PRS
 SELECT pg_reload_conf();
 
 SELECT plan(1);
@@ -27,8 +28,8 @@ SELECT ok(
 	'the background worker runs maintenance'
 );
 
-ALTER SYSTEM RESET pg_partman_bgw.interval;
-ALTER SYSTEM RESET pg_partman_bgw.role;
+ALTER SYSTEM RESET pg_partman_bgw.interval;  -- noqa: PRS
+ALTER SYSTEM RESET pg_partman_bgw.role;  -- noqa: PRS
 SELECT pg_reload_conf();
 SELECT * FROM finish(TRUE);
 

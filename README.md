@@ -255,7 +255,7 @@ To add an extension:
   `# renovate:` comment).
 - Describe it in `extensions.toml` and run `uv run python -m scripts.render_readme` to update this table.
 - If it needs preloading, register its library in `image/preload-libraries.txt`.
-- Add a smoke test as `tests/sql/<extension>.sql`.
+- Add `tests/sql/<extension>.sql`, a pgTAP script proving the extension works (known answers, not just loading).
 
 CI builds and tests every PostgreSQL major on each pull request, and publishes from `master` and the weekly scheduled
 run. Renovate keeps the pinned versions current.
