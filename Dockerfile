@@ -73,6 +73,15 @@ RUN while read -r dist version; do \
     done < /tmp/pgxn-packages.txt
 
 
+FROM build-base AS datasketches
+# Out of the PGXN list, whose builds run one after another: compiling the bundled DataSketches C++
+# library takes over a minute, which its own stage spends in parallel.
+# renovate: datasource=custom.pgxn depName=datasketches
+ARG DATASKETCHES_VERSION=1.7.0
+RUN build-pgxs "https://api.pgxn.org/dist/datasketches/${DATASKETCHES_VERSION}/datasketches-${DATASKETCHES_VERSION}.zip" \
+        USE_PGXS=1
+
+
 FROM build-base AS github
 # Make variables in the list work around upstream issues: pg_tracing's PG_CFLAGS= drops its -Werror,
 # which trixie's stricter libcurl headers trip. decoder_raw follows PostgreSQL's development branch
@@ -235,6 +244,7 @@ RUN --mount=type=bind,source=build,target=/build \
 
 COPY --link --from=timescaledb /out/ /
 COPY --link --from=pgxn /out/ /
+COPY --link --from=datasketches /out/ /
 COPY --link --from=github /out/ /
 COPY --link --from=citus /out/ /
 COPY --link --from=pgactive /out/ /
