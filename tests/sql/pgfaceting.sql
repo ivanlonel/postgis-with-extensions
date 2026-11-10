@@ -131,7 +131,12 @@ SELECT faceting.add_faceting_to_table(
 	]
 );
 
-SELECT plan(1);
+-- Changes are recorded as deltas, which maintenance merges into the facet index.
+INSERT INTO documents (id, created, finished, category_id, tags, type, size, title) VALUES
+(11, '2010-01-01 00:02:00+02', NULL, 24, '{blue}', 'text/csv', 1234, 'Late arrival');
+CALL faceting.run_maintenance();
+
+SELECT plan(3);
 SELECT is(
 	(
 		SELECT sum(cardinality)::bigint
@@ -142,7 +147,23 @@ SELECT is(
 			)
 		WHERE facet_name = 'type'
 	),
-	4::bigint,
+	5::bigint,
 	'facets count the filtered documents'
+);
+SELECT is(
+	(
+		SELECT sum(cardinality)::bigint
+		FROM faceting.count_results('documents'::regclass, filters => ARRAY[]::faceting.facet_filter[])
+		WHERE facet_name = 'type'
+	),
+	11::bigint,
+	'new rows reach the facets'
+);
+SELECT ok(
+	(
+		SELECT count(*) > 0 FROM faceting.top_values('documents'::regclass, n => 3)
+		WHERE facet_name = 'category_id'
+	),
+	'top values are listed'
 );
 SELECT * FROM finish(TRUE);

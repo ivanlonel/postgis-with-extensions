@@ -2,14 +2,16 @@
 CREATE EXTENSION vectorscale CASCADE;  -- requires vector
 
 CREATE TABLE document_embedding (id bigint PRIMARY KEY, embedding vector(3));
--- Seeded random vectors: no near-duplicates, the same on every run.
+-- Seeded random vectors: no near-duplicates, the same on every run. Three dimensions are too few
+-- for the default quantized storage to rank neighbours, hence storage_layout = plain.
 SELECT setseed(0.42);
 INSERT INTO document_embedding
 SELECT
 	i,
 	ARRAY[random(), random(), random()]::vector(3)
 FROM generate_series(1, 2000) AS i;
-CREATE INDEX document_embedding_idx ON document_embedding USING diskann (embedding vector_cosine_ops);
+CREATE INDEX document_embedding_idx ON document_embedding USING diskann (embedding vector_cosine_ops)
+WITH (storage_layout = plain);
 ANALYZE document_embedding;
 SELECT set_config('enable_seqscan', 'off', FALSE);
 

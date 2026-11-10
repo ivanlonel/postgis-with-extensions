@@ -480,6 +480,7 @@ name = "plProfiler"
 url = "https://github.com/bigsql/plprofiler"
 provides = ["plprofiler"]
 preload = "plprofiler"
+note = "Collects nothing when `plugin_debugger` is loaded after it, as in the `legacy` and `all` presets: PL/pgSQL takes one plugin"
 
 [[extension]]
 name = "pointcloud"

@@ -2,6 +2,21 @@
 -- https://github.com/postgrespro/pg_wait_sampling
 CREATE EXTENSION pg_wait_sampling;
 
-WITH t AS (SELECT sum(0) FROM pg_wait_sampling_current)
+SELECT pg_sleep(1);
 
-SELECT sum(0) FROM generate_series(1, 2), t;
+SELECT plan(2);
+SELECT ok(
+	(
+		SELECT count(*) > 0 FROM pg_wait_sampling_profile
+		WHERE pid = pg_backend_pid() AND event = 'PgSleep'
+	),
+	'waits are sampled into the profile'
+);
+SELECT ok(
+	(
+		SELECT count(*) > 0 FROM pg_wait_sampling_history
+		WHERE pid = pg_backend_pid() AND event = 'PgSleep'
+	),
+	'waits are kept in the history'
+);
+SELECT * FROM finish(TRUE);
