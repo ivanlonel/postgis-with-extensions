@@ -18,6 +18,8 @@ plus 100+ extensions. The images follow upstream's Debian tags (amd64 only); CI 
   (`preload-libraries.txt`, shared by the wrapper, the init scripts and the tests), `preload.sh` helpers, and the init
   scripts, whose file names (`z_conf.sh`, `setup_powa-archivist.sh`) must not change: users may override them.
 - `extensions.toml`: the manifest behind the README table and the catalog tests.
+- `justfile`: the common tasks (`just --list`): lint, static tests, README rendering, image builds and tests, CI
+  dispatch and logs.
 - `tests/`: pytest drives the docker CLI (`tests/_docker.py`); `tests/sql/*.sql` are per-extension pgTAP scripts with
   `-- preload:` / `-- conflicts:` / `-- pg:` / `-- database:` directives, run on a server preloading just what they
   need and on the `all` one; `tests/sql/lib/helpers.sql` gives them `wait_until()` and `plan_of()`, and
@@ -29,6 +31,10 @@ plus 100+ extensions. The images follow upstream's Debian tags (amd64 only); CI 
 - Never break existing containers: no edits to existing clusters' configuration files, the wrapper only adds
   libraries, and published tags keep their meaning. Ask before any change that alters behaviour for existing clusters.
 - Pin every non-apt source (with a `# renovate:` comment); PGDG packages float and refresh weekly.
+- When adding an extension, record its library's background workers in `image/preload-libraries.txt` (they size
+  `max_worker_processes`), and list any logical decoding output plugin it ships in `trusted_plugins`
+  (`image/initdb/z_conf.sh`): since the August 2026 minor releases, PostgreSQL refuses other plugins, even for
+  superusers.
 - Docker isn't available on the maintainer's Windows machine: image builds and tests run in GitHub Actions.
 - Python is 3.13+, fully typed, with Sphinx field-list docstrings (`:param:`, `:return:`, `:raise:`); prek runs ruff
   (`ALL`), ty and pydoclint. Every suppression comment carries a reason.

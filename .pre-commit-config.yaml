@@ -122,6 +122,15 @@ repos:
         pass_filenames: false
         files: ^(extensions\.toml|docker-bake\.hcl|README\.md|scripts/(manifest|render_readme)\.py)$
 
+      - id: just-fmt
+        name: justfile is formatted
+        entry: just --fmt --check
+        language: python
+        additional_dependencies:
+          - rust-just==1.59.0
+        pass_filenames: false
+        files: ^justfile$
+
       - id: static-tests
         name: static tests (manifest, preload registry, baselines)
         entry: uv run --exact pytest --quiet tests/test_manifest.py
