@@ -11,7 +11,9 @@ SELECT
 	'2024-01-01'::date + (i % 365)
 FROM generate_series(1, 1000) AS i;
 
-CREATE TABLE measurement_aux (id integer, city text, logdate date NOT NULL) PARTITION BY RANGE (id);
+-- pg_rewrite copies the source's constraints, NOT NULL ones too from PostgreSQL 18 on (which catalogs
+-- them): declaring those here as well would make it fail.
+CREATE TABLE measurement_aux (id integer, city text, logdate date) PARTITION BY RANGE (id);
 CREATE TABLE measurement_aux_low PARTITION OF measurement_aux FOR VALUES FROM (minvalue) TO (501);
 CREATE TABLE measurement_aux_high PARTITION OF measurement_aux FOR VALUES FROM (501) TO (maxvalue);
 ALTER TABLE measurement_aux ADD PRIMARY KEY (id);

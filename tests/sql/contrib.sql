@@ -179,7 +179,17 @@ SELECT is((
 	SELECT count(*) FROM items
 	WHERE name LIKE '%tem 99%'
 ), 11::bigint, 'pg_trgm indexes LIKE searches');
-SELECT ok((SELECT all_visible > 0 FROM pg_visibility_map_summary('items')), 'pg_visibility reads the visibility map');
+-- VACUUM only marks pages all-visible once no older snapshot remains, which a background worker can
+-- hold: retry it, from another session (VACUUM can't run in a function).
+SELECT ok(
+	wait_until(
+		$$
+			SELECT dblink_exec(format('dbname=%s', current_database()), 'VACUUM items') = 'VACUUM'
+				AND (SELECT all_visible > 0 FROM pg_visibility_map_summary('items'))
+		$$
+	),
+	'pg_visibility reads the visibility map'
+);
 SELECT is(
 	encode(digest('abc', 'sha256'), 'hex'),
 	'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad',
