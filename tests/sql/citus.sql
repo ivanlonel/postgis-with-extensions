@@ -3,8 +3,10 @@
 -- A single-node cluster: the coordinator holds the shards too.
 CREATE EXTENSION citus;
 SELECT citus_set_coordinator_host('localhost', current_setting('port')::integer);
--- Should a shard query connect back to the coordinator, give Citus the test password.
-INSERT INTO pg_dist_authinfo (nodeid, rolename, authinfo) VALUES (0, 'postgres', 'password=postgres');
+-- Should a shard query connect back to the coordinator, give Citus the password of the test
+-- containers (the same throwaway one as tests/_docker.py's PASSWORD).
+INSERT INTO pg_dist_authinfo (nodeid, rolename, authinfo)
+VALUES (0, 'postgres', 'password=postgres');  -- ggignore: throwaway test container password
 
 CREATE TABLE events (id bigint PRIMARY KEY, kind text NOT NULL);
 SELECT create_distributed_table('events', 'id', shard_count => 4);
