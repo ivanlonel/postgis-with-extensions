@@ -1,8 +1,6 @@
 # <package, % = PG major> [pg>=N] [pg<=N] [postgis>=X.Y] [postgis<=X.Y]
 libhiredis1.1.0
-libjq1
 libpoppler-glib8t64
-librdkafka1
 libsodium23
 libsqlite3-mod-spatialite pg<=17
 liburiparser1

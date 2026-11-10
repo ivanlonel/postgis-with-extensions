@@ -14,7 +14,7 @@ SELECT cmp_ok(
         FROM generate_series(1, 10000) AS i
     ),
     '<',
-    400::real,
+    400::double precision,
     'KLL sketches estimate quantiles'
 );
 SELECT * FROM finish(TRUE);

@@ -14,7 +14,7 @@ source /usr/local/share/postgis-with-extensions/preload.sh
 pwe_load_registry
 
 conf="$PGDATA/postgresql.conf"
-trusted_plugins='pgoutput, test_decoding, wal2json, pglogical_output, pg_squeeze, pg_rewrite, decoderbufs, decoder_raw'
+trusted_plugins='pgoutput, test_decoding, wal2json, pglogical_output, pg_squeeze, pg_rewrite, decoderbufs, decoder_raw, pgactive'
 
 if [[ -z "${PWE_DEFAULT_PRELOAD:-}" ]]; then
 	cat >>"$conf" <<-EOT

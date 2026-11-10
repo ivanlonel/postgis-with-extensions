@@ -39,7 +39,6 @@ pg_ivm|all||0|
 pg_rewrite|all||0|
 pg_textsearch|all||0|
 pg_store_plans|all||0|
-pg_tracing|all||0|
 plan_filter|all||0|
 pg_savior|all||0|pg_savior.enabled=off
 pg_statement_rollback|all||0|pg_statement_rollback.enabled=off

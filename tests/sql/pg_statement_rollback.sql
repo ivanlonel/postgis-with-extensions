@@ -1,8 +1,8 @@
 -- preload: pg_statement_rollback
 -- https://github.com/HexaCluster/pg_statement_rollback
 -- Each statement of a transaction gets a savepoint, so a failed one can be undone alone. psql
--- stops at the first error: the transaction runs in another session.
-CREATE EXTENSION pg_statement_rollback;
+-- stops at the first error: the transaction runs in another session. It's a library, with no
+-- extension to create.
 CREATE EXTENSION dblink;
 CREATE TABLE kept (id integer);
 

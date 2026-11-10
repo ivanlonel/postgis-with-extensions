@@ -59,8 +59,7 @@ note = "Logical decoding output plugin (SQL statements), not an extension; trust
 [[extension]]
 name = "decoderbufs"
 url = "https://github.com/debezium/postgres-decoderbufs"
-provides = []
-note = "Logical decoding output plugin (Protocol Buffers, for Debezium), not an extension; trusted on new clusters"
+note = "Logical decoding output plugin (Protocol Buffers, for Debezium), trusted on new clusters; its package lists it as an extension, but there's nothing to create"
 
 [[extension]]
 name = "DocumentDB"
@@ -125,10 +124,6 @@ url = "https://github.com/theirix/json_accessors"
 [[extension]]
 name = "jsquery"
 url = "https://github.com/postgrespro/jsquery"
-
-[[extension]]
-name = "kafka_fdw"
-url = "https://github.com/adjust/kafka_fdw"
 
 [[extension]]
 name = "MobilityDB"
@@ -354,8 +349,9 @@ preload = "pg_stat_monitor"
 [[extension]]
 name = "pg_statement_rollback"
 url = "https://github.com/HexaCluster/pg_statement_rollback"
+provides = []
 preload = "pg_statement_rollback"
-note = "Off unless `pg_statement_rollback.enabled = on` when `SHARED_PRELOAD_LIBRARIES` adds it"
+note = "A library, not an extension: preload it, or `LOAD` it per session. Off unless `pg_statement_rollback.enabled = on` when `SHARED_PRELOAD_LIBRARIES` adds it"
 
 [[extension]]
 name = "pg_statviz"
@@ -376,11 +372,6 @@ preload = "pg_textsearch"
 name = "pg_tle"
 url = "https://github.com/aws/pg_tle"
 preload = "pg_tle"
-
-[[extension]]
-name = "pg_tracing"
-url = "https://github.com/DataDog/pg_tracing"
-preload = "pg_tracing"
 
 [[extension]]
 name = "pg_track_settings"
@@ -409,7 +400,7 @@ provides = ["xxhash"]
 name = "pgactive"
 url = "https://github.com/aws/pgactive"
 preload = "pgactive"
-note = "A pgactive node can't also subscribe through pglogical or built-in logical replication"
+note = "Needs `pgactive` in `output_plugin_libraries`, which new clusters get. A pgactive node can't also subscribe through pglogical or built-in logical replication"
 
 [[extension]]
 name = "pgagent"
@@ -442,11 +433,6 @@ url = "https://github.com/cybertec-postgresql/pgfaceting"
 [[extension]]
 name = "pgfincore"
 url = "https://github.com/klando/pgfincore"
-
-[[extension]]
-name = "pgJQ"
-url = "https://github.com/Florents-Tselai/pgJQ"
-provides = ["pgjq"]
 
 [[extension]]
 name = "pgl_ddl_deploy"
@@ -711,10 +697,6 @@ url = "https://github.com/theory/pg-semver"
 name = "set_user"
 url = "https://github.com/pgaudit/set_user"
 preload = "set_user"
-
-[[extension]]
-name = "smlar"
-url = "https://github.com/jirutka/smlar"
 
 [[extension]]
 name = "sqlite_fdw"

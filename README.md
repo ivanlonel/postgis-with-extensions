@@ -138,7 +138,7 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [db_migrator](https://github.com/cybertec-postgresql/db_migrator) | all |  |  |
 | [ddlx](https://github.com/lacanoid/pgddl) | all |  |  |
 | [decoder_raw](https://github.com/michaelpq/pg_plugins/tree/main/decoder_raw) | all |  | Logical decoding output plugin (SQL statements), not an extension; trusted on new clusters |
-| [decoderbufs](https://github.com/debezium/postgres-decoderbufs) | all |  | Logical decoding output plugin (Protocol Buffers, for Debezium), not an extension; trusted on new clusters |
+| [decoderbufs](https://github.com/debezium/postgres-decoderbufs) | all |  | Logical decoding output plugin (Protocol Buffers, for Debezium), trusted on new clusters; its package lists it as an extension, but there's nothing to create |
 | [DocumentDB](https://github.com/documentdb/documentdb) | 15+ | `pg_documentdb` | SQL API only (no MongoDB wire-protocol gateway); `documentdb_distributed` also needs Citus preloaded |
 | [E-Maj](https://github.com/dalibo/emaj) | all |  | Without its Perl and PHP client tools |
 | [extra_window_functions](https://github.com/xocolatl/extra_window_functions) | all |  |  |
@@ -152,7 +152,6 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [ip4r](https://github.com/RhodiumToad/ip4r) | all |  |  |
 | [json_accessors](https://github.com/theirix/json_accessors) | all |  |  |
 | [jsquery](https://github.com/postgrespro/jsquery) | all |  |  |
-| [kafka_fdw](https://github.com/adjust/kafka_fdw) | all |  |  |
 | [MobilityDB](https://github.com/MobilityDB/MobilityDB) | all |  |  |
 | [mongo_fdw](https://github.com/EnterpriseDB/mongo_fdw) | all |  |  |
 | [mysql_fdw](https://github.com/EnterpriseDB/mysql_fdw) | all |  |  |
@@ -201,18 +200,17 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [pg_stat_kcache](https://github.com/powa-team/pg_stat_kcache) | all | `pg_stat_kcache` |  |
 | [pg_stat_log](https://github.com/fabriziomello/pg_stat_log) | 18+ | `pg_stat_log` |  |
 | [pg_stat_monitor](https://github.com/percona/pg_stat_monitor) | all | `pg_stat_monitor` |  |
-| [pg_statement_rollback](https://github.com/HexaCluster/pg_statement_rollback) | all | `pg_statement_rollback` | Off unless `pg_statement_rollback.enabled = on` when `SHARED_PRELOAD_LIBRARIES` adds it |
+| [pg_statement_rollback](https://github.com/HexaCluster/pg_statement_rollback) | all | `pg_statement_rollback` | A library, not an extension: preload it, or `LOAD` it per session. Off unless `pg_statement_rollback.enabled = on` when `SHARED_PRELOAD_LIBRARIES` adds it |
 | [pg_statviz](https://github.com/vyruss/pg_statviz) | all |  |  |
 | [pg_store_plans](https://github.com/ossc-db/pg_store_plans) | all | `pg_store_plans` |  |
 | [pg_textsearch](https://github.com/timescale/pg_textsearch) | 17+ | `pg_textsearch` |  |
 | [pg_tle](https://github.com/aws/pg_tle) | all | `pg_tle` |  |
-| [pg_tracing](https://github.com/DataDog/pg_tracing) | all | `pg_tracing` |  |
 | [pg_track_settings](https://github.com/rjuju/pg_track_settings) | all |  |  |
 | [pg_uuidv7](https://github.com/fboulnois/pg_uuidv7) | all |  |  |
 | [pg_wait_sampling](https://github.com/postgrespro/pg_wait_sampling) | all | `pg_wait_sampling` |  |
 | [pg_xenophile](https://github.com/bigsmoke/pg_xenophile) | all |  |  |
 | [pg_xxhash](https://github.com/hatarist/pg_xxhash) | all |  |  |
-| [pgactive](https://github.com/aws/pgactive) | all | `pgactive` | A pgactive node can't also subscribe through pglogical or built-in logical replication |
+| [pgactive](https://github.com/aws/pgactive) | all | `pgactive` | Needs `pgactive` in `output_plugin_libraries`, which new clusters get. A pgactive node can't also subscribe through pglogical or built-in logical replication |
 | [pgagent](https://github.com/pgadmin-org/pgagent) | all |  |  |
 | [pgaudit](https://github.com/pgaudit/pgaudit) | all | `pgaudit` |  |
 | [pgauditlogtofile](https://github.com/fmbiete/pgauditlogtofile) | all | `pgauditlogtofile` |  |
@@ -220,7 +218,6 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [pgextwlist](https://github.com/dimitri/pgextwlist) | all |  | A library, not an extension: load it per session (`session_preload_libraries`) to let non-superusers create the extensions listed in `extwlist.extensions` |
 | [pgfaceting](https://github.com/cybertec-postgresql/pgfaceting) | all |  |  |
 | [pgfincore](https://github.com/klando/pgfincore) | all |  |  |
-| [pgJQ](https://github.com/Florents-Tselai/pgJQ) | all |  |  |
 | [pgl_ddl_deploy](https://github.com/enova/pgl_ddl_deploy) | up to 17 |  |  |
 | [pglogical](https://github.com/2ndQuadrant/pglogical) | all | `pglogical` |  |
 | [pglogical_ticker](https://github.com/enova/pglogical_ticker) | up to 17 | `pglogical_ticker` |  |
@@ -270,7 +267,6 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [rum](https://github.com/postgrespro/rum) | all |  |  |
 | [semver](https://github.com/theory/pg-semver) | all |  |  |
 | [set_user](https://github.com/pgaudit/set_user) | all | `set_user` |  |
-| [smlar](https://github.com/jirutka/smlar) | all |  |  |
 | [sqlite_fdw](https://github.com/pgspider/sqlite_fdw) | up to 17 |  |  |
 | [Supabase Vault](https://github.com/supabase/vault) | all | `supabase_vault` | Needs preloading; the image's `pgsodium_getkey` keeps a generated root key in the data directory (point `vault.getkey_script` at a key manager instead) |
 | [table_log](https://github.com/credativ/table_log) | all |  |  |
