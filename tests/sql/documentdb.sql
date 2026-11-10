@@ -1,4 +1,4 @@
--- preload: pg_documentdb_core, pg_documentdb
+-- preload: pg_documentdb_core, pg_documentdb, pg_documentdb_extended_rum
 -- pg: >=15
 -- database: cron
 -- https://github.com/documentdb/documentdb

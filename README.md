@@ -51,7 +51,7 @@ docker run -e POSTGRES_PASSWORD=mysecretpassword -e SHARED_PRELOAD_LIBRARIES=tim
 - `all` preloads every library of the [extension table](#extensions)'s Preload column that the image ships for its
   PostgreSQL version; `legacy` preloads the list the images preloaded by default before 3.7.
 - Libraries required by others come along: `powa` brings PoWA's statistics extensions, `pg_documentdb` brings
-  `pg_documentdb_core` and `pg_cron`.
+  `pg_documentdb_core`, `pg_documentdb_extended_rum` and `pg_cron`.
 - The variable only adds libraries: those the cluster's own configuration preloads stay loaded. To remove one of those,
   edit the configuration, e.g. `ALTER SYSTEM SET shared_preload_libraries = '...'`, and restart.
 - The settings a library relies on come along too (for instance `cron.database_name`), unless the configuration
@@ -116,7 +116,7 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [asn1oid](https://github.com/df7cb/pgsql-asn1oid) | all |  |  |
 | [credcheck](https://github.com/HexaCluster/credcheck) | all | `credcheck` |  |
 | [ddlx](https://github.com/lacanoid/pgddl) | all |  |  |
-| [DocumentDB](https://github.com/documentdb/documentdb) | 15+ | `pg_documentdb` | SQL API only (no MongoDB wire-protocol gateway); `documentdb_extended_rum` also needs `pg_documentdb_extended_rum` preloaded; `documentdb_distributed` needs Citus, which isn't included |
+| [DocumentDB](https://github.com/documentdb/documentdb) | 15+ | `pg_documentdb` | SQL API only (no MongoDB wire-protocol gateway); `documentdb_distributed` needs Citus, which isn't included |
 | [extra_window_functions](https://github.com/xocolatl/extra_window_functions) | all |  |  |
 | [first_last_agg](https://github.com/wulczer/first_last_agg) | all |  |  |
 | [h3-pg](https://github.com/postgis/h3-pg) | all |  |  |
