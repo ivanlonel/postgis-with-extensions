@@ -1,0 +1,126 @@
+# Example stack: PostgreSQL with every library that needs preloading enabled, the PoWA web UI and
+# pgAdmin. Create the secrets first, for instance:
+#   mkdir secrets
+#   printf %s 'a strong password' > secrets/postgres-passwd.txt
+#   printf %s 'me@example.com' > secrets/pgadmin-email.txt
+#   printf %s 'another strong password' > secrets/pgadmin-passwd.txt
+# then run `docker compose up --detach`.
+name: postgis-with-extensions
+
+services:
+  postgres:
+    # image: ivanlonel/postgis-with-extensions:18-3.7
+    build:
+      context: . # The Dockerfile in this directory adds a locale to the published image.
+      args:
+        BASE_IMAGE_TAG: 18-3.7
+        LOCALE: pt_BR
+        ENCODING: UTF-8
+    command:
+      - postgres
+      - -c
+      - logging_collector=on
+      - -c
+      - log_filename=postgresql-%a.log
+      - -c
+      - log_rotation_age=1440
+      - -c
+      - log_truncate_on_rotation=on
+      - -c
+      - datestyle=ISO, DMY
+      - -c
+      - effective_cache_size=2048MB
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - work_mem=8MB
+      - -c
+      - maintenance_work_mem=256MB
+    environment:
+      # Preload every library this image can preload, which also sets PoWA up on the first start.
+      SHARED_PRELOAD_LIBRARIES: all
+      # LC_COLLATE=C makes string comparisons (and operations such as sorting) faster, because
+      #   they become byte-to-byte comparisons (no complex locale rules).
+      # LC_CTYPE=C would make PostgreSQL features that use ctype.h (e.g. upper(), lower(),
+      #   initcap(), ILIKE, citext) work as expected only for US-ASCII characters.
+      LANG: pt_BR.utf8
+      LC_COLLATE: C
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
+      TZ: America/Sao_Paulo
+    healthcheck:
+      test: [CMD, pg_isready, --host, 127.0.0.1, --username, postgres]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5m
+    networks:
+      - pgnetwork
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    secrets:
+      - postgres-passwd
+    shm_size: 2gb
+    stop_grace_period: 2m30s
+    volumes:
+      # PostgreSQL 18+ images keep their data in a major-specific directory under this mount.
+      - postgres_data:/var/lib/postgresql
+
+  powa-web:
+    image: powateam/powa-web:5.3.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      TZ: America/Sao_Paulo
+    networks:
+      - pgnetwork
+    ports:
+      - "8888:8888"
+    restart: unless-stopped
+    volumes:
+      - ./powa-web.conf:/etc/powa-web.conf:ro
+
+  pgadmin:
+    image: dpage/pgadmin4:9.19
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: /pgadmin_entrypoint.sh
+    environment:
+      PGADMIN_DEFAULT_EMAIL_FILE: /run/secrets/pgadmin-email
+      PGADMIN_DEFAULT_PASSWORD_FILE: /run/secrets/pgadmin-passwd
+      TZ: America/Sao_Paulo
+    networks:
+      - pgnetwork
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    secrets:
+      - pgadmin-email
+      - pgadmin-passwd
+    volumes:
+      - pgadmin4_data:/var/lib/pgadmin
+      - ./pgadmin_entrypoint.sh:/pgadmin_entrypoint.sh:ro
+      - ./servers.json:/pgadmin4/servers.json:ro
+
+volumes:
+  postgres_data:
+  pgadmin4_data:
+
+secrets:
+  postgres-passwd:
+    file: secrets/postgres-passwd.txt
+  pgadmin-email:
+    file: secrets/pgadmin-email.txt
+  pgadmin-passwd:
+    file: secrets/pgadmin-passwd.txt
+
+networks:
+  pgnetwork:
+    driver: bridge
+    ipam:
+      # A static IP range for the network, so pg_hba.conf can reference it.
+      driver: default
+      config:
+        - subnet: 172.24.240.0/24

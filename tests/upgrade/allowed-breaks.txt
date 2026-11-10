@@ -1,0 +1,3 @@
+# Extensions whose shared libraries may disappear across an image update, one per line, each
+# with a README migration note telling users what to run (e.g. ALTER EXTENSION ... UPDATE).
+# Must be empty for the final PostGIS 3.6 release.

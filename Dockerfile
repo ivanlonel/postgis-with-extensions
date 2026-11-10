@@ -1,226 +1,162 @@
-ARG BASE_IMAGE_TAG=latest
+# syntax=docker/dockerfile:1
 
-FROM postgis/postgis:$BASE_IMAGE_TAG AS base-image
+# The postgis/postgis tag to extend, as <PostgreSQL major>-<PostGIS major.minor>.
+# docker-bake.hcl sets it for every target; the default only serves plain `docker build`.
+ARG BASE_IMAGE_TAG=18-3.7
 
 
+FROM postgis/postgis:${BASE_IMAGE_TAG} AS base
+SHELL ["/bin/bash", "-Eeuo", "pipefail", "-c"]
 
 
-FROM base-image AS basic-deps
-
-RUN apt-get update && \
-	apt-get install -y --no-install-recommends \
+FROM base AS build-base
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends \
+		build-essential \
 		ca-certificates \
-		curl
+		cmake \
+		curl \
+		libcurl4-openssl-dev \
+		libicu-dev \
+		libkrb5-dev \
+		libsqlite3-dev \
+		libssl-dev \
+		"postgresql-server-dev-${PG_MAJOR}" \
+		python3 \
+		unzip \
+	&& rm -rf /var/lib/apt/lists/*
+COPY --chmod=0755 build/build-pgxs.sh /usr/local/bin/build-pgxs
 
 
+FROM build-base AS timescaledb
+# docker-bake.hcl pins older releases for majors the current line no longer supports.
+# renovate: datasource=github-releases depName=timescale/timescaledb
+ARG TIMESCALEDB_VERSION=2.31.0
+WORKDIR /src/timescaledb
+RUN curl --fail --silent --show-error --location --retry 3 --output /tmp/timescaledb.tar.gz \
+		"https://github.com/timescale/timescaledb/archive/refs/tags/${TIMESCALEDB_VERSION}.tar.gz" \
+	&& tar -xzf /tmp/timescaledb.tar.gz --strip-components=1 \
+	&& ./bootstrap \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DREGRESS_CHECKS=OFF \
+		-DTAP_CHECKS=OFF \
+		-DWARNINGS_AS_ERRORS=OFF \
+	&& make -C build -j "$(nproc)" \
+	&& make -C build install DESTDIR=/out
 
 
-FROM basic-deps AS powa-scripts
-
-WORKDIR /tmp/powa
-RUN (curl --fail -LOJ "https://raw.githubusercontent.com/powa-team/powa-podman/master/powa-archivist/$PG_MAJOR/setup_powa-archivist.sh" || \
-	curl --fail -LOJ "https://raw.githubusercontent.com/powa-team/powa-podman/master/powa-archivist-git/setup_powa-archivist.sh") && \
-	(curl --fail -LOJ "https://raw.githubusercontent.com/powa-team/powa-podman/master/powa-archivist/$PG_MAJOR/install_all_powa_ext.sql" || \
-	curl --fail -LOJ "https://raw.githubusercontent.com/powa-team/powa-podman/master/powa-archivist-git/install_all_powa_ext.sql")
-
+FROM build-base AS pgxn
+COPY build/pgxn-packages.txt /tmp/pgxn-packages.txt
+RUN while read -r dist version; do \
+		case "$dist" in ''|'#'*) continue ;; esac; \
+		build-pgxs "https://api.pgxn.org/dist/${dist}/${version}/${dist}-${version}.zip" USE_PGXS=1; \
+	done < /tmp/pgxn-packages.txt
 
 
-
-FROM basic-deps AS common-deps
-
-# /var/lib/apt/lists/ still has the indexes from parent stage, so there's no need to run apt-get update again.
-# (unless the parent stage cache is not invalidated...)
-RUN apt-get install -y --no-install-recommends \
-	build-essential \
-	cmake \
-	postgresql-server-dev-$PG_MAJOR
+FROM build-base AS pguint
+# renovate: datasource=github-tags depName=petere/pguint
+ARG PGUINT_VERSION=1.20260630
+RUN build-pgxs "https://github.com/petere/pguint/archive/refs/tags/${PGUINT_VERSION}.tar.gz" PYTHON=python3
 
 
-
-
-FROM common-deps AS build-timescaledb
-
-WORKDIR /tmp/timescaledb
-RUN apt-get install -y --no-install-recommends libicu-dev libkrb5-dev && \
-	URL_END=$(case "$PG_MAJOR" in ("15") echo "tag/2.28.3";; ("14") echo "tag/2.19.3";; (*) echo "latest";; esac) && \
-	ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/timescale/timescaledb/releases/${URL_END})) && \
-	curl --fail -L "https://github.com/timescale/timescaledb/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
-	./bootstrap
-WORKDIR /tmp/timescaledb/build
-RUN make -j$(nproc) && \
-	make install
-
-
-
-
-FROM common-deps AS pgxn
-
-RUN apt-get install -y --no-install-recommends pgxnclient libicu-dev && \
-	pgxn install --verbose ddlx && \
-	pgxn install --verbose json_accessors && \
-	pgxn install --verbose parray_gin && \
-	pgxn install --verbose permuteseq && \
-	pgxn install --verbose pg_jobmon && \
-	pgxn install --verbose pg_rowalesce && \
-	pgxn install --verbose pg_uuidv7 && \
-	pgxn install --verbose pg_xenophile && \
-	pgxn install --verbose pg_xxhash && \
-	pgxn install --verbose pgmq && \
-	pgxn install --verbose pgsql_tweaks && \
-	pgxn install --verbose temporal_tables
-
-
-
-
-FROM common-deps AS build-pguint
-
-WORKDIR /tmp/pguint
-RUN ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/petere/pguint/releases/latest)) && \
-	curl --fail -L "https://github.com/petere/pguint/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
-	make && \
-	make install
-
-
-
-
-FROM common-deps AS build-sqlite_fdw
-
-WORKDIR /tmp/sqlite_fdw
+FROM build-base AS sqlite-fdw
+# renovate: datasource=github-tags depName=pgspider/sqlite_fdw extractVersion=^v(?<version>.+)$
+ARG SQLITE_FDW_VERSION=2.5.0
+# sqlite_fdw doesn't support PostgreSQL 18 yet.
 RUN if [ "$PG_MAJOR" -le 17 ]; then \
-		apt-get install -y --no-install-recommends libsqlite3-dev && \
-		ASSET_NAME=$(basename $(curl -LIs -o /dev/null -w %{url_effective} https://github.com/pgspider/sqlite_fdw/releases/latest)) && \
-		curl --fail -L "https://github.com/pgspider/sqlite_fdw/archive/${ASSET_NAME}.tar.gz" | tar -zx --strip-components=1 -C . && \
-		make USE_PGXS=1 && \
-		make USE_PGXS=1 install; \
+		build-pgxs "https://github.com/pgspider/sqlite_fdw/archive/refs/tags/v${SQLITE_FDW_VERSION}.tar.gz" USE_PGXS=1; \
+	else \
+		mkdir -p /out; \
 	fi
 
 
+FROM build-base AS pg-stat-monitor
+# renovate: datasource=github-releases depName=percona/pg_stat_monitor
+ARG PG_STAT_MONITOR_VERSION=2.4.0
+RUN build-pgxs "https://github.com/percona/pg_stat_monitor/archive/refs/tags/${PG_STAT_MONITOR_VERSION}.tar.gz" USE_PGXS=1
 
 
-FROM base-image AS final-stage
+FROM build-base AS pg-net
+# renovate: datasource=github-tags depName=supabase/pg_net extractVersion=^v(?<version>.+)$
+ARG PG_NET_VERSION=0.20.5
+RUN build-pgxs "https://github.com/supabase/pg_net/archive/refs/tags/v${PG_NET_VERSION}.tar.gz"
 
-RUN apt-get update && \
-	apt-get install -y --no-install-recommends \
-		pgagent \
-		postgresql-$PG_MAJOR-age \
-		postgresql-$PG_MAJOR-asn1oid \
-		postgresql-$PG_MAJOR-credcheck \
-		postgresql-$PG_MAJOR-cron \
-		postgresql-$PG_MAJOR-debversion \
-		postgresql-$PG_MAJOR-dirtyread \
-		postgresql-$PG_MAJOR-extra-window-functions \
-		postgresql-$PG_MAJOR-first-last-agg \
-		postgresql-$PG_MAJOR-h3 \
-		postgresql-$PG_MAJOR-hll \
-		postgresql-$PG_MAJOR-hypopg \
-		postgresql-$PG_MAJOR-icu-ext \
-		postgresql-$PG_MAJOR-ip4r \
-		postgresql-$PG_MAJOR-jsquery \
-		postgresql-$PG_MAJOR-mobilitydb \
-		postgresql-$PG_MAJOR-mysql-fdw \
-		postgresql-$PG_MAJOR-numeral \
-		postgresql-$PG_MAJOR-ogr-fdw \
-		postgresql-$PG_MAJOR-oracle-fdw \
-		postgresql-$PG_MAJOR-orafce \
-		postgresql-$PG_MAJOR-partman \
-		postgresql-$PG_MAJOR-periods \
-		postgresql-$PG_MAJOR-pg-hint-plan \
-		postgresql-$PG_MAJOR-pg-permissions \
-		postgresql-$PG_MAJOR-pg-qualstats \
-		postgresql-$PG_MAJOR-pg-rrule \
-		postgresql-$PG_MAJOR-pg-stat-kcache \
-		postgresql-$PG_MAJOR-pg-track-settings \
-		postgresql-$PG_MAJOR-pg-wait-sampling \
-		postgresql-$PG_MAJOR-pgaudit \
-		postgresql-$PG_MAJOR-pgauditlogtofile \
-		postgresql-$PG_MAJOR-pgfaceting \
-		postgresql-$PG_MAJOR-pgfincore \
-		postgresql-$PG_MAJOR-pglogical \
-		postgresql-$PG_MAJOR-pgmemcache \
-		postgresql-$PG_MAJOR-pgmp \
-		postgresql-$PG_MAJOR-pgpcre \
-		postgresql-$PG_MAJOR-pgq-node \
-		postgresql-$PG_MAJOR-pgrouting \
-		postgresql-$PG_MAJOR-pgrouting-scripts \
-		postgresql-$PG_MAJOR-pgsphere \
-		postgresql-$PG_MAJOR-pgtap \
-		postgresql-$PG_MAJOR-pgvector \
-		postgresql-$PG_MAJOR-pldebugger \
-		postgresql-$PG_MAJOR-plpgsql-check \
-		postgresql-$PG_MAJOR-plprofiler \
-		postgresql-$PG_MAJOR-plproxy \
-		postgresql-$PG_MAJOR-plsh \
-		postgresql-$PG_MAJOR-pointcloud \
-		postgresql-$PG_MAJOR-powa \
-		postgresql-$PG_MAJOR-prefix \
-		postgresql-$PG_MAJOR-prioritize \
-		postgresql-$PG_MAJOR-q3c \
-		postgresql-$PG_MAJOR-rational \
-		postgresql-$PG_MAJOR-repack \
-		postgresql-$PG_MAJOR-roaringbitmap \
-		postgresql-$PG_MAJOR-rum \
-		postgresql-$PG_MAJOR-semver \
-		postgresql-$PG_MAJOR-set-user \
-		postgresql-$PG_MAJOR-show-plans \
-		postgresql-$PG_MAJOR-similarity \
-		postgresql-$PG_MAJOR-squeeze \
-		postgresql-$PG_MAJOR-tablelog \
-		postgresql-$PG_MAJOR-tdigest \
-		postgresql-$PG_MAJOR-tds-fdw \
-		postgresql-$PG_MAJOR-toastinfo \
-		postgresql-$PG_MAJOR-unit \
-		postgresql-$PG_MAJOR-wal2json \
-		postgresql-plperl-$PG_MAJOR \
-		postgresql-plpython3-$PG_MAJOR && \
-	if [ "$PG_MAJOR" -le 17 ]; then \
-		apt-get install -y --no-install-recommends \
-			libsqlite3-mod-spatialite \
-			postgresql-$PG_MAJOR-pg-fact-loader \
-			postgresql-$PG_MAJOR-pgl-ddl-deploy \
-			postgresql-$PG_MAJOR-pglogical-ticker; \
-	fi && \
-	apt-get purge -y --auto-remove && \
-	rm -rf /var/lib/apt/lists/*
 
-COPY --from=powa-scripts \
-	/tmp/powa/setup_powa-archivist.sh \
-	/docker-entrypoint-initdb.d/setup_powa-archivist.sh
-COPY --from=powa-scripts \
-	/tmp/powa/install_all_powa_ext.sql \
-	/usr/local/src/install_all_powa_ext.sql
+FROM build-base AS pg-tle
+# renovate: datasource=github-tags depName=aws/pg_tle extractVersion=^v(?<version>.+)$
+ARG PG_TLE_VERSION=1.5.3
+RUN build-pgxs "https://github.com/aws/pg_tle/archive/refs/tags/v${PG_TLE_VERSION}.tar.gz"
 
-COPY --from=pgxn \
-	/usr/share/postgresql/$PG_MAJOR/extension/ \
-	/usr/share/postgresql/$PG_MAJOR/extension/
-COPY --from=pgxn \
-	/usr/lib/postgresql/$PG_MAJOR/lib \
-	/usr/lib/postgresql/$PG_MAJOR/lib
 
-COPY --from=build-timescaledb \
-	/usr/share/postgresql/$PG_MAJOR/extension/timescaledb* \
-	/usr/share/postgresql/$PG_MAJOR/extension/
-COPY --from=build-timescaledb \
-	/usr/lib/postgresql/$PG_MAJOR/lib/timescaledb* \
-	/usr/lib/postgresql/$PG_MAJOR/lib/
+FROM build-base AS pg-hashids
+# renovate: datasource=github-tags depName=iCyberon/pg_hashids extractVersion=^v(?<version>.+)$
+ARG PG_HASHIDS_VERSION=1.2.1
+RUN build-pgxs "https://github.com/iCyberon/pg_hashids/archive/refs/tags/v${PG_HASHIDS_VERSION}.tar.gz"
 
-COPY --from=build-pguint \
-	/usr/share/postgresql/$PG_MAJOR/extension/uint* \
-	/usr/share/postgresql/$PG_MAJOR/extension/
-COPY --from=build-pguint \
-	/usr/lib/postgresql/$PG_MAJOR/lib/uint* \
-	/usr/lib/postgresql/$PG_MAJOR/lib/
 
-COPY --from=build-sqlite_fdw \
-	/usr/share/postgresql/$PG_MAJOR/extension/sqlite_fdw* \
-	/usr/share/postgresql/$PG_MAJOR/extension/
-COPY --from=build-sqlite_fdw \
-	/usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw.index.b[c] \
-	/usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw.index.bc
-COPY --from=build-sqlite_fdw \
-	/usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fd[w] \
-	/usr/lib/postgresql/$PG_MAJOR/lib/bitcode/sqlite_fdw
-COPY --from=build-sqlite_fdw \
-	/usr/lib/postgresql/$PG_MAJOR/lib/sqlite_fdw.s[o] \
-	/usr/lib/postgresql/$PG_MAJOR/lib/sqlite_fdw.so
+FROM build-base AS pg-bigm
+# renovate: datasource=github-tags depName=pgbigm/pg_bigm extractVersion=^v(?<version>.+)$ versioning=loose
+ARG PG_BIGM_VERSION=1.2-20250903
+RUN build-pgxs "https://github.com/pgbigm/pg_bigm/archive/refs/tags/v${PG_BIGM_VERSION}.tar.gz" USE_PGXS=1
 
-COPY ./conf.sh  /docker-entrypoint-initdb.d/z_conf.sh
+
+FROM build-base AS pg-profile
+# renovate: datasource=github-releases depName=zubkov-andrei/pg_profile
+ARG PG_PROFILE_VERSION=4.16
+# The release tarball holds the ready-to-install control and SQL files.
+RUN extdir="/out$(pg_config --sharedir)/extension" \
+	&& mkdir -p "$extdir" \
+	&& curl --fail --silent --show-error --location --retry 3 --output /tmp/pg_profile.tar.gz \
+		"https://github.com/zubkov-andrei/pg_profile/releases/download/${PG_PROFILE_VERSION}/pg_profile--${PG_PROFILE_VERSION}.tar.gz" \
+	&& tar -xzf /tmp/pg_profile.tar.gz -C "$extdir"
+
+
+FROM build-base AS vendor
+# renovate: datasource=github-releases depName=supervc-stack/VectorChord
+ARG VCHORD_VERSION=1.1.1
+# renovate: datasource=github-releases depName=timescale/pgvectorscale
+ARG PGVECTORSCALE_VERSION=0.9.1
+# renovate: datasource=github-releases depName=supabase/pg_graphql extractVersion=^v(?<version>.+)$
+ARG PG_GRAPHQL_VERSION=1.6.3
+# renovate: datasource=github-releases depName=supabase/pg_jsonschema extractVersion=^v(?<version>.+)$
+ARG PG_JSONSCHEMA_VERSION=0.3.4
+# renovate: datasource=github-releases depName=timescale/timescaledb-toolkit extractVersion=^(?<version>\d+\.\d+\.\d+)
+ARG TIMESCALEDB_TOOLKIT_VERSION=1.27.0
+COPY --chmod=0755 build/fetch-vendor.sh /usr/local/bin/fetch-vendor
+RUN fetch-vendor
+
+
+FROM base AS final
+# CI passes the ISO week, so the PGDG packages refresh weekly while rebuilds within a week stay cached.
+ARG APT_CACHE_BUST=
+# Image-level default for shared_preload_libraries on new clusters: "legacy" (PostGIS 3.6) or empty.
+ARG DEFAULT_PRELOAD=
+
+RUN --mount=type=bind,source=build,target=/build \
+	--mount=type=bind,from=vendor,source=/debs,target=/debs \
+	/build/install-runtime.sh /build/apt-packages.txt /debs/*.deb
+
+COPY --link --from=timescaledb /out/ /
+COPY --link --from=pgxn /out/ /
+COPY --link --from=pguint /out/ /
+COPY --link --from=sqlite-fdw /out/ /
+COPY --link --from=pg-stat-monitor /out/ /
+COPY --link --from=pg-net /out/ /
+COPY --link --from=pg-tle /out/ /
+COPY --link --from=pg-hashids /out/ /
+COPY --link --from=pg-bigm /out/ /
+COPY --link --from=pg-profile /out/ /
+
+COPY --chmod=0755 image/postgis-with-extensions-entrypoint.sh /usr/local/bin/
+COPY --chmod=0644 image/preload-libraries.txt image/preload.sh /usr/local/share/postgis-with-extensions/
+COPY --chmod=0644 image/powa/install_all_powa_ext.sql /usr/local/src/
+COPY --chmod=0755 image/initdb/ /docker-entrypoint-initdb.d/
+
+ENV PWE_DEFAULT_PRELOAD=${DEFAULT_PRELOAD}
+
+# The shell is part of the image config: restore the default so images built FROM this one keep
+# running their RUN instructions with plain `sh -c`, as they did before.
+SHELL ["/bin/sh", "-c"]
+
+ENTRYPOINT ["postgis-with-extensions-entrypoint.sh"]
+CMD ["postgres"]

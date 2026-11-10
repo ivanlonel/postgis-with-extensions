@@ -1,0 +1,90 @@
+[project]
+name = "postgis-with-extensions"
+version = "0.0.0"
+description = "Tooling and test suite for the ivanlonel/postgis-with-extensions Docker image"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.13"
+classifiers = [
+  "Private :: Do Not Upload",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
+]
+dependencies = []
+
+[dependency-groups]
+dev = [
+  "prek~=0.5.10",
+  "ty~=0.0.100",
+]
+test = [
+  "pytest~=9.2",
+]
+
+[tool.uv]
+default-groups = [ "dev", "test" ]
+package = false
+
+[tool.ruff]
+line-length = 99
+format.docstring-code-line-length = 99
+format.docstring-code-format = true
+lint.select = [ "ALL" ]
+lint.ignore = [
+  "COM812", # Trailing comma missing (conflicts with the formatter)
+  "CPY001", # Missing copyright notice at top of file
+  "D203",   # Use a blank line to separate the docstring from the class definition
+  "D212",   # Multi-line docstring summary should start at the first line
+]
+lint.per-file-ignores."scripts/*.py" = [
+  "T201", # Command-line tools report through print
+]
+lint.per-file-ignores."tests/**/*.py" = [
+  "PLR2004", # Magic values are OK in tests
+  "S101",    # assert is a first class citizen in pytest tests
+]
+
+[tool.pydoclint]
+style = "sphinx"
+arg-type-hints-in-docstring = false
+check-return-types = false
+check-yield-types = false
+check-class-attributes = false
+skip-checking-short-docstrings = false
+
+[tool.typos]
+default.extend-words.dateset = "dateset"  # MobilityDB's set-of-dates type
+
+[tool.ty]
+environment.python-version = "3.13"
+
+[tool.pytest]
+addopts = [ "-ra", "--strict-markers", "--strict-config" ]
+minversion = "9.2"
+pythonpath = [ "." ]
+testpaths = [ "tests" ]
+xfail_strict = true
+
+[tool.sqlfluff]
+core.dialect = "postgres"
+core.templater = "raw"
+core.max_line_length = 120
+# The SQL here is mostly smoke tests that mirror upstream examples, so these don't apply:
+core.exclude_rules = [
+  "AL03", # Column expressions without alias: smoke-test SELECTs just print values
+  "AL05", # "Unused" aliases: its fix drops the column definition lists of record functions
+  "AM04", # Unknown result column count: SELECT * is the point of a smoke test
+  "AM09", # LIMIT without ORDER BY: only used to cap printed rows
+  "CP03", # Function name capitalisation: keep upstream spellings such as ST_AsText
+  "RF02", # Qualify references in multi-table selects: same as AM04
+  "RF04", # Keywords as identifiers: column names (time, type, ...) follow upstream examples
+  "RF05", # Special characters in identifiers: "$user" in search_path
+  "ST07", # USING joins are idiomatic PostgreSQL
+]
+indentation.indent_unit = "tab"
+indentation.tab_space_size = 4
+rules.capitalisation.keywords.capitalisation_policy = "upper"
+rules.capitalisation.literals.capitalisation_policy = "upper"
+rules.capitalisation.types.extended_capitalisation_policy = "lower"

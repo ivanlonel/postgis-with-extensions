@@ -1,0 +1,4 @@
+ignored:
+  # PGDG and Debian packages are deliberately unpinned: the weekly rebuild picks up their updates,
+  # while the sources built or downloaded from elsewhere are pinned (and bumped by Renovate).
+  - DL3008

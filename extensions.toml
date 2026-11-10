@@ -1,0 +1,607 @@
+# The extensions this image adds to postgis/postgis, rendered into the README and checked by the
+# tests. Keys of each [[extension]]:
+#   name      display name (also the default for `provides`)
+#   url       project home page
+#   provides  PostgreSQL extensions installed (defaults to [name]; empty for non-extensions)
+#   pg        PostgreSQL majors shipped, as constraints such as ">=15" or "<=17"
+#   preload   library to list in SHARED_PRELOAD_LIBRARIES to use it
+#   note      remark for the README
+
+[[extension]]
+name = "address_standardizer"
+url = "https://github.com/postgis/address_standardizer"
+provides = [
+  "address_standardizer",
+  "address_standardizer-3",
+  "address_standardizer_data_us",
+  "address_standardizer_data_us-3",
+]
+note = "Packaged separately from PostGIS since 3.7"
+
+[[extension]]
+name = "age"
+url = "https://github.com/apache/age"
+
+[[extension]]
+name = "asn1oid"
+url = "https://github.com/df7cb/pgsql-asn1oid"
+
+[[extension]]
+name = "credcheck"
+url = "https://github.com/HexaCluster/credcheck"
+preload = "credcheck"
+
+[[extension]]
+name = "ddlx"
+url = "https://github.com/lacanoid/pgddl"
+
+[[extension]]
+name = "DocumentDB"
+url = "https://github.com/documentdb/documentdb"
+provides = [
+  "documentdb",
+  "documentdb_core",
+  "documentdb_distributed",
+  "documentdb_extended_rum",
+]
+pg = ">=15"
+preload = "pg_documentdb"
+note = "SQL API only (no MongoDB wire-protocol gateway); `documentdb_distributed` needs Citus, which isn't included"
+
+[[extension]]
+name = "extra_window_functions"
+url = "https://github.com/xocolatl/extra_window_functions"
+
+[[extension]]
+name = "first_last_agg"
+url = "https://github.com/wulczer/first_last_agg"
+
+[[extension]]
+name = "h3-pg"
+url = "https://github.com/postgis/h3-pg"
+provides = ["h3", "h3_postgis"]
+
+[[extension]]
+name = "hll"
+url = "https://github.com/citusdata/postgresql-hll"
+
+[[extension]]
+name = "http"
+url = "https://github.com/pramsey/pgsql-http"
+
+[[extension]]
+name = "hypopg"
+url = "https://github.com/HypoPG/hypopg"
+
+[[extension]]
+name = "icu_ext"
+url = "https://github.com/dverite/icu_ext"
+
+[[extension]]
+name = "ip4r"
+url = "https://github.com/RhodiumToad/ip4r"
+
+[[extension]]
+name = "json_accessors"
+url = "https://github.com/theirix/json_accessors"
+
+[[extension]]
+name = "jsquery"
+url = "https://github.com/postgrespro/jsquery"
+
+[[extension]]
+name = "MobilityDB"
+url = "https://github.com/MobilityDB/MobilityDB"
+provides = ["mobilitydb", "mobilitydb_datagen"]
+
+[[extension]]
+name = "mongo_fdw"
+url = "https://github.com/EnterpriseDB/mongo_fdw"
+
+[[extension]]
+name = "mysql_fdw"
+url = "https://github.com/EnterpriseDB/mysql_fdw"
+
+[[extension]]
+name = "numeral"
+url = "https://github.com/df7cb/postgresql-numeral"
+
+[[extension]]
+name = "ogr_fdw"
+url = "https://github.com/pramsey/pgsql-ogr-fdw"
+
+[[extension]]
+name = "oracle_fdw"
+url = "https://github.com/laurenz/oracle_fdw"
+
+[[extension]]
+name = "orafce"
+url = "https://github.com/orafce/orafce"
+
+[[extension]]
+name = "parray_gin"
+url = "https://github.com/theirix/parray_gin"
+
+[[extension]]
+name = "periods"
+url = "https://github.com/xocolatl/periods"
+
+[[extension]]
+name = "permuteseq"
+url = "https://github.com/dverite/permuteseq"
+
+[[extension]]
+name = "pg_background"
+url = "https://github.com/vibhorkum/pg_background"
+
+[[extension]]
+name = "pg_bigm"
+url = "https://github.com/pgbigm/pg_bigm"
+
+[[extension]]
+name = "pg_cron"
+url = "https://github.com/citusdata/pg_cron"
+preload = "pg_cron"
+
+[[extension]]
+name = "pg_csv"
+url = "https://github.com/PostgREST/pg_csv"
+
+[[extension]]
+name = "pg_dirtyread"
+url = "https://github.com/df7cb/pg_dirtyread"
+
+[[extension]]
+name = "pg_fact_loader"
+url = "https://salsa.debian.org/postgresql/pg-fact-loader"
+pg = "<=17"
+
+[[extension]]
+name = "pg_graphql"
+url = "https://github.com/supabase/pg_graphql"
+
+[[extension]]
+name = "pg_hashids"
+url = "https://github.com/iCyberon/pg_hashids"
+
+[[extension]]
+name = "pg_hint_plan"
+url = "https://github.com/ossc-db/pg_hint_plan"
+
+[[extension]]
+name = "pg_ivm"
+url = "https://github.com/sraoss/pg_ivm"
+preload = "pg_ivm"
+note = "Preloading is recommended, not required"
+
+[[extension]]
+name = "pg_jobmon"
+url = "https://github.com/omniti-labs/pg_jobmon"
+
+[[extension]]
+name = "pg_jsonschema"
+url = "https://github.com/supabase/pg_jsonschema"
+
+[[extension]]
+name = "pg_net"
+url = "https://github.com/supabase/pg_net"
+preload = "pg_net"
+
+[[extension]]
+name = "pg_partman"
+url = "https://github.com/pgpartman/pg_partman"
+preload = "pg_partman_bgw"
+note = "Preload only for the background maintenance worker"
+
+[[extension]]
+name = "pg_permissions"
+url = "https://github.com/cybertec-postgresql/pg_permissions"
+
+[[extension]]
+name = "pg_profile"
+url = "https://github.com/zubkov-andrei/pg_profile"
+
+[[extension]]
+name = "pg_pwhash"
+url = "https://github.com/cybertec-postgresql/pg_pwhash"
+
+[[extension]]
+name = "pg_qualstats"
+url = "https://github.com/powa-team/pg_qualstats"
+preload = "pg_qualstats"
+
+[[extension]]
+name = "pg_rational"
+url = "https://github.com/begriffs/pg_rational"
+
+[[extension]]
+name = "pg_repack"
+url = "https://github.com/reorg/pg_repack"
+
+[[extension]]
+name = "pg_rewrite"
+url = "https://github.com/cybertec-postgresql/pg_rewrite"
+preload = "pg_rewrite"
+
+[[extension]]
+name = "pg_roaringbitmap"
+url = "https://github.com/ChenHuajun/pg_roaringbitmap"
+provides = ["roaringbitmap"]
+
+[[extension]]
+name = "pg_rowalesce"
+url = "https://github.com/bigsmoke/pg_rowalesce"
+
+[[extension]]
+name = "pg_rrule"
+url = "https://github.com/petropavel13/pg_rrule"
+
+[[extension]]
+name = "pg_show_plans"
+url = "https://github.com/cybertec-postgresql/pg_show_plans"
+preload = "pg_show_plans"
+note = "Off by default, as it [crashes inserts into TimescaleDB hypertables](https://github.com/timescale/timescaledb/pull/10417); enable with `pg_show_plans.is_enabled = on`"
+
+[[extension]]
+name = "pg_similarity"
+url = "https://github.com/eulerto/pg_similarity"
+
+[[extension]]
+name = "pg_squeeze"
+url = "https://github.com/cybertec-postgresql/pg_squeeze"
+preload = "pg_squeeze"
+
+[[extension]]
+name = "pg_stat_kcache"
+url = "https://github.com/powa-team/pg_stat_kcache"
+preload = "pg_stat_kcache"
+
+[[extension]]
+name = "pg_stat_log"
+url = "https://github.com/fabriziomello/pg_stat_log"
+pg = ">=18"
+preload = "pg_stat_log"
+
+[[extension]]
+name = "pg_stat_monitor"
+url = "https://github.com/percona/pg_stat_monitor"
+preload = "pg_stat_monitor"
+
+[[extension]]
+name = "pg_stat_plans"
+url = "https://github.com/pganalyze/pg_stat_plans"
+pg = ">=16"
+preload = "pg_stat_plans"
+
+[[extension]]
+name = "pg_statviz"
+url = "https://github.com/vyruss/pg_statviz"
+
+[[extension]]
+name = "pg_textsearch"
+url = "https://github.com/timescale/pg_textsearch"
+pg = ">=17"
+preload = "pg_textsearch"
+
+[[extension]]
+name = "pg_tle"
+url = "https://github.com/aws/pg_tle"
+preload = "pg_tle"
+
+[[extension]]
+name = "pg_track_settings"
+url = "https://github.com/rjuju/pg_track_settings"
+
+[[extension]]
+name = "pg_uuidv7"
+url = "https://github.com/fboulnois/pg_uuidv7"
+
+[[extension]]
+name = "pg_wait_sampling"
+url = "https://github.com/postgrespro/pg_wait_sampling"
+preload = "pg_wait_sampling"
+
+[[extension]]
+name = "pg_xenophile"
+url = "https://github.com/bigsmoke/pg_xenophile"
+provides = ["l10n_table_dependent_extension", "pg_xenophile"]
+
+[[extension]]
+name = "pg_xxhash"
+url = "https://github.com/hatarist/pg_xxhash"
+provides = ["xxhash"]
+
+[[extension]]
+name = "pgagent"
+url = "https://github.com/pgadmin-org/pgagent"
+
+[[extension]]
+name = "pgaudit"
+url = "https://github.com/pgaudit/pgaudit"
+preload = "pgaudit"
+
+[[extension]]
+name = "pgauditlogtofile"
+url = "https://github.com/fmbiete/pgauditlogtofile"
+preload = "pgauditlogtofile"
+
+[[extension]]
+name = "pgfaceting"
+url = "https://github.com/cybertec-postgresql/pgfaceting"
+
+[[extension]]
+name = "pgfincore"
+url = "https://github.com/klando/pgfincore"
+
+[[extension]]
+name = "pgl_ddl_deploy"
+url = "https://github.com/enova/pgl_ddl_deploy"
+pg = "<=17"
+
+[[extension]]
+name = "pglogical"
+url = "https://github.com/2ndQuadrant/pglogical"
+provides = ["pglogical", "pglogical_origin"]
+preload = "pglogical"
+
+[[extension]]
+name = "pglogical_ticker"
+url = "https://github.com/enova/pglogical_ticker"
+pg = "<=17"
+preload = "pglogical_ticker"
+
+[[extension]]
+name = "pgmemcache"
+url = "https://github.com/ohmu/pgmemcache"
+preload = "pgmemcache"
+
+[[extension]]
+name = "pgmp"
+url = "https://github.com/dvarrazzo/pgmp"
+
+[[extension]]
+name = "pgmq"
+url = "https://github.com/pgmq/pgmq"
+
+[[extension]]
+name = "pgnodemx"
+url = "https://github.com/CrunchyData/pgnodemx"
+provides = ["pg_proctab", "pgnodemx"]
+preload = "pgnodemx"
+
+[[extension]]
+name = "pgpcre"
+url = "https://github.com/petere/pgpcre"
+
+[[extension]]
+name = "pgq"
+url = "https://github.com/pgq/pgq"
+
+[[extension]]
+name = "pgq_node"
+url = "https://github.com/pgq/pgq-node"
+
+[[extension]]
+name = "pgrouting"
+url = "https://github.com/pgRouting/pgrouting"
+
+[[extension]]
+name = "pgsentinel"
+url = "https://github.com/pgsentinel/pgsentinel"
+preload = "pgsentinel"
+
+[[extension]]
+name = "pgsphere"
+url = "https://github.com/postgrespro/pgsphere"
+provides = ["pg_sphere"]
+
+[[extension]]
+name = "pgsql_tweaks"
+url = "https://codeberg.org/pgsql_tweaks/pgsql_tweaks"
+
+[[extension]]
+name = "pgtap"
+url = "https://github.com/theory/pgtap"
+
+[[extension]]
+name = "pgtt"
+url = "https://github.com/darold/pgtt"
+
+[[extension]]
+name = "pguint"
+url = "https://github.com/petere/pguint"
+provides = ["uint"]
+
+[[extension]]
+name = "pgvector"
+url = "https://github.com/pgvector/pgvector"
+provides = ["vector"]
+
+[[extension]]
+name = "pgvectorscale"
+url = "https://github.com/timescale/pgvectorscale"
+provides = ["vectorscale"]
+
+[[extension]]
+name = "PL/JS"
+url = "https://github.com/plv8/pljs"
+provides = ["pljs"]
+
+[[extension]]
+name = "PL/Lua"
+url = "https://github.com/pllua/pllua"
+provides = ["hstore_pllua", "hstore_plluau", "pllua", "plluau"]
+
+[[extension]]
+name = "PL/Perl"
+url = "https://www.postgresql.org/docs/current/plperl.html"
+provides = [
+  "bool_plperl",
+  "bool_plperlu",
+  "hstore_plperl",
+  "hstore_plperlu",
+  "jsonb_plperl",
+  "jsonb_plperlu",
+  "plperl",
+  "plperlu",
+]
+
+[[extension]]
+name = "PL/Proxy"
+url = "https://github.com/plproxy/plproxy"
+provides = ["plproxy"]
+
+[[extension]]
+name = "PL/Python"
+url = "https://www.postgresql.org/docs/current/plpython.html"
+provides = [
+  "hstore_plpython3u",
+  "jsonb_plpython3u",
+  "ltree_plpython3u",
+  "plpython3u",
+]
+
+[[extension]]
+name = "PL/sh"
+url = "https://github.com/petere/plsh"
+provides = ["plsh"]
+
+[[extension]]
+name = "PL/Tcl"
+url = "https://www.postgresql.org/docs/current/pltcl.html"
+provides = ["pltcl", "pltclu"]
+
+[[extension]]
+name = "pldebugger"
+url = "https://github.com/EnterpriseDB/pldebugger"
+provides = ["pldbgapi"]
+preload = "plugin_debugger"
+
+[[extension]]
+name = "plpgsql_check"
+url = "https://github.com/okbob/plpgsql_check"
+
+[[extension]]
+name = "plProfiler"
+url = "https://github.com/bigsql/plprofiler"
+provides = ["plprofiler"]
+preload = "plprofiler"
+
+[[extension]]
+name = "pointcloud"
+url = "https://github.com/pgpointcloud/pointcloud"
+provides = ["pointcloud", "pointcloud_postgis"]
+
+[[extension]]
+name = "PostGIS"
+url = "https://github.com/postgis/postgis"
+provides = [
+  "postgis",
+  "postgis-3",
+  "postgis_raster",
+  "postgis_raster-3",
+  "postgis_sfcgal",
+  "postgis_sfcgal-3",
+  "postgis_topology",
+  "postgis_topology-3",
+]
+preload = "postgis-3"
+note = "From the base image; preloading it is optional"
+
+[[extension]]
+name = "postgis_tiger_geocoder"
+url = "https://postgis.net/docs/Extras.html#Tiger_Geocoder"
+provides = ["postgis_tiger_geocoder", "postgis_tiger_geocoder-3"]
+note = "Packaged separately from PostGIS since 3.7"
+
+[[extension]]
+name = "postgresql-debversion"
+url = "https://salsa.debian.org/postgresql/postgresql-debversion"
+provides = ["debversion"]
+
+[[extension]]
+name = "PoWA (archivist)"
+url = "https://github.com/powa-team/powa-archivist"
+provides = ["powa"]
+preload = "powa"
+note = "Preloading it also preloads its statistics extensions and creates the `powa` database on new clusters"
+
+[[extension]]
+name = "prefix"
+url = "https://github.com/dimitri/prefix"
+
+[[extension]]
+name = "prioritize"
+url = "https://github.com/schmiddy/pg_prioritize"
+
+[[extension]]
+name = "q3c"
+url = "https://github.com/segasai/q3c"
+
+[[extension]]
+name = "rum"
+url = "https://github.com/postgrespro/rum"
+
+[[extension]]
+name = "semver"
+url = "https://github.com/theory/pg-semver"
+
+[[extension]]
+name = "set_user"
+url = "https://github.com/pgaudit/set_user"
+preload = "set_user"
+
+[[extension]]
+name = "sqlite_fdw"
+url = "https://github.com/pgspider/sqlite_fdw"
+pg = "<=17"
+
+[[extension]]
+name = "table_log"
+url = "https://github.com/credativ/table_log"
+
+[[extension]]
+name = "tdigest"
+url = "https://github.com/tvondra/tdigest"
+
+[[extension]]
+name = "tds_fdw"
+url = "https://github.com/tds-fdw/tds_fdw"
+
+[[extension]]
+name = "temporal_tables"
+url = "https://github.com/arkhipov/temporal_tables"
+
+[[extension]]
+name = "timescaledb"
+url = "https://github.com/timescale/timescaledb"
+preload = "timescaledb"
+note = "Includes the Timescale License (TSL) features"
+
+[[extension]]
+name = "TimescaleDB Toolkit"
+url = "https://github.com/timescale/timescaledb-toolkit"
+provides = ["timescaledb_toolkit"]
+pg = ">=15"
+note = "Timescale License (TSL)"
+
+[[extension]]
+name = "toastinfo"
+url = "https://github.com/credativ/toastinfo"
+
+[[extension]]
+name = "unit"
+url = "https://github.com/df7cb/postgresql-unit"
+
+[[extension]]
+name = "VectorChord"
+url = "https://github.com/supervc-stack/VectorChord"
+provides = ["vchord"]
+preload = "vchord"
+note = "Dual-licensed AGPLv3 / ELv2"
+
+[[extension]]
+name = "wal2json"
+url = "https://github.com/eulerto/wal2json"
+provides = []
+note = "Logical decoding output plugin, not an extension"

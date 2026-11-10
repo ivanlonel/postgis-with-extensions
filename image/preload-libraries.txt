@@ -1,0 +1,39 @@
+# Registry of the libraries this image can add to shared_preload_libraries, in canonical order.
+# Columns (|-separated): library | in the "legacy" preset | required libraries | background
+# workers | settings applied when SHARED_PRELOAD_LIBRARIES adds the library.
+# Settings are ;-separated name=value pairs: extension (dotted) GUCs only apply when not already
+# configured, core GUCs are enforced. @CRON_DB@ and @PARTMAN_DB@ expand to the target databases.
+pg_stat_statements|yes||0|
+powa|yes|pg_stat_statements,pg_qualstats,pg_stat_kcache,pg_wait_sampling|1|powa.frequency=30s
+pg_qualstats|yes||0|
+pg_stat_kcache|yes|pg_stat_statements|0|
+pg_wait_sampling|yes||1|
+credcheck|yes||0|
+pg_cron|yes||1|cron.database_name=@CRON_DB@
+pg_partman_bgw|yes||1|pg_partman_bgw.dbname=@PARTMAN_DB@
+pg_show_plans|yes||0|pg_show_plans.is_enabled=off
+pg_similarity|yes||0|
+pg_squeeze|yes||1|
+pgaudit|yes||0|
+pgauditlogtofile|yes|pgaudit|0|
+pglogical|yes||2|wal_level=logical;track_commit_timestamp=on
+pgmemcache|yes||0|
+plprofiler|yes||0|
+plugin_debugger|yes||0|
+postgis-3|yes||0|
+set_user|yes||0|
+timescaledb|yes||2|timescaledb.telemetry_level=off
+pglogical_ticker|yes|pglogical|1|
+pgsentinel|no|pg_stat_statements|1|
+pgnodemx|no||0|
+pg_stat_monitor|no||0|
+pg_stat_plans|no||0|
+pg_stat_log|no||0|
+pg_net|no||1|
+pg_tle|no||0|
+vchord|no||0|
+pg_ivm|no||0|
+pg_rewrite|no||0|
+pg_textsearch|no||0|
+pg_documentdb_core|no||0|
+pg_documentdb|no|pg_documentdb_core,pg_cron|1|

@@ -1,0 +1,98 @@
+# <package, % = PG major> [pg>=N] [pg<=N] [postgis>=X.Y] [postgis<=X.Y]
+libsqlite3-mod-spatialite pg<=17
+pgagent
+postgresql-%-address-standardizer postgis>=3.7
+postgresql-%-age
+postgresql-%-asn1oid
+postgresql-%-credcheck
+postgresql-%-cron
+postgresql-%-debversion
+postgresql-%-dirtyread
+postgresql-%-documentdb pg>=15
+postgresql-%-extra-window-functions
+postgresql-%-first-last-agg
+postgresql-%-h3
+postgresql-%-hll
+postgresql-%-http
+postgresql-%-hypopg
+postgresql-%-icu-ext
+postgresql-%-ip4r
+postgresql-%-jsquery
+postgresql-%-mobilitydb
+postgresql-%-mongo-fdw
+postgresql-%-mysql-fdw
+postgresql-%-numeral
+postgresql-%-ogr-fdw
+postgresql-%-oracle-fdw
+postgresql-%-orafce
+postgresql-%-partman
+postgresql-%-periods
+postgresql-%-pg-background
+postgresql-%-pg-csv
+postgresql-%-pg-fact-loader pg<=17
+postgresql-%-pg-hint-plan
+postgresql-%-pg-ivm
+postgresql-%-pg-permissions
+postgresql-%-pg-pwhash
+postgresql-%-pg-qualstats
+postgresql-%-pg-rewrite
+postgresql-%-pg-rrule
+postgresql-%-pg-stat-kcache
+postgresql-%-pg-stat-plans pg>=16
+postgresql-%-pg-textsearch pg>=17
+postgresql-%-pg-track-settings
+postgresql-%-pg-uuidv7
+postgresql-%-pg-wait-sampling
+postgresql-%-pgaudit
+postgresql-%-pgauditlogtofile
+postgresql-%-pgfaceting
+postgresql-%-pgfincore
+postgresql-%-pgl-ddl-deploy pg<=17
+postgresql-%-pglogical
+postgresql-%-pglogical-ticker pg<=17
+postgresql-%-pgmemcache
+postgresql-%-pgmp
+postgresql-%-pgnodemx
+postgresql-%-pgpcre
+postgresql-%-pgq-node
+postgresql-%-pgrouting
+postgresql-%-pgrouting-scripts
+postgresql-%-pgsentinel
+postgresql-%-pgsphere
+postgresql-%-pgtap
+postgresql-%-pgtt
+postgresql-%-pgvector
+postgresql-%-pldebugger
+postgresql-%-pljs
+postgresql-%-pllua
+postgresql-%-plpgsql-check
+postgresql-%-plprofiler
+postgresql-%-plproxy
+postgresql-%-plsh
+postgresql-%-pointcloud
+postgresql-%-postgis-tiger-geocoder pg>=16 postgis>=3.7
+postgresql-%-powa
+postgresql-%-prefix
+postgresql-%-prioritize
+postgresql-%-q3c
+postgresql-%-rational
+postgresql-%-repack
+postgresql-%-roaringbitmap
+postgresql-%-rum
+postgresql-%-semver
+postgresql-%-set-user
+postgresql-%-show-plans
+postgresql-%-similarity
+postgresql-%-squeeze
+postgresql-%-stat-log pg>=18
+postgresql-%-statviz
+postgresql-%-tablelog
+postgresql-%-tdigest
+postgresql-%-tds-fdw
+postgresql-%-timestamp9
+postgresql-%-toastinfo
+postgresql-%-unit
+postgresql-%-wal2json
+postgresql-plperl-%
+postgresql-plpython3-%
+postgresql-pltcl-%

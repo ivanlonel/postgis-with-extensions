@@ -17,7 +17,7 @@ file_env() {
 	if [ "${!var:-}" ]; then
 		val="${!var}"
 	elif [ "${!fileVar:-}" ]; then
-		val="$(< "${!fileVar}")"
+		val="$(<"${!fileVar}")"
 	fi
 	export "$var"="$val"
 	unset "$fileVar"
@@ -26,4 +26,5 @@ file_env() {
 file_env "PGADMIN_DEFAULT_EMAIL"
 file_env "PGADMIN_DEFAULT_PASSWORD"
 
+# shellcheck source=/dev/null  # pgAdmin's own entrypoint, only present in its image
 source /entrypoint.sh
