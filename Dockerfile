@@ -150,8 +150,9 @@ COPY --link --from=pg-bigm /out/ /
 COPY --link --from=pg-profile /out/ /
 
 COPY --chmod=0755 image/postgis-with-extensions-entrypoint.sh /usr/local/bin/
-COPY --chmod=0644 image/preload-libraries.txt image/preload.sh /usr/local/share/postgis-with-extensions/
-COPY --chmod=0644 image/powa/install_all_powa_ext.sql /usr/local/src/
+# No --chmod here: it would also apply to the directory COPY creates, leaving it unsearchable.
+COPY image/preload-libraries.txt image/preload.sh /usr/local/share/postgis-with-extensions/
+COPY image/powa/install_all_powa_ext.sql /usr/local/src/
 COPY --chmod=0755 image/initdb/ /docker-entrypoint-initdb.d/
 
 ENV PWE_DEFAULT_PRELOAD=${DEFAULT_PRELOAD}
