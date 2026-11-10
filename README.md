@@ -49,12 +49,16 @@ docker run -e POSTGRES_PASSWORD=mysecretpassword -e SHARED_PRELOAD_LIBRARIES=tim
 ```
 
 - `all` preloads every library of the [extension table](#extensions)'s Preload column that the image ships for its
-  PostgreSQL version, except Citus's and DocumentDB's; `legacy` preloads the list the images preloaded by default
-  before 3.7.
+  PostgreSQL version, except Citus's, DocumentDB's and pg_auto_failover's; `legacy` preloads the list the images
+  preloaded by default before 3.7.
 - DocumentDB is opt-in (`SHARED_PRELOAD_LIBRARIES=all,pg_documentdb` adds it): until `CREATE EXTENSION documentdb` has
   run in pg_cron's database, its background worker makes every `DROP DATABASE` wait up to 10 seconds.
 - Citus is opt-in too (`SHARED_PRELOAD_LIBRARIES=citus`). It must load before every other library, so it's put
   first, ahead of the cluster's own list.
+- So is pg_auto_failover's monitor library (`pgautofailover`): on PostgreSQL 15 and later, its background workers make
+  `DROP DATABASE` hang for as long as it's preloaded
+  ([pg_auto_failover#1063](https://github.com/hapostgres/pg_auto_failover/issues/1063)). `pg_autoctl create monitor`
+  runs a monitor in an instance of its own, which doesn't need it.
 - pg_savior and pg_statement_rollback change how statements behave, so they're preloaded switched off: turn them on
   with `pg_savior.enabled = on` or `pg_statement_rollback.enabled = on`, per session, role or database.
 - Preloaded, pgsodium and Supabase Vault read a root key from `$(pg_config --sharedir)/extension/pgsodium_getkey`. The
@@ -163,7 +167,7 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [parray_gin](https://github.com/theirix/parray_gin) | all |  |  |
 | [periods](https://github.com/xocolatl/periods) | all |  |  |
 | [permuteseq](https://github.com/dverite/permuteseq) | all |  |  |
-| [pg_auto_failover](https://github.com/hapostgres/pg_auto_failover) | all | `pgautofailover` | The monitor's extension, plus the `pg_autoctl` command |
+| [pg_auto_failover](https://github.com/hapostgres/pg_auto_failover) | all | `pgautofailover` | The monitor's extension, plus the `pg_autoctl` command. Opt-in (not in `all`): preloaded, it makes `DROP DATABASE` hang on PostgreSQL 15 and later ([pg_auto_failover#1063](https://github.com/hapostgres/pg_auto_failover/issues/1063)) |
 | [pg_background](https://github.com/vibhorkum/pg_background) | all |  |  |
 | [pg_bigm](https://github.com/pgbigm/pg_bigm) | all |  |  |
 | [pg_bulkload](https://github.com/ossc-db/pg_bulkload) | all |  |  |

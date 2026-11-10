@@ -175,7 +175,7 @@ name = "pg_auto_failover"
 url = "https://github.com/hapostgres/pg_auto_failover"
 provides = ["pgautofailover"]
 preload = "pgautofailover"
-note = "The monitor's extension, plus the `pg_autoctl` command"
+note = "The monitor's extension, plus the `pg_autoctl` command. Opt-in (not in `all`): preloaded, it makes `DROP DATABASE` hang on PostgreSQL 15 and later ([pg_auto_failover#1063](https://github.com/hapostgres/pg_auto_failover/issues/1063))"
 
 [[extension]]
 name = "pg_background"

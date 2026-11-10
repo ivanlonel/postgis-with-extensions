@@ -45,7 +45,7 @@ pg_statement_rollback|all||0|pg_statement_rollback.enabled=off
 pgsodium|all||0|
 supabase_vault|all||0|
 repmgr|all||0|
-pgautofailover|all||1|
+pgautofailover|none||1|
 pgactive|all||2|wal_level=logical;track_commit_timestamp=on
 pg_documentdb_core|none||0|
 pg_documentdb|none|pg_documentdb_core,pg_cron,pg_documentdb_extended_rum|1|documentdb.bg_worker_database_name=@CRON_DB@

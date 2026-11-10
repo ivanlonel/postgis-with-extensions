@@ -1,4 +1,9 @@
-"""Client programs that come with extensions: pg_repack, the pgAgent daemon and repmgr."""
+"""
+Client programs that come with extensions (pg_repack, the pgAgent daemon, repmgr), and more.
+
+pg_auto_failover's monitor is tested here rather than in ``tests/sql``: while its library is
+preloaded, ``DROP DATABASE`` hangs on PostgreSQL 15 and later, so its server keeps every database.
+"""
 
 from __future__ import annotations
 
@@ -37,6 +42,13 @@ data_directory='{data_directory}'
 
 REPMGR_CONF_PATH: Final = "/tmp/repmgr.conf"  # noqa: S108 -- inside the throwaway test container
 """Where repmgr's configuration is written, in the container."""
+
+REGISTER_NODE_SQL: Final = """
+CREATE EXTENSION pgautofailover CASCADE;
+SELECT assigned_group_state
+FROM pgautofailover.register_node('default', 'localhost', 9876, 'postgres');
+"""
+"""Create the monitor's extension (it requires btree_gist), then register a node with it."""
 
 
 def test_pg_repack_rewrites_a_table(default_server: Server) -> None:
@@ -92,5 +104,19 @@ def test_repmgr_registers_the_primary(image: Image) -> None:
         show = server.exec("repmgr", "-f", REPMGR_CONF_PATH, "cluster", "show")
         assert show.returncode == 0, show.stderr
         assert "primary" in show.stdout
+    finally:
+        server.remove()
+
+
+def test_pg_auto_failover_monitor_registers_nodes(image: Image) -> None:
+    """Nodes register with the monitor, which assigns a node alone in its group to run single."""
+    server = start_server(
+        image, role="pgautofailover", env={"SHARED_PRELOAD_LIBRARIES": "pgautofailover"}
+    )
+    try:
+        process = server.psql(stdin=REGISTER_NODE_SQL)
+        assert process.returncode == 0, process.stderr
+        assert process.stdout.split() == ["single"]
+        assert server.scalar("SELECT count(*) FROM pgautofailover.node") == "1"
     finally:
         server.remove()
