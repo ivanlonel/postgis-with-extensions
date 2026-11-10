@@ -134,7 +134,7 @@ ARG DEFAULT_PRELOAD=
 
 RUN --mount=type=bind,source=build,target=/build \
 	--mount=type=bind,from=vendor,source=/debs,target=/debs \
-	/build/install-runtime.sh /build/apt-packages.txt /debs/*.deb
+	bash /build/install-runtime.sh /build/apt-packages.txt /debs/*.deb
 
 COPY --link --from=timescaledb /out/ /
 COPY --link --from=pgxn /out/ /
