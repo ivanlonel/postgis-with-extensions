@@ -3,7 +3,7 @@
 CREATE EXTENSION credcheck;
 
 BEGIN;
-SELECT plan(3);
+SELECT plan(4);
 
 -- set_config(..., true) is SET LOCAL: the settings end with the transaction.
 SELECT set_config('credcheck.username_min_length', '4', TRUE);
@@ -24,6 +24,9 @@ SELECT set_config('credcheck.password_ignore_case', 'on', TRUE);
 SELECT throws_ok(
 	$$CREATE USER "abcd$" WITH PASSWORD 'ABCD$xyz'$$, NULL, NULL,
 	'a password containing the user name is rejected'
+);
+SELECT lives_ok(
+	$$CREATE USER pwe_compliant WITH PASSWORD 'x9-Unrelated$secret'$$, 'compliant credentials are accepted'
 );
 
 SELECT * FROM finish(TRUE);

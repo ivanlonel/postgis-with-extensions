@@ -58,10 +58,10 @@ SELECT is(
 SELECT is(
 	(
 		SELECT count(*) FROM trips
-		WHERE trip && stbox 'STBOX X((-1, -1), (1, 1))'
+		WHERE eIntersects(trip, ST_MakeEnvelope(-1, -1, 1, 1))
 	),
 	1::bigint,
-	'temporal points are found by bounding box'
+	'spatial relationships are evaluated over time'
 );
 SELECT is(
 	(

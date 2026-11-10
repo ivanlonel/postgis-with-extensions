@@ -25,6 +25,27 @@ WHERE name = 'Bernard Marx';
 DELETE FROM employees
 WHERE name = 'Helmholtz Watson';
 
-SELECT plan(1);
+SELECT plan(4);
 SELECT is((SELECT count(*) FROM employees_history), 2::bigint, 'history keeps the old rows');
+SELECT is(
+	(
+		SELECT salary FROM employees_history
+		WHERE name = 'Bernard Marx'
+	),
+	10000::numeric(20, 2),
+	'with their old values'
+);
+SELECT ok(
+	(SELECT bool_and(NOT upper_inf(sys_period)) FROM employees_history),
+	'history rows have an end'
+);
+SELECT ok(
+	(
+		SELECT lower(e.sys_period) = upper(h.sys_period)
+		FROM employees AS e
+		INNER JOIN employees_history AS h ON e.name = h.name
+		WHERE e.name = 'Bernard Marx'
+	),
+	'versions follow one another without gaps'
+);
 SELECT * FROM finish(TRUE);

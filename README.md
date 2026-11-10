@@ -210,7 +210,7 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [PL/Tcl](https://www.postgresql.org/docs/current/pltcl.html) | all |  |  |
 | [pldebugger](https://github.com/EnterpriseDB/pldebugger) | all | `plugin_debugger` |  |
 | [plpgsql_check](https://github.com/okbob/plpgsql_check) | all |  |  |
-| [plProfiler](https://github.com/bigsql/plprofiler) | all | `plprofiler` |  |
+| [plProfiler](https://github.com/bigsql/plprofiler) | all | `plprofiler` | Collects nothing when `plugin_debugger` is loaded after it, as in the `legacy` and `all` presets: PL/pgSQL takes one plugin |
 | [pointcloud](https://github.com/pgpointcloud/pointcloud) | all |  |  |
 | [PostGIS](https://github.com/postgis/postgis) | all | `postgis-3` | From the base image; preloading it is optional |
 | [postgis_tiger_geocoder](https://postgis.net/docs/Extras.html#Tiger_Geocoder) | all |  | Packaged separately from PostGIS since 3.7 |

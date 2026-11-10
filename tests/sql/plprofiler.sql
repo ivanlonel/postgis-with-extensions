@@ -1,4 +1,11 @@
+-- preload: plprofiler
+-- conflicts: plugin_debugger
 -- https://github.com/bigsql/plprofiler
+-- PL/pgSQL takes one instrumentation plugin: when pldebugger loads after plprofiler, as in the
+-- legacy and all presets, it takes the slot and plprofiler sees nothing.
+-- plprofiler decides whether to profile at the first PL/pgSQL call of each transaction (when
+-- preloaded), and drops the local statistics when an unprofiled call runs: profile and check in
+-- one transaction.
 CREATE EXTENSION plprofiler;
 
 CREATE FUNCTION fib(n integer) RETURNS integer LANGUAGE plpgsql AS $$
@@ -11,9 +18,9 @@ END
 $$;
 
 SELECT pl_profiler_set_enabled_local(TRUE);
-SELECT fib(10);
-SELECT pl_profiler_set_enabled_local(FALSE);
 
+BEGIN;
+SELECT fib(10);
 SELECT plan(2);
 SELECT ok(
 	(
@@ -27,3 +34,6 @@ SELECT ok(
 	'call graphs are collected'
 );
 SELECT * FROM finish(TRUE);
+COMMIT;
+
+SELECT pl_profiler_set_enabled_local(FALSE);

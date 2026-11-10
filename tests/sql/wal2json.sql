@@ -24,17 +24,18 @@ UPDATE table2_without_pk SET c = 'Anta'
 WHERE c = 'Tapir';
 COMMIT;
 
-SELECT plan(1);
-SELECT matches(
-	(
-		SELECT string_agg(data, E'\n')
-		FROM pg_logical_slot_get_changes(
-			'wal2json_test', NULL, NULL, 'pretty-print', '1', 'add-msg-prefixes', 'wal2json'
-		)
-	),
-	'Backup and Restore',
-	'wal2json decodes the changes'
+-- Reading the slot consumes it: keep what it returned.
+CREATE TEMPORARY TABLE changes AS
+SELECT string_agg(data, E'\n') AS json
+FROM pg_logical_slot_get_changes('wal2json_test', NULL, NULL, 'pretty-print', '1', 'add-msg-prefixes', 'wal2json');
+SELECT 'stop' FROM pg_drop_replication_slot('wal2json_test');
+
+SELECT plan(5);
+SELECT matches((SELECT json FROM changes), 'Backup and Restore', 'inserts are decoded');
+SELECT matches((SELECT json FROM changes), '"kind": "delete"', 'deletes are decoded');
+SELECT matches((SELECT json FROM changes), 'this message will be delivered', 'messages are decoded');
+SELECT doesnt_match((SELECT json FROM changes), 'will be filtered', 'messages are filtered by prefix');
+SELECT doesnt_match(
+	(SELECT json FROM changes), 'Anta', 'updates of tables without a replica identity are left out'
 );
 SELECT * FROM finish(TRUE);
-
-SELECT 'stop' FROM pg_drop_replication_slot('wal2json_test');

@@ -38,14 +38,25 @@ UPDATE partman.part_config SET premake = '4'
 WHERE parent_table = 'public.employees';
 CALL partman.run_maintenance_proc();
 
-SELECT plan(1);
+SELECT plan(4);
 SELECT cmp_ok(
-	(
-		SELECT count(*) FROM pg_inherits
-		WHERE inhparent = 'public.employees'::regclass
-	),
+	(SELECT count(*) FROM partman.show_partitions('public.employees')),
 	'>=',
 	3::bigint,
 	'yearly partitions exist'
+);
+SELECT is((SELECT count(*) FROM public.employees), 10000::bigint, 'no row is lost');
+SELECT is(
+	(SELECT coalesce(sum(count), 0) FROM partman.check_default(p_exact_count := TRUE)),
+	0::numeric,
+	'rows moved out of the default partition'
+);
+SELECT cmp_ok(
+	(
+		SELECT count(DISTINCT tableoid) FROM public.employees
+	),
+	'>=',
+	3::bigint,
+	'rows are spread over the partitions'
 );
 SELECT * FROM finish(TRUE);
