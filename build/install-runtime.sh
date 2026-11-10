@@ -89,4 +89,6 @@ if dpkg --compare-versions "$postgis_series" ge 3.7; then
 fi
 
 apt-get clean
-rm -rf /var/lib/apt/lists/*
+# oracle-libs, oracle_fdw's Oracle Instant Client downloader, keeps the zips it fetched (~73 MiB)
+# as a cache for re-runs; the unpacked client in /usr/lib/oracle is all the image needs.
+rm -rf /var/lib/apt/lists/* /var/tmp/oracle-libs
