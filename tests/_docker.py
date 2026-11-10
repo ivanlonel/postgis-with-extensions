@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import time
 import uuid
 from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass
+from pathlib import Path
 from typing import TYPE_CHECKING, Final, Self
 
 if TYPE_CHECKING:
@@ -19,6 +21,9 @@ DOCKER: Final = shutil.which("docker") or "docker"
 
 LABEL: Final = "io.github.ivanlonel.postgis-with-extensions.test"
 """Label put on every container and volume the tests create."""
+
+LOGS_VARIABLE: Final = "PWE_TEST_LOGS"
+"""Environment variable naming a directory where server logs are saved as containers go away."""
 
 PASSWORD: Final = "postgres"  # noqa: S105 -- throwaway password of local test containers
 """Superuser password of the test servers."""
@@ -39,7 +44,11 @@ class ServerExitedError(DockerError):
 
 
 def docker(
-    *args: str, check: bool = True, stdin: str | None = None, timeout: float = COMMAND_TIMEOUT
+    *args: str,
+    check: bool = True,
+    stdin: str | None = None,
+    timeout: float = COMMAND_TIMEOUT,
+    merge_stderr: bool = False,
 ) -> subprocess.CompletedProcess[str]:
     """
     Run a docker CLI command and capture its output.
@@ -48,13 +57,15 @@ def docker(
     :param check: Whether to raise :exc:`DockerError` on a non-zero exit status.
     :param stdin: Text to feed to the command's standard input.
     :param timeout: Seconds to wait for the command to finish.
+    :param merge_stderr: Whether to interleave standard error into the captured standard output.
     :return: The finished process.
     :raise DockerError: If ``check`` is true and the command fails.
     """
     process = subprocess.run(  # noqa: S603 -- a fixed executable with an argument list, no shell
         [DOCKER, *args],
         input=stdin,
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT if merge_stderr else subprocess.PIPE,
         text=True,
         encoding="utf-8",
         errors="replace",
@@ -228,10 +239,9 @@ class Server:
         """
         Fetch the container's output.
 
-        :return: Standard output and error of the container.
+        :return: Standard output and error of the container, interleaved as they were written.
         """
-        process = docker("logs", self.name, check=False)
-        return process.stdout + process.stderr
+        return docker("logs", self.name, check=False, merge_stderr=True).stdout
 
     def wait_ready(self, timeout: float = STARTUP_TIMEOUT) -> None:
         """
@@ -258,7 +268,16 @@ class Server:
         docker("stop", "--time", "120", self.name)
 
     def remove(self) -> None:
-        """Remove the container and its anonymous volumes."""
+        """
+        Remove the container and its anonymous volumes.
+
+        When the ``PWE_TEST_LOGS`` environment variable names a directory, the container's output
+        is saved there first, as ``<container name>.log``.
+        """
+        if directory := os.environ.get(LOGS_VARIABLE):
+            path = Path(directory)
+            path.mkdir(parents=True, exist_ok=True)
+            (path / f"{self.name}.log").write_text(self.logs(), encoding="utf-8")
         docker("rm", "--force", "--volumes", self.name, check=False)
 
 
@@ -279,9 +298,10 @@ def _run_options(
     return options
 
 
-def start_server(
+def start_server(  # noqa: PLR0913 -- keyword-only container options
     image: Image,
     *,
+    role: str = "server",
     env: Mapping[str, str] | None = None,
     volume: str | None = None,
     mounts: Mapping[str, str] | None = None,
@@ -291,13 +311,14 @@ def start_server(
     Start a server container and wait until it accepts connections.
 
     :param image: The image to run.
+    :param role: Short name for what the server is for, put in the container name.
     :param env: Extra environment variables.
     :param volume: Named volume to mount at the image's data volume path.
     :param mounts: Host paths to mount read-only, mapped to container paths.
     :param command: Command overriding the image's default.
     :return: The running server.
     """
-    name = f"pwe-test-{uuid.uuid4().hex[:12]}"
+    name = f"pwe-test-{role}-{uuid.uuid4().hex[:8]}"
     options = _run_options(image, env=env, volume=volume, mounts=mounts)
     docker("run", "--detach", "--name", name, *options, image.reference, *command)
     server = Server(name=name, image=image)

@@ -58,6 +58,21 @@ def _old_image_reference(image: Image, config: pytest.Config) -> str:
     return pinned[str(image.pg_major)]
 
 
+def _library_path(probin: str, libdir: str) -> str:
+    """
+    Resolve a ``pg_proc.probin`` value the way the server's dynamic loader does.
+
+    :param probin: The library a C function lives in: ``$libdir/name``, a bare name looked up in
+        ``dynamic_library_path`` (``$libdir`` by default), or an absolute path.
+    :param libdir: The server's library directory.
+    :return: The shared library's file path.
+    """
+    path = probin.replace("$libdir", libdir)
+    if "/" not in path:
+        path = f"{libdir}/{path}"
+    return path if path.endswith(".so") else f"{path}.so"
+
+
 def _seed(server: Server) -> dict[str, str]:
     """
     Create every available extension in a database of its own.
@@ -100,7 +115,7 @@ def upgrade(image: Image, pytestconfig: pytest.Config) -> Iterator[Upgrade]:
     docker("pull", reference)
     mounts = {str(UPGRADE_DIR): "/tests/upgrade"}
     with scratch_volume() as volume:
-        old = start_server(Image.inspect(reference), volume=volume, mounts=mounts)
+        old = start_server(Image.inspect(reference), role="old", volume=volume, mounts=mounts)
         try:
             seeded = _seed(old)
             old.query("CREATE DATABASE upgrade")
@@ -110,7 +125,7 @@ def upgrade(image: Image, pytestconfig: pytest.Config) -> Iterator[Upgrade]:
             old.stop()
         finally:
             old.remove()
-        new = start_server(image, volume=volume, mounts=mounts)
+        new = start_server(image, role="new", volume=volume, mounts=mounts)
         try:
             yield Upgrade(server=new, volume=volume, seeded=seeded, preloaded=preloaded)
         finally:
@@ -139,10 +154,7 @@ def test_referenced_libraries_exist(upgrade: Upgrade) -> None:
     ).stdout.splitlines()
     libdir = upgrade.server.image.libdir
     references = {tuple(row.split("|", 1)) for row in rows if "|" in row}
-    paths = {
-        (name, probin.replace("$libdir", libdir) + ("" if probin.endswith(".so") else ".so"))
-        for name, probin in references
-    }
+    paths = {(name, _library_path(probin, libdir)) for name, probin in references}
     present = set(
         upgrade.server.exec(
             "bash",
@@ -165,12 +177,19 @@ def test_seeded_objects_work(upgrade: Upgrade) -> None:
 
 
 def test_variable_adds_to_the_existing_list(upgrade: Upgrade, image: Image) -> None:
-    """SHARED_PRELOAD_LIBRARIES adds to the cluster's own list without dropping anything."""
+    """
+    SHARED_PRELOAD_LIBRARIES adds to the cluster's own list without dropping anything.
+
+    The extended list names each library once, though the old configuration may repeat some.
+    """
     upgrade.server.stop()
     server = start_server(
-        image, volume=upgrade.volume, env={"SHARED_PRELOAD_LIBRARIES": "pg_stat_monitor"}
+        image,
+        role="extended",
+        volume=upgrade.volume,
+        env={"SHARED_PRELOAD_LIBRARIES": "pg_stat_monitor"},
     )
     try:
-        assert server.preloaded() == [*upgrade.preloaded, "pg_stat_monitor"]
+        assert server.preloaded() == [*dict.fromkeys(upgrade.preloaded), "pg_stat_monitor"]
     finally:
         server.remove()

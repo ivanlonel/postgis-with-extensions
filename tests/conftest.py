@@ -95,7 +95,7 @@ def default_server(image: Image) -> Iterator[Server]:
     :param image: The image under test.
     :yield: The running server.
     """
-    server = start_server(image, mounts={str(SQL_DIR): "/tests/sql"})
+    server = start_server(image, role="default", mounts={str(SQL_DIR): "/tests/sql"})
     yield server
     server.remove()
 
@@ -110,6 +110,7 @@ def all_server(image: Image) -> Iterator[Server]:
     """
     server = start_server(
         image,
+        role="all",
         env={"SHARED_PRELOAD_LIBRARIES": "all", "POSTGRES_DB": ALL_DATABASE},
         mounts={str(SQL_DIR): "/tests/sql"},
     )
