@@ -1,5 +1,6 @@
 -- https://github.com/MobilityDB/MobilityDB
 CREATE EXTENSION mobilitydb CASCADE;  -- requires postgis
+CREATE EXTENSION mobilitydb_datagen;
 
 -- A point moving 2 units east over two days, and a temperature rising alongside.
 CREATE TABLE trips (id integer PRIMARY KEY, trip tgeompoint, temperature tfloat);
@@ -14,7 +15,7 @@ INSERT INTO trips VALUES (
 );
 CREATE INDEX trips_trip_idx ON trips USING gist (trip);
 
-SELECT plan(10);
+SELECT plan(11);
 SELECT is((
 	SELECT numInstants(trip) FROM trips
 	WHERE id = 1
@@ -86,5 +87,9 @@ SELECT is(
 	),
 	20::float8,
 	'time-weighted averages are computed'
+);
+SELECT ok(
+	(SELECT bool_and(random_int(1, 10) BETWEEN 1 AND 10) FROM generate_series(1, 100)),
+	'the data generator stays within bounds'
 );
 SELECT * FROM finish(TRUE);
