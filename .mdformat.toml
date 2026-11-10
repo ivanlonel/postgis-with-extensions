@@ -1,0 +1,6 @@
+wrap = "keep"
+end_of_line = "lf"
+
+[plugin.tables]
+# Padding every cell to its column's width would make the extension table too long for Docker Hub.
+compact_tables = true

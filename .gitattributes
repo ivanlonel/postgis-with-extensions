@@ -1,0 +1,2 @@
+# Keep LF line endings everywhere, including Windows checkouts: the shell scripts run in the image.
+* text=auto eol=lf

@@ -1,0 +1,190 @@
+default_install_hook_types:
+  - pre-commit
+
+repos:
+  - repo: meta
+    hooks:
+      - id: check-hooks-apply
+      - id: check-useless-excludes
+
+  - repo: builtin
+    hooks:
+      - id: check-added-large-files
+        args:
+          - --maxkb=500
+      - id: check-case-conflict
+      - id: check-illegal-windows-names
+      - id: check-merge-conflict
+        args:
+          - --assume-in-merge
+      - id: check-json
+        exclude: ^\.github/renovate\.json$
+      - id: check-jsonc
+        files: ^\.github/renovate\.json$
+        types:
+          - json
+      - id: check-toml
+      - id: check-yaml
+      - id: destroyed-symlinks
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: fix-byte-order-marker
+      - id: mixed-line-ending
+        args:
+          - --fix=lf
+      - id: trailing-whitespace
+        args:
+          - --markdown-linebreak-ext=md
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: file-contents-sorter
+        files: ^(build/(apt|pgxn)-packages\.txt|tests/baseline/pg\d+\.txt)$
+
+  - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+    rev: 3.11.1
+    hooks:
+      - id: editorconfig-checker
+        alias: ec
+
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.52.0
+    hooks:
+      - id: typos
+        # Report only: --write-changes "corrects" domain words such as MobilityDB's dateset.
+        args:
+          - --force-exclude
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: python-check-blanket-noqa
+      - id: python-check-blanket-type-ignore
+      - id: python-use-type-annotations
+      - id: text-unicode-replacement-char
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.13.7
+    hooks:
+      - id: uv-lock
+
+  - repo: https://github.com/tox-dev/pyproject-fmt
+    rev: v2.30.6
+    hooks:
+      - id: pyproject-fmt
+
+  # The other TOML files; pyproject.toml belongs to pyproject-fmt.
+  - repo: https://github.com/ComPWA/taplo-pre-commit
+    rev: v0.9.3
+    hooks:
+      - id: taplo-format
+        exclude: ^pyproject\.toml$
+      - id: taplo-lint
+        exclude: ^pyproject\.toml$
+        # No schema catalogs: none of these files has a schema, and fetching it needs the network.
+        args: []
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.4
+    hooks:
+      - id: ruff-check
+        args:
+          - --fix
+      - id: ruff-format
+
+  - repo: https://github.com/jsh9/pydoclint
+    rev: 0.12.0
+    hooks:
+      - id: pydoclint
+        # Test functions get a summary docstring; their arguments are pytest fixtures.
+        exclude: ^tests/test_[^/]*\.py$
+
+  - repo: local
+    hooks:
+      - id: ty
+        name: ty check
+        entry: uv run --exact ty check
+        language: system
+        pass_filenames: false
+        require_serial: true
+        types_or:
+          - python
+          - pyi
+
+      - id: render-readme
+        name: README extension table is up to date
+        entry: uv run --exact python -m scripts.render_readme --check
+        language: system
+        pass_filenames: false
+        files: ^(extensions\.toml|docker-bake\.hcl|README\.md|scripts/(manifest|render_readme)\.py)$
+
+      - id: static-tests
+        name: static tests (manifest, preload registry, baselines)
+        entry: uv run --exact pytest --quiet tests/test_manifest.py
+        language: system
+        pass_filenames: false
+        files: ^(extensions\.toml|docker-bake\.hcl|image/preload-libraries\.txt|tests/baseline/.*|scripts/manifest\.py|tests/test_manifest\.py)$
+
+  - repo: https://github.com/sqlfluff/sqlfluff
+    rev: 4.5.0
+    hooks:
+      # Configured in pyproject.toml. The PoWA setup is a psql script (\c meta-commands) that
+      # the image and its users run by path, so it stays as upstream wrote it.
+      - id: sqlfluff-fix
+        exclude: ^image/powa/
+      - id: sqlfluff-lint
+        exclude: ^image/powa/
+
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 1.0.0
+    hooks:
+      - id: mdformat
+        additional_dependencies:
+          - mdformat-gfm==1.0.0
+
+  - repo: https://github.com/renovatebot/pre-commit-hooks
+    rev: 44.224.2
+    hooks:
+      - id: renovate-config-validator
+        args:
+          - --strict
+
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.12
+    hooks:
+      - id: actionlint
+        language: golang
+        additional_dependencies:
+          - github.com/wasilibs/go-shellcheck/cmd/shellcheck@v0.11.1
+
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: v1.32.0
+    hooks:
+      - id: zizmor
+
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.39.0
+    hooks:
+      - id: check-compose-spec
+
+  - repo: https://github.com/AleksaC/hadolint-py
+    rev: v2.15.1
+    hooks:
+      - id: hadolint
+
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1
+    hooks:
+      - id: shellcheck
+        args:
+          - --external-sources
+          - --source-path=SCRIPTDIR
+
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.14.1-1
+    hooks:
+      - id: shfmt

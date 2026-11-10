@@ -10,9 +10,12 @@ indent_style = tab
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.{conf,html,xml,json,yaml,yml}]
+[*.py]
+indent_style = space
+
+[*.{conf,hcl,json,md,toml,yaml,yml}]
 indent_size = 2
 indent_style = space
 
-[*.{md,csv}]
+[*.md]
 trim_trailing_whitespace = false

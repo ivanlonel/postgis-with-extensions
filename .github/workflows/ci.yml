@@ -1,0 +1,232 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  schedule:
+    # postgis/postgis rebuilds its images on Mondays at 05:15 UTC.
+    - cron: "15 7 * * 1"
+  workflow_dispatch:
+    inputs:
+      postgis:
+        description: PostGIS major.minor to build (3.6 only for the one-off final 3.6 release)
+        type: choice
+        options:
+          - "3.7"
+          - "3.6"
+        default: "3.7"
+      publish:
+        description: Push the images (only honoured on master)
+        type: boolean
+        default: false
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.postgis || 'default' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  POSTGIS_VERSION: ${{ inputs.postgis || '3.7' }}
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Get source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Run prek
+        uses: j178/prek-action@44924fe9ef4a6f88253c4b6b1bf11c689d3ce53d # v3.1.0
+        with:
+          prek-version: "v0.5.10"
+          extra-args: --all-files --verbose
+
+      - name: Run the static tests
+        run: uv run --exact pytest tests/test_manifest.py
+
+      - name: Validate the compose example
+        working-directory: compose_example
+        run: |
+          mkdir -p secrets
+          for secret in postgres-passwd pgadmin-email pgadmin-passwd; do
+            echo placeholder > "secrets/$secret.txt"
+          done
+          docker compose config --quiet
+
+  matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      targets: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - name: Get source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: List the Bake targets
+        id: matrix
+        uses: docker/bake-action/subaction/matrix@59cb1203cd42bcefd40a1b6d73b589e48c86040e # v7.5.0
+        with:
+          target: default
+
+  build-test:
+    name: build-test (${{ matrix.target }})
+    needs:
+      - lint
+      - matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    permissions:
+      contents: read
+      packages: write # GHCR build cache, and the GHCR push of publishing runs
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.matrix.outputs.targets) }}
+    env:
+      CACHE_REF: ghcr.io/${{ github.repository }}:buildcache-${{ matrix.target }}-${{ inputs.postgis || '3.7' }}
+      PUBLISH: ${{ github.event_name == 'push' || github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish && github.ref == 'refs/heads/master') }}
+      TEST_IMAGE: postgis-with-extensions:test
+    steps:
+      - name: Get source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Compute the build arguments
+        id: args
+        run: echo "week=$(date -u +%G-W%V)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build
+        uses: docker/bake-action@59cb1203cd42bcefd40a1b6d73b589e48c86040e # v7.5.0
+        env:
+          APT_CACHE_BUST: ${{ steps.args.outputs.week }}
+          REVISION: ${{ github.sha }}
+        with:
+          source: .
+          targets: ${{ matrix.target }}
+          load: true
+          set: |
+            ${{ matrix.target }}.tags=${{ env.TEST_IMAGE }}
+            ${{ matrix.target }}.cache-from=type=registry,ref=${{ env.CACHE_REF }}
+            ${{ matrix.target }}.cache-to=type=registry,ref=${{ env.CACHE_REF }},mode=max,ignore-error=true
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: false
+
+      - name: Test
+        env:
+          TARGET: ${{ matrix.target }}
+          STRICT_DRIFT: ${{ github.event_name == 'pull_request' }}
+        run: |
+          args=(--image "$TEST_IMAGE" --junitxml=junit.xml)
+          # Upgrade from the image currently published under this tag, if there is one yet;
+          # otherwise the test falls back to the pre-rewrite image pinned in tests/upgrade.
+          previous="ghcr.io/${GITHUB_REPOSITORY}:${TARGET#pg}-${POSTGIS_VERSION}"
+          if docker buildx imagetools inspect "$previous" > /dev/null 2>&1; then
+            args+=(--old-image "$previous")
+          fi
+          if [[ "$STRICT_DRIFT" == true ]]; then
+            args+=(--strict-drift)
+          fi
+          uv run --exact pytest "${args[@]}"
+
+      - name: Upload the test report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: junit-${{ matrix.target }}-${{ env.POSTGIS_VERSION }}
+          path: junit.xml
+
+      - name: Log in to Docker Hub
+        if: env.PUBLISH == 'true'
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push
+        if: env.PUBLISH == 'true'
+        uses: docker/bake-action@59cb1203cd42bcefd40a1b6d73b589e48c86040e # v7.5.0
+        env:
+          APT_CACHE_BUST: ${{ steps.args.outputs.week }}
+          REVISION: ${{ github.sha }}
+        with:
+          source: .
+          targets: ${{ matrix.target }}
+          push: true
+          provenance: mode=max
+          sbom: true
+          set: |
+            ${{ matrix.target }}.cache-from=type=registry,ref=${{ env.CACHE_REF }}
+
+  dockerhub-description:
+    needs: build-test
+    if: github.event_name == 'push' || github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Get source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Update the Docker Hub description
+        uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa # v5.0.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          repository: ${{ github.repository }}
+
+  upstream-drift:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Get source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Compare the build matrix with upstream
+        run: uv run --exact python -m scripts.check_upstream
