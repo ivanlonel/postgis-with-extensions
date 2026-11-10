@@ -191,7 +191,7 @@ preload = "pg_net"
 name = "pg_partman"
 url = "https://github.com/pgpartman/pg_partman"
 preload = "pg_partman_bgw"
-note = "Preload only for the background maintenance worker"
+note = "Preload only for the background maintenance worker, which runs as `pg_partman_bgw.role` (default `partman_maintainer`, a role you create)"
 
 [[extension]]
 name = "pg_permissions"
@@ -270,8 +270,9 @@ preload = "pg_stat_monitor"
 [[extension]]
 name = "pg_stat_plans"
 url = "https://github.com/pganalyze/pg_stat_plans"
-pg = ">=16"
+pg = ">=18"
 preload = "pg_stat_plans"
+note = "Not on 16/17: there, background workers that run queries (PoWA, TimescaleDB jobs) crash with it"
 
 [[extension]]
 name = "pg_statviz"

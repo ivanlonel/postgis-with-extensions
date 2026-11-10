@@ -150,7 +150,7 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [pg_jobmon](https://github.com/omniti-labs/pg_jobmon) | all |  |  |
 | [pg_jsonschema](https://github.com/supabase/pg_jsonschema) | all |  |  |
 | [pg_net](https://github.com/supabase/pg_net) | all | `pg_net` |  |
-| [pg_partman](https://github.com/pgpartman/pg_partman) | all | `pg_partman_bgw` | Preload only for the background maintenance worker |
+| [pg_partman](https://github.com/pgpartman/pg_partman) | all | `pg_partman_bgw` | Preload only for the background maintenance worker, which runs as `pg_partman_bgw.role` (default `partman_maintainer`, a role you create) |
 | [pg_permissions](https://github.com/cybertec-postgresql/pg_permissions) | all |  |  |
 | [pg_profile](https://github.com/zubkov-andrei/pg_profile) | all |  |  |
 | [pg_pwhash](https://github.com/cybertec-postgresql/pg_pwhash) | all |  |  |
@@ -167,7 +167,7 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [pg_stat_kcache](https://github.com/powa-team/pg_stat_kcache) | all | `pg_stat_kcache` |  |
 | [pg_stat_log](https://github.com/fabriziomello/pg_stat_log) | 18+ | `pg_stat_log` |  |
 | [pg_stat_monitor](https://github.com/percona/pg_stat_monitor) | all | `pg_stat_monitor` |  |
-| [pg_stat_plans](https://github.com/pganalyze/pg_stat_plans) | 16+ | `pg_stat_plans` |  |
+| [pg_stat_plans](https://github.com/pganalyze/pg_stat_plans) | 18+ | `pg_stat_plans` | Not on 16/17: there, background workers that run queries (PoWA, TimescaleDB jobs) crash with it |
 | [pg_statviz](https://github.com/vyruss/pg_statviz) | all |  |  |
 | [pg_textsearch](https://github.com/timescale/pg_textsearch) | 17+ | `pg_textsearch` |  |
 | [pg_tle](https://github.com/aws/pg_tle) | all | `pg_tle` |  |
