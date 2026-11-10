@@ -2,9 +2,10 @@
 -- database: cron
 -- pg: >=16
 -- https://github.com/CrunchyData/pg_incremental
--- Pipelines are pg_cron jobs, in pg_cron's database. Created, a pipeline first processes the rows
--- already there.
-CREATE EXTENSION IF NOT EXISTS pg_incremental CASCADE;  -- requires pg_cron
+-- Pipelines are pg_cron jobs, in pg_cron's database, where pg_cron's extension must exist (the
+-- control file doesn't require it). Created, a pipeline first processes the rows already there.
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+CREATE EXTENSION IF NOT EXISTS pg_incremental;
 
 CREATE TABLE pwe_events (event_id bigserial PRIMARY KEY, kind text NOT NULL);
 INSERT INTO pwe_events (kind)
