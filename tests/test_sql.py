@@ -10,10 +10,13 @@ restrict where a script runs:
 
 ``-- preload: <library>[, <library>...]``
     Libraries the server must preload (the ones they require come along).
+``-- conflicts: <library>[, <library>...]``
+    Skip on servers preloading any of these, which keep the extension from working.
 ``-- pg: <constraints>``
     Skip unless the PostgreSQL major matches, e.g. ``<=17``.
-``-- database: cron``
-    Run in pg_cron's database instead of a scratch one.
+``-- database: cron|partman|net``
+    Run in the database a background worker uses (pg_cron's, pg_partman's or pg_net's) instead
+    of a scratch one.
 
 Scripts can fetch the files of ``tests/sql/data`` from ``http://127.0.0.1:8000/``; the scripts'
 directory is mounted at ``/tests/sql``, so server-side functions can read it too.
@@ -36,10 +39,21 @@ if TYPE_CHECKING:
     from tests._docker import Image, Server
     from tests.conftest import ServerPool
 
-_DIRECTIVE: Final = re.compile(r"--\s*(?P<key>preload|pg|database):\s*(?P<value>.*?)\s*")
+_DIRECTIVE: Final = re.compile(r"--\s*(?P<key>preload|conflicts|pg|database):\s*(?P<value>.*?)\s*")
 
 HELPERS: Final = "/tests/sql/lib/helpers.sql"
 """Functions installed in every database a script runs in."""
+
+WORKER_DATABASES: Final = {
+    "cron": "cron.database_name",
+    "partman": "pg_partman_bgw.dbname",
+    "net": "pg_net.database_name",
+}
+"""Values of the ``database`` directive, mapped to the setting naming that database."""
+
+
+def _libraries(value: str | None) -> frozenset[str]:
+    return frozenset(filter(None, re.split(r"[,\s]+", value or "")))
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -52,11 +66,14 @@ class SqlScript:
     preload: frozenset[str]
     """Libraries the server must preload."""
 
+    conflicts: frozenset[str]
+    """Preloaded libraries that keep the extension from working."""
+
     majors: MajorRange
     """PostgreSQL majors to run on."""
 
-    in_cron_database: bool
-    """Whether to run in pg_cron's database instead of a scratch one."""
+    database_setting: str | None
+    """Setting naming the database to run in, or ``None`` for a scratch database."""
 
     @classmethod
     def parse(cls, path: Path) -> Self:
@@ -74,14 +91,15 @@ class SqlScript:
                 break
             directives[match["key"]] = match["value"]
         database = directives.get("database")
-        if database not in {None, "cron"}:
+        if database is not None and database not in WORKER_DATABASES:
             msg = f"{path.name}: unsupported database directive {database!r}"
             raise ValueError(msg)
         return cls(
             path=path,
-            preload=frozenset(filter(None, re.split(r"[,\s]+", directives.get("preload", "")))),
+            preload=_libraries(directives.get("preload")),
+            conflicts=_libraries(directives.get("conflicts")),
             majors=MajorRange.parse(directives.get("pg")),
-            in_cron_database=database == "cron",
+            database_setting=WORKER_DATABASES[database] if database else None,
         )
 
 
@@ -118,8 +136,10 @@ def test_sql_script(
         server = server_pool.get(script.preload)
     else:
         server = request.getfixturevalue("default_server")
-    if script.in_cron_database:
-        _run(server, script, server.setting("cron.database_name"))
+    if conflicting := sorted(script.conflicts & set(server.preloaded())):
+        pytest.skip(f"doesn't work alongside {', '.join(conflicting)}")
+    if script.database_setting is not None:
+        _run(server, script, server.setting(script.database_setting))
     else:
         with server.database() as database:
             _run(server, script, database)
