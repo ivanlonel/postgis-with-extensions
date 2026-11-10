@@ -35,6 +35,8 @@ RUN apt-get update \
         libsqlite3-dev \
         libssl-dev \
         liburiparser-dev \
+        libxml2-dev \
+        libxslt1-dev \
         libzstd-dev \
         pkgconf \
         "postgresql-server-dev-${PG_MAJOR}" \
@@ -72,7 +74,9 @@ RUN while read -r dist version; do \
 
 FROM build-base AS github
 # Make variables in the list work around upstream issues: pg_tracing's PG_CFLAGS= drops its -Werror,
-# which trixie's stricter libcurl headers trip.
+# which trixie's stricter libcurl headers trip. decoder_raw follows PostgreSQL's development branch
+# without version checks, so it's pinned (without a branch, which Renovate would follow) to the
+# last commits building on 14-16 and on 17-18.
 COPY --chmod=0755 build/build-github.sh /usr/local/bin/build-github
 COPY build/github-packages.txt /tmp/github-packages.txt
 RUN build-github /tmp/github-packages.txt
