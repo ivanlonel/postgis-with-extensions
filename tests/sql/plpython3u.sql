@@ -7,22 +7,22 @@ CREATE EXTENSION jsonb_plpython3u;
 CREATE FUNCTION py_version() RETURNS text
 LANGUAGE plpython3u
 AS $$
-	import sys
-	return sys.version
+    import sys
+    return sys.version
 $$;
 
 CREATE FUNCTION py_query() RETURNS integer
 LANGUAGE plpython3u
 AS $$
-	plan = plpy.prepare("SELECT $1 + $2 AS total", ["integer", "integer"])
-	with plpy.subtransaction():
-		return plpy.execute(plan, [40, 2])[0]["total"]
+    plan = plpy.prepare("SELECT $1 + $2 AS total", ["integer", "integer"])
+    with plpy.subtransaction():
+        return plpy.execute(plan, [40, 2])[0]["total"]
 $$;
 
 CREATE FUNCTION py_series(n integer) RETURNS SETOF integer
 LANGUAGE plpython3u
 AS $$
-	return range(n)
+    return range(n)
 $$;
 
 -- One function per transform: hstore and ltree values arrive as Python dicts and lists.
@@ -30,29 +30,29 @@ CREATE FUNCTION py_hstore_keys(value hstore) RETURNS integer
 LANGUAGE plpython3u
 TRANSFORM FOR TYPE hstore
 AS $$
-	return len(value)
+    return len(value)
 $$;
 
 CREATE FUNCTION py_ltree_depth(value ltree) RETURNS integer
 LANGUAGE plpython3u
 TRANSFORM FOR TYPE ltree
 AS $$
-	return len(value)
+    return len(value)
 $$;
 
 CREATE FUNCTION py_jsonb_keys(value jsonb) RETURNS integer
 LANGUAGE plpython3u
 TRANSFORM FOR TYPE jsonb
 AS $$
-	return len(value)
+    return len(value)
 $$;
 
 -- Untrusted Python can use the standard library.
 CREATE FUNCTION py_sha256(value text) RETURNS text
 LANGUAGE plpython3u
 AS $$
-	import hashlib
-	return hashlib.sha256(value.encode()).hexdigest()
+    import hashlib
+    return hashlib.sha256(value.encode()).hexdigest()
 $$;
 
 SELECT plan(7);

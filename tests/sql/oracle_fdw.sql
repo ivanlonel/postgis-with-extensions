@@ -8,8 +8,8 @@ OPTIONS (dbserver '//127.0.0.1:1521/ORADB');
 CREATE USER MAPPING FOR current_user SERVER oradb OPTIONS (user 'orauser', password 'secret');
 
 CREATE FOREIGN TABLE oratab (
-	id integer OPTIONS (key 'true') NOT NULL,
-	title text OPTIONS (strip_zeros 'true')
+    id integer OPTIONS (key 'true') NOT NULL,
+    title text OPTIONS (strip_zeros 'true')
 ) SERVER oradb OPTIONS (schema 'ORAUSER', table 'ORATAB');
 
 SELECT plan(2);

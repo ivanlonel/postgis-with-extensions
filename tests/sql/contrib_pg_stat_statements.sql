@@ -10,12 +10,12 @@ WHERE i > 70;
 
 SELECT plan(1);
 SELECT cmp_ok(
-	(
-		SELECT sum(calls) FROM pg_stat_statements
-		WHERE query LIKE 'SELECT count(*) FROM pwe_tracked%'
-	),
-	'>=',
-	2::numeric,
-	'statements are normalized and counted'
+    (
+        SELECT sum(calls) FROM pg_stat_statements
+        WHERE query LIKE 'SELECT count(*) FROM pwe_tracked%'
+    ),
+    '>=',
+    2::numeric,
+    'statements are normalized and counted'
 );
 SELECT * FROM finish(TRUE);

@@ -4,22 +4,22 @@ CREATE EXTENSION plluau;
 CREATE EXTENSION hstore_pllua CASCADE;  -- requires hstore
 
 CREATE FUNCTION lua_add(a integer, b integer) RETURNS integer LANGUAGE pllua AS $$
-	return a + b
+    return a + b
 $$;
 
 CREATE FUNCTION lua_query() RETURNS integer LANGUAGE pllua AS $$
-	return spi.execute("SELECT 40 + 2 AS total")[1].total
+    return spi.execute("SELECT 40 + 2 AS total")[1].total
 $$;
 
 CREATE FUNCTION lua_hstore_get(value hstore, key text) RETURNS text LANGUAGE pllua
 TRANSFORM FOR TYPE hstore
 AS $$
-	return value[key]
+    return value[key]
 $$;
 
 -- Untrusted Lua can reach the environment.
 CREATE FUNCTION lua_getenv(name text) RETURNS text LANGUAGE plluau AS $$
-	return os.getenv(name)
+    return os.getenv(name)
 $$;
 
 SELECT plan(4);

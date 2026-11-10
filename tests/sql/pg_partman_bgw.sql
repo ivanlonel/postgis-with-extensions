@@ -22,11 +22,11 @@ SELECT pg_reload_conf();
 
 SELECT plan(1);
 SELECT ok(
-	wait_until($$
-		SELECT count(*) >= (SELECT partitions + 4 FROM initial)
-		FROM partman.show_partitions('public.bgw_events')
-	$$),
-	'the background worker runs maintenance'
+    wait_until($$
+        SELECT count(*) >= (SELECT partitions + 4 FROM initial)
+        FROM partman.show_partitions('public.bgw_events')
+    $$),
+    'the background worker runs maintenance'
 );
 
 ALTER SYSTEM RESET pg_partman_bgw.interval;  -- noqa: PRS

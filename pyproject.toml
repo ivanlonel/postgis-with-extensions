@@ -84,7 +84,7 @@ core.exclude_rules = [
   "RF05", # Special characters in identifiers: "$user" in search_path
   "ST07", # USING joins are idiomatic PostgreSQL
 ]
-indentation.indent_unit = "tab"
+indentation.indent_unit = "space"
 indentation.tab_space_size = 4
 rules.capitalisation.keywords.capitalisation_policy = "upper"
 rules.capitalisation.literals.capitalisation_policy = "upper"

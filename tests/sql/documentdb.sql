@@ -17,23 +17,23 @@ CREATE TEMPORARY TABLE stored AS
 SELECT document FROM documentdb_api.collection('smoke', 'patients');
 CREATE TEMPORARY TABLE found AS
 SELECT document FROM documentdb_api_catalog.bson_aggregation_find(
-	'smoke', '{"find": "patients", "filter": {"age": {"$gt": 40}}}'
+    'smoke', '{"find": "patients", "filter": {"age": {"$gt": 40}}}'
 );
 CREATE TEMPORARY TABLE grouped AS
 SELECT document FROM documentdb_api_catalog.bson_aggregation_pipeline(
-	'smoke', '{"aggregate": "patients", "pipeline": [{"$group": {"_id": "$age"}}], "cursor": {}}'
+    'smoke', '{"aggregate": "patients", "pipeline": [{"$group": {"_id": "$age"}}], "cursor": {}}'
 );
 
 SELECT documentdb_api.update(
-	'smoke', '{"update": "patients", "updates": [{"q": {"patient_id": "P001"}, "u": {"$set": {"age": 31}}}]}'
+    'smoke', '{"update": "patients", "updates": [{"q": {"patient_id": "P001"}, "u": {"$set": {"age": 31}}}]}'
 );
 CREATE TEMPORARY TABLE updated AS
 SELECT document FROM documentdb_api_catalog.bson_aggregation_find(
-	'smoke', '{"find": "patients", "filter": {"age": 31}}'
+    'smoke', '{"find": "patients", "filter": {"age": 31}}'
 );
 
 SELECT documentdb_api.delete(
-	'smoke', '{"delete": "patients", "deletes": [{"q": {"patient_id": "P002"}, "limit": 1}]}'
+    'smoke', '{"delete": "patients", "deletes": [{"q": {"patient_id": "P002"}, "limit": 1}]}'
 );
 CREATE TEMPORARY TABLE remaining AS
 SELECT document FROM documentdb_api.collection('smoke', 'patients');

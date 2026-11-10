@@ -9,19 +9,19 @@ CREATE EXTENSION dblink;
 
 CREATE TABLE pwe_audited (id integer);
 SELECT n FROM dblink(
-	format('dbname=%s', current_database()),
-	$$SET pgaudit.log = 'read, write'; INSERT INTO pwe_audited VALUES (1); SELECT count(*) FROM pwe_audited$$
+    format('dbname=%s', current_database()),
+    $$SET pgaudit.log = 'read, write'; INSERT INTO pwe_audited VALUES (1); SELECT count(*) FROM pwe_audited$$
 ) AS t (n bigint);
 SELECT n FROM dblink(
-	format('dbname=%s', current_database()),
-	'SET pgaudit.log = none; SELECT count(*) FROM pwe_audited WHERE id = 42'
+    format('dbname=%s', current_database()),
+    'SET pgaudit.log = none; SELECT count(*) FROM pwe_audited WHERE id = 42'
 ) AS t (n bigint);
 
 -- The audit files: CSV, one record per line.
 CREATE FUNCTION audit_log() RETURNS text LANGUAGE sql AS $$
-	SELECT coalesce(string_agg(pg_read_file(current_setting('pgaudit.log_directory') || '/' || f), E'\n'), '')
-	FROM pg_ls_dir(current_setting('pgaudit.log_directory'), TRUE, FALSE) AS f
-	WHERE f LIKE 'audit-%'
+    SELECT coalesce(string_agg(pg_read_file(current_setting('pgaudit.log_directory') || '/' || f), E'\n'), '')
+    FROM pg_ls_dir(current_setting('pgaudit.log_directory'), TRUE, FALSE) AS f
+    WHERE f LIKE 'audit-%'
 $$;
 SELECT wait_until($$SELECT audit_log() ~ 'pwe_audited'$$, '10 seconds');
 

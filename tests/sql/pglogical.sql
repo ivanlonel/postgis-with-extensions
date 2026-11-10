@@ -13,29 +13,29 @@ SELECT pglogical.replication_set_add_table('default', 'replicated', synchronize_
 -- The subscriber, set up through dblink (dblink_exec takes no statement returning rows).
 CREATE DATABASE pwe_pglogical_subscriber;
 CREATE FUNCTION on_subscriber(statement text) RETURNS text LANGUAGE sql AS $$
-	SELECT r FROM dblink('dbname=pwe_pglogical_subscriber', statement) AS t (r text)
+    SELECT r FROM dblink('dbname=pwe_pglogical_subscriber', statement) AS t (r text)
 $$;
 SELECT dblink_exec('dbname=pwe_pglogical_subscriber', 'CREATE EXTENSION pglogical');
 SELECT dblink_exec('dbname=pwe_pglogical_subscriber', 'CREATE TABLE replicated (id integer PRIMARY KEY, v text)');
 SELECT on_subscriber(
-	$$SELECT pglogical.create_node(node_name := 'pwe_subscriber', dsn := 'dbname=pwe_pglogical_subscriber')::text$$
+    $$SELECT pglogical.create_node(node_name := 'pwe_subscriber', dsn := 'dbname=pwe_pglogical_subscriber')::text$$
 );
 SELECT on_subscriber(
-	format(
-		$$SELECT pglogical.create_subscription(subscription_name := 'pwe_subscription', provider_dsn := %L)::text$$,
-		format('dbname=%s', current_database())
-	)
+    format(
+        $$SELECT pglogical.create_subscription(subscription_name := 'pwe_subscription', provider_dsn := %L)::text$$,
+        format('dbname=%s', current_database())
+    )
 );
 
 SELECT plan(2);
 SELECT ok(
-	wait_until($$SELECT on_subscriber('SELECT count(*)::text FROM replicated WHERE id = 1') = '1'$$),
-	'existing rows are copied to the subscriber'
+    wait_until($$SELECT on_subscriber('SELECT count(*)::text FROM replicated WHERE id = 1') = '1'$$),
+    'existing rows are copied to the subscriber'
 );
 INSERT INTO replicated VALUES (2, 'after the subscription');
 SELECT ok(
-	wait_until($$SELECT on_subscriber('SELECT count(*)::text FROM replicated WHERE id = 2') = '1'$$),
-	'new rows are replicated'
+    wait_until($$SELECT on_subscriber('SELECT count(*)::text FROM replicated WHERE id = 2') = '1'$$),
+    'new rows are replicated'
 );
 
 -- Clean up first: the subscription's slot would keep this database from being dropped.

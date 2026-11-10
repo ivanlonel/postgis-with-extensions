@@ -7,11 +7,11 @@ INSERT INTO parray_gin_test_table (val) VALUES (ARRAY['postgres', 'postgis']), (
 
 SELECT plan(1);
 SELECT is(
-	(
-		SELECT count(*) FROM parray_gin_test_table
-		WHERE val @> ARRAY['postgis']
-	),
-	1::bigint,
-	'arrays are matched'
+    (
+        SELECT count(*) FROM parray_gin_test_table
+        WHERE val @> ARRAY['postgis']
+    ),
+    1::bigint,
+    'arrays are matched'
 );
 SELECT * FROM finish(TRUE);

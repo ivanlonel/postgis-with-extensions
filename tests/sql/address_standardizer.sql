@@ -4,7 +4,7 @@ CREATE EXTENSION address_standardizer_data_us;
 
 CREATE TEMPORARY TABLE standardized AS
 SELECT * FROM standardize_address(
-	'us_lex', 'us_gaz', 'us_rules', 'One Devonshire Place, PH 301', 'Boston, MA 02109'
+    'us_lex', 'us_gaz', 'us_rules', 'One Devonshire Place, PH 301', 'Boston, MA 02109'
 );
 CREATE TEMPORARY TABLE parsed AS
 SELECT * FROM parse_address('1 Devonshire Place, Boston, MA 02109-1234');

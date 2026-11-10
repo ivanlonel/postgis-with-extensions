@@ -2,5 +2,5 @@
 CREATE EXTENSION pg_repack;
 
 SELECT
-	repack.version(),
-	repack.version_sql();
+    repack.version(),
+    repack.version_sql();

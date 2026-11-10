@@ -2,10 +2,10 @@
 CREATE EXTENSION table_log;
 
 CREATE TABLE public.drop_test (
-	id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-	col1 text NOT NULL DEFAULT '',
-	col2 text NOT NULL DEFAULT '',
-	col3 text NOT NULL DEFAULT ''
+    id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    col1 text NOT NULL DEFAULT '',
+    col2 text NOT NULL DEFAULT '',
+    col3 text NOT NULL DEFAULT ''
 );
 
 -- Level 5: log old and new rows, with a sequence-numbered id and the user.
@@ -26,19 +26,19 @@ WHERE col1 = 'a2';
 SELECT plan(3);
 SELECT is((SELECT count(*) FROM drop_test_log), 5::bigint, 'every change is logged');
 SELECT is(
-	(
-		SELECT count(*) FROM drop_test_log
-		WHERE trigger_mode = 'UPDATE'
-	),
-	2::bigint,
-	'updates log the old and the new row'
+    (
+        SELECT count(*) FROM drop_test_log
+        WHERE trigger_mode = 'UPDATE'
+    ),
+    2::bigint,
+    'updates log the old and the new row'
 );
 SELECT is(
-	(
-		SELECT col1 FROM drop_test_log
-		WHERE trigger_mode = 'DELETE'
-	),
-	'a2',
-	'deletions keep the deleted values'
+    (
+        SELECT col1 FROM drop_test_log
+        WHERE trigger_mode = 'DELETE'
+    ),
+    'a2',
+    'deletions keep the deleted values'
 );
 SELECT * FROM finish(TRUE);

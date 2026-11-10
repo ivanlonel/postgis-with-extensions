@@ -17,17 +17,17 @@ SELECT pgq.finish_batch((SELECT id FROM batch));
 SELECT plan(4);
 SELECT isnt((SELECT id FROM batch), NULL, 'ticks make batches');
 SELECT is((
-	SELECT ev_data FROM events
-	WHERE ev_type = 'greeting'
+    SELECT ev_data FROM events
+    WHERE ev_type = 'greeting'
 ), 'hello', 'batches carry the events');
 SELECT is(
-	(SELECT pending_events FROM pgq.get_consumer_info('pwe_queue', 'pwe_consumer')),
-	0::bigint,
-	'finished batches are consumed'
+    (SELECT pending_events FROM pgq.get_consumer_info('pwe_queue', 'pwe_consumer')),
+    0::bigint,
+    'finished batches are consumed'
 );
 SELECT is_empty(
-	$$SELECT * FROM pgq_node.get_queue_locations('pwe_queue')$$,
-	'plain queues have no cascade locations'
+    $$SELECT * FROM pgq_node.get_queue_locations('pwe_queue')$$,
+    'plain queues have no cascade locations'
 );
 SELECT * FROM finish(TRUE);
 

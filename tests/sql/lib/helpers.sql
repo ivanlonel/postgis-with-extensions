@@ -7,18 +7,18 @@ RETURNS boolean
 LANGUAGE plpgsql
 AS $$
 DECLARE
-	deadline timestamptz := clock_timestamp() + timeout;
-	satisfied boolean;
+    deadline timestamptz := clock_timestamp() + timeout;
+    satisfied boolean;
 BEGIN
-	LOOP
-		EXECUTE condition INTO satisfied;
-		IF satisfied THEN
-			RETURN TRUE;
-		ELSIF clock_timestamp() > deadline THEN
-			RETURN FALSE;
-		END IF;
-		PERFORM pg_sleep(0.2);
-	END LOOP;
+    LOOP
+        EXECUTE condition INTO satisfied;
+        IF satisfied THEN
+            RETURN TRUE;
+        ELSIF clock_timestamp() > deadline THEN
+            RETURN FALSE;
+        END IF;
+        PERFORM pg_sleep(0.2);
+    END LOOP;
 END;
 $$;
 
@@ -28,13 +28,13 @@ RETURNS text
 LANGUAGE plpgsql
 AS $$
 DECLARE
-	detail text;
+    detail text;
 BEGIN
-	EXECUTE statement;
-	RETURN NULL;
+    EXECUTE statement;
+    RETURN NULL;
 EXCEPTION WHEN OTHERS THEN
-	GET STACKED DIAGNOSTICS detail = PG_EXCEPTION_DETAIL;
-	RETURN concat_ws(E'\n', SQLERRM, nullif(detail, ''));
+    GET STACKED DIAGNOSTICS detail = PG_EXCEPTION_DETAIL;
+    RETURN concat_ws(E'\n', SQLERRM, nullif(detail, ''));
 END;
 $$;
 
@@ -44,12 +44,12 @@ RETURNS text
 LANGUAGE plpgsql
 AS $$
 DECLARE
-	line text;
-	plan text := '';
+    line text;
+    plan text := '';
 BEGIN
-	FOR line IN EXECUTE 'EXPLAIN (COSTS OFF) ' || query LOOP
-		plan := plan || line || E'\n';
-	END LOOP;
-	RETURN plan;
+    FOR line IN EXECUTE 'EXPLAIN (COSTS OFF) ' || query LOOP
+        plan := plan || line || E'\n';
+    END LOOP;
+    RETURN plan;
 END;
 $$;

@@ -8,8 +8,8 @@ OPTIONS (host '127.0.0.1', port '3306');
 CREATE USER MAPPING FOR current_user SERVER mysql_server OPTIONS (username 'app', password 'secret');
 
 CREATE FOREIGN TABLE mysql_table (
-	id integer,
-	title text
+    id integer,
+    title text
 ) SERVER mysql_server OPTIONS (dbname 'db', table_name 'the_table');
 
 SELECT plan(2);

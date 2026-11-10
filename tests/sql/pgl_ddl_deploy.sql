@@ -19,17 +19,17 @@ CREATE SCHEMA sad;
 CREATE TABLE sad.customers (id integer PRIMARY KEY);
 
 SELECT ok(
-	EXISTS (
-		SELECT FROM pgl_ddl_deploy.events
-		WHERE ddl_sql_raw LIKE '%happy.customers%'
-	),
-	'DDL in included schemas is captured'
+    EXISTS (
+        SELECT FROM pgl_ddl_deploy.events
+        WHERE ddl_sql_raw LIKE '%happy.customers%'
+    ),
+    'DDL in included schemas is captured'
 );
 SELECT ok(
-	NOT EXISTS (
-		SELECT FROM pgl_ddl_deploy.events
-		WHERE ddl_sql_raw LIKE '%sad.customers%'
-	),
-	'DDL elsewhere is ignored'
+    NOT EXISTS (
+        SELECT FROM pgl_ddl_deploy.events
+        WHERE ddl_sql_raw LIKE '%sad.customers%'
+    ),
+    'DDL elsewhere is ignored'
 );
 SELECT * FROM finish(TRUE);

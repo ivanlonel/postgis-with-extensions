@@ -11,22 +11,22 @@ SHELL ["/bin/bash", "-Eeuo", "pipefail", "-c"]
 
 FROM base AS build-base
 RUN apt-get update \
-	&& apt-get install -y --no-install-recommends \
-		bison \
-		build-essential \
-		ca-certificates \
-		cmake \
-		curl \
-		flex \
-		libcurl4-openssl-dev \
-		libicu-dev \
-		libkrb5-dev \
-		libsqlite3-dev \
-		libssl-dev \
-		"postgresql-server-dev-${PG_MAJOR}" \
-		python3 \
-		unzip \
-	&& rm -rf /var/lib/apt/lists/*
+    && apt-get install -y --no-install-recommends \
+        bison \
+        build-essential \
+        ca-certificates \
+        cmake \
+        curl \
+        flex \
+        libcurl4-openssl-dev \
+        libicu-dev \
+        libkrb5-dev \
+        libsqlite3-dev \
+        libssl-dev \
+        "postgresql-server-dev-${PG_MAJOR}" \
+        python3 \
+        unzip \
+    && rm -rf /var/lib/apt/lists/*
 COPY --chmod=0755 build/build-pgxs.sh /usr/local/bin/build-pgxs
 
 
@@ -36,23 +36,23 @@ FROM build-base AS timescaledb
 ARG TIMESCALEDB_VERSION=2.31.0
 WORKDIR /src/timescaledb
 RUN curl --fail --silent --show-error --location --retry 3 --output /tmp/timescaledb.tar.gz \
-		"https://github.com/timescale/timescaledb/archive/refs/tags/${TIMESCALEDB_VERSION}.tar.gz" \
-	&& tar -xzf /tmp/timescaledb.tar.gz --strip-components=1 \
-	&& ./bootstrap \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DREGRESS_CHECKS=OFF \
-		-DTAP_CHECKS=OFF \
-		-DWARNINGS_AS_ERRORS=OFF \
-	&& make -C build -j "$(nproc)" \
-	&& make -C build install DESTDIR=/out
+        "https://github.com/timescale/timescaledb/archive/refs/tags/${TIMESCALEDB_VERSION}.tar.gz" \
+    && tar -xzf /tmp/timescaledb.tar.gz --strip-components=1 \
+    && ./bootstrap \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DREGRESS_CHECKS=OFF \
+        -DTAP_CHECKS=OFF \
+        -DWARNINGS_AS_ERRORS=OFF \
+    && make -C build -j "$(nproc)" \
+    && make -C build install DESTDIR=/out
 
 
 FROM build-base AS pgxn
 COPY build/pgxn-packages.txt /tmp/pgxn-packages.txt
 RUN while read -r dist version; do \
-		case "$dist" in ''|'#'*) continue ;; esac; \
-		build-pgxs "https://api.pgxn.org/dist/${dist}/${version}/${dist}-${version}.zip" USE_PGXS=1; \
-	done < /tmp/pgxn-packages.txt
+        case "$dist" in ''|'#'*) continue ;; esac; \
+        build-pgxs "https://api.pgxn.org/dist/${dist}/${version}/${dist}-${version}.zip" USE_PGXS=1; \
+    done < /tmp/pgxn-packages.txt
 
 
 FROM build-base AS pguint
@@ -66,10 +66,10 @@ FROM build-base AS sqlite-fdw
 ARG SQLITE_FDW_VERSION=2.5.0
 # sqlite_fdw doesn't support PostgreSQL 18 yet.
 RUN if [ "$PG_MAJOR" -le 17 ]; then \
-		build-pgxs "https://github.com/pgspider/sqlite_fdw/archive/refs/tags/v${SQLITE_FDW_VERSION}.tar.gz" USE_PGXS=1; \
-	else \
-		mkdir -p /out; \
-	fi
+        build-pgxs "https://github.com/pgspider/sqlite_fdw/archive/refs/tags/v${SQLITE_FDW_VERSION}.tar.gz" USE_PGXS=1; \
+    else \
+        mkdir -p /out; \
+    fi
 
 
 FROM build-base AS pg-stat-monitor
@@ -107,10 +107,10 @@ FROM build-base AS pg-profile
 ARG PG_PROFILE_VERSION=4.16
 # The release tarball holds the ready-to-install control and SQL files.
 RUN extdir="/out$(pg_config --sharedir)/extension" \
-	&& mkdir -p "$extdir" \
-	&& curl --fail --silent --show-error --location --retry 3 --output /tmp/pg_profile.tar.gz \
-		"https://github.com/zubkov-andrei/pg_profile/releases/download/${PG_PROFILE_VERSION}/pg_profile--${PG_PROFILE_VERSION}.tar.gz" \
-	&& tar -xzf /tmp/pg_profile.tar.gz -C "$extdir"
+    && mkdir -p "$extdir" \
+    && curl --fail --silent --show-error --location --retry 3 --output /tmp/pg_profile.tar.gz \
+        "https://github.com/zubkov-andrei/pg_profile/releases/download/${PG_PROFILE_VERSION}/pg_profile--${PG_PROFILE_VERSION}.tar.gz" \
+    && tar -xzf /tmp/pg_profile.tar.gz -C "$extdir"
 
 
 FROM build-base AS vendor
@@ -135,8 +135,8 @@ ARG APT_CACHE_BUST=
 ARG DEFAULT_PRELOAD=
 
 RUN --mount=type=bind,source=build,target=/build \
-	--mount=type=bind,from=vendor,source=/debs,target=/debs \
-	bash /build/install-runtime.sh /build/apt-packages.txt /debs/*.deb
+    --mount=type=bind,from=vendor,source=/debs,target=/debs \
+    bash /build/install-runtime.sh /build/apt-packages.txt /debs/*.deb
 
 COPY --link --from=timescaledb /out/ /
 COPY --link --from=pgxn /out/ /

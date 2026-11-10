@@ -8,19 +8,19 @@ SELECT count(*) FROM pwe_monitored;
 
 SELECT plan(2);
 SELECT ok(
-	(
-		SELECT count(*) > 0 FROM pg_stat_monitor
-		WHERE query LIKE '%FROM pwe_monitored%'
-	),
-	'statements are tracked'
+    (
+        SELECT count(*) > 0 FROM pg_stat_monitor
+        WHERE query LIKE '%FROM pwe_monitored%'
+    ),
+    'statements are tracked'
 );
 SELECT cmp_ok(
-	(
-		SELECT sum(calls) FROM pg_stat_monitor
-		WHERE query LIKE 'SELECT count(*) FROM pwe_monitored%'
-	),
-	'>=',
-	2::numeric,
-	'calls are counted'
+    (
+        SELECT sum(calls) FROM pg_stat_monitor
+        WHERE query LIKE 'SELECT count(*) FROM pwe_monitored%'
+    ),
+    '>=',
+    2::numeric,
+    'calls are counted'
 );
 SELECT * FROM finish(TRUE);

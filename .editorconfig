@@ -6,16 +6,16 @@ root = true
 charset = utf-8
 end_of_line = lf
 indent_size = 4
-indent_style = tab
+indent_style = space
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.py]
-indent_style = space
-
 [*.{conf,geojson,hcl,json,md,toml,yaml,yml}]
 indent_size = 2
-indent_style = space
+
+# Tabs: `<<-` heredocs (z_conf.sh) only strip leading tabs, and shfmt reads this file.
+[*.sh]
+indent_style = tab
 
 [*.md]
 trim_trailing_whitespace = false

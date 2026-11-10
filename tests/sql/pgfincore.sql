@@ -3,8 +3,8 @@ CREATE EXTENSION pgfincore;
 
 CREATE TABLE cached AS
 SELECT
-	i,
-	md5(i::text) AS hash
+    i,
+    md5(i::text) AS hash
 FROM generate_series(1, 100000) AS i;
 -- Write the table out, so its pages are in the OS cache. (sqlfluff can't parse CHECKPOINT.)
 CHECKPOINT;  -- noqa: PRS

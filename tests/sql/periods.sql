@@ -18,16 +18,16 @@ INSERT INTO bookings VALUES (1, '2024-01-01', '2024-01-05');
 
 SELECT plan(4);
 SELECT is((
-	SELECT price FROM prices_history
-	WHERE product = 'tea'
+    SELECT price FROM prices_history
+    WHERE product = 'tea'
 ), 3::numeric, 'old versions are kept');
 SELECT is(
-	(SELECT price FROM marks, prices__as_of(before_change)),
-	3::numeric,
-	'the past can be queried'
+    (SELECT price FROM marks, prices__as_of(before_change)),
+    3::numeric,
+    'the past can be queried'
 );
 SELECT lives_ok($$INSERT INTO bookings VALUES (1, '2024-01-05', '2024-01-07')$$, 'adjacent periods are fine');
 SELECT throws_ok(
-	$$INSERT INTO bookings VALUES (1, '2024-01-03', '2024-01-04')$$, '23P01', NULL, 'overlapping periods are rejected'
+    $$INSERT INTO bookings VALUES (1, '2024-01-03', '2024-01-04')$$, '23P01', NULL, 'overlapping periods are rejected'
 );
 SELECT * FROM finish(TRUE);
