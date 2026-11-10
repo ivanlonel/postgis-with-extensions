@@ -50,14 +50,19 @@ def test_unknown_library_fails_fast(image: Image) -> None:
 
 
 def test_user_options_win(image: Image) -> None:
-    """Options passed by the user override the defaults the wrapper adds for a library."""
+    """
+    Options passed by the user override the defaults the wrapper adds for a library.
+
+    The wrapper would point pg_cron at POSTGRES_DB. (Not at template1: a session pg_cron keeps
+    there makes the PostGIS init script's ``CREATE DATABASE`` fail.)
+    """
     server = start_server(
         image,
-        env={"SHARED_PRELOAD_LIBRARIES": "pg_cron"},
-        command=["postgres", "-c", "cron.database_name=template1"],
+        env={"SHARED_PRELOAD_LIBRARIES": "pg_cron", "POSTGRES_DB": "app"},
+        command=["postgres", "-c", "cron.database_name=postgres"],
     )
     try:
-        assert server.setting("cron.database_name") == "template1"
+        assert server.setting("cron.database_name") == "postgres"
     finally:
         server.remove()
 
