@@ -14,9 +14,9 @@ restrict where a script runs:
     Skip on servers preloading any of these, which keep the extension from working.
 ``-- pg: <constraints>``
     Skip unless the PostgreSQL major matches, e.g. ``<=17``.
-``-- database: cron|partman|net``
-    Run in the database a background worker uses (pg_cron's, pg_partman's or pg_net's) instead
-    of a scratch one.
+``-- database: cron|partman|net|sentinel``
+    Run in the database a background worker uses (pg_cron's, pg_partman's, pg_net's or
+    pgsentinel's) instead of a scratch one.
 
 Scripts can fetch the files of ``tests/sql/data`` from ``http://127.0.0.1:8000/``; the scripts'
 directory is mounted at ``/tests/sql``, so server-side functions can read it too.
@@ -48,6 +48,7 @@ WORKER_DATABASES: Final = {
     "cron": "cron.database_name",
     "partman": "pg_partman_bgw.dbname",
     "net": "pg_net.database_name",
+    "sentinel": "pgsentinel.db_name",
 }
 """Values of the ``database`` directive, mapped to the setting naming that database."""
 

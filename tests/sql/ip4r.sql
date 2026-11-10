@@ -17,7 +17,7 @@ SELECT is(
 	'ffff:ffff:ffff:ffff:ffff:ffff:ffff:fffe/127',
 	'IPv6 prefixes'
 );
--- sqlfluff can't parse ip4r's >>= (contains or equals) operator, nor lay out what follows.
+-- (The linter can't parse ip4r's >>= (contains or equals) operator, nor lay out what follows.)
 SELECT ok(ip4r '10.0.0.0/8' >>= ip4 '10.1.2.3', 'ranges contain addresses');  -- noqa: PRS
 SELECT is(family(ipaddress '::1'), 6, 'address families are told apart');
 SELECT is(

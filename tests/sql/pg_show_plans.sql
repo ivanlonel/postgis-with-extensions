@@ -1,5 +1,7 @@
 -- preload: pg_show_plans
+-- pg: >=15
 -- https://github.com/cybertec-postgresql/pg_show_plans
+-- (On PostgreSQL 14, plan collection can only be turned on at startup: see tests/test_preload.py.)
 CREATE EXTENSION pg_show_plans;
 
 -- The image turns plan collection off (it crashes TimescaleDB inserts): turn it on for this session.

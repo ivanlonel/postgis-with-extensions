@@ -43,6 +43,13 @@ CREATE EXTENSION unaccent;
 CREATE EXTENSION "uuid-ossp";
 CREATE EXTENSION xml2;
 
+-- dict_xsyn's dictionary comes without rules: give it the sample file the module installs.
+DO $$
+BEGIN
+	EXECUTE $sql$ALTER TEXT SEARCH DICTIONARY xsyn (RULES = 'xsyn_sample')$sql$;
+END
+$$;
+
 CREATE TABLE items (id integer PRIMARY KEY, name text NOT NULL, tags integer[], author text, modified timestamptz);
 INSERT INTO items (id, name, tags)
 SELECT

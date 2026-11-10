@@ -163,7 +163,7 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [pg_roaringbitmap](https://github.com/ChenHuajun/pg_roaringbitmap) | all |  |  |
 | [pg_rowalesce](https://github.com/bigsmoke/pg_rowalesce) | all |  |  |
 | [pg_rrule](https://github.com/petropavel13/pg_rrule) | all |  |  |
-| [pg_show_plans](https://github.com/cybertec-postgresql/pg_show_plans) | all | `pg_show_plans` | Off by default, as it [crashes inserts into TimescaleDB hypertables](https://github.com/timescale/timescaledb/pull/10417); enable with `pg_show_plans.is_enabled = on` |
+| [pg_show_plans](https://github.com/cybertec-postgresql/pg_show_plans) | all | `pg_show_plans` | Off by default, as it [crashes inserts into TimescaleDB hypertables](https://github.com/timescale/timescaledb/pull/10417); enable with `pg_show_plans.is_enabled = on` (on PostgreSQL 14, only at server start) |
 | [pg_similarity](https://github.com/eulerto/pg_similarity) | all |  |  |
 | [pg_squeeze](https://github.com/cybertec-postgresql/pg_squeeze) | all | `pg_squeeze` |  |
 | [pg_stat_kcache](https://github.com/powa-team/pg_stat_kcache) | all | `pg_stat_kcache` |  |

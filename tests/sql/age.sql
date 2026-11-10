@@ -43,16 +43,16 @@ SELECT is(
 			'graph_name', $$MATCH (:label {property: 'Node A'})-[e:RELTYPE]->() RETURN e.property$$
 		) AS (p agtype)
 	),
-	'"Node A<->Node B"',
+	'Node A<->Node B',
 	'edge properties are computed'
 );
 SELECT is(
 	(
 		SELECT n::text FROM cypher(
-			'graph_name', $$MATCH (:label {property: 'Node A'})-[:RELTYPE*2]->(c) RETURN c.property$$
+			'graph_name', $$MATCH (:label {property: 'Node A'})-[:RELTYPE*2..2]->(c) RETURN c.property$$
 		) AS (n agtype)
 	),
-	'"Node C"',
+	'Node C',
 	'variable-length paths are traversed'
 );
 SELECT * FROM finish(TRUE);

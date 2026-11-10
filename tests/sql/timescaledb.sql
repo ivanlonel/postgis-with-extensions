@@ -37,7 +37,15 @@ CALL refresh_continuous_aggregate('conditions_hourly', NULL, NULL);
 -- Policies are jobs; run one by hand.
 CREATE TEMPORARY TABLE jobs AS
 SELECT add_retention_policy('conditions', drop_after => interval '10 years') AS retention;
-CALL run_job((SELECT retention FROM jobs));
+-- (CALL takes no subquery argument.)
+DO $$
+DECLARE
+	job integer;
+BEGIN
+	SELECT retention INTO job FROM jobs;
+	CALL run_job(job);
+END
+$$;
 
 -- And have the scheduler run a job of our own.
 CREATE TABLE ticks (at timestamptz NOT NULL DEFAULT now());

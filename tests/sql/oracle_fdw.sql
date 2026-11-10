@@ -14,5 +14,6 @@ CREATE FOREIGN TABLE oratab (
 
 SELECT plan(2);
 SELECT matches(oracle_diag(), 'Oracle client \d', 'Oracle Instant Client is loaded');
-SELECT throws_like('SELECT * FROM oratab', '%ORA-%', 'the client tries to connect');
+-- oracle_fdw's own message leaves Oracle's error (ORA-nnnnn) to the detail.
+SELECT matches(error_of('SELECT * FROM oratab'), 'ORA-\d+', 'the client tries to connect');
 SELECT * FROM finish(TRUE);

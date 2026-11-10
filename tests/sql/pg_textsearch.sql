@@ -17,7 +17,7 @@ SELECT set_config('enable_seqscan', 'off', FALSE);
 
 SELECT plan(2);
 SELECT is(
-	-- sqlfluff can't parse pg_textsearch's <@> (BM25 score) operator, nor lay out what follows.
+	-- (The linter can't parse pg_textsearch's <@> (BM25 score) operator, nor lay out what follows.)
 	(SELECT id FROM documents ORDER BY content <@> 'geographic objects' LIMIT 1),  -- noqa: PRS, LT14
 	2,
 	'BM25 ranks the best match first'
