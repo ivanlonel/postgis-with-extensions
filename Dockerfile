@@ -18,6 +18,7 @@ RUN apt-get update \
         cmake \
         curl \
         flex \
+        git \
         libboost-dev \
         libcurl4-openssl-dev \
         libhiredis-dev \
@@ -76,7 +77,8 @@ FROM build-base AS github
 # Make variables in the list work around upstream issues: pg_tracing's PG_CFLAGS= drops its -Werror,
 # which trixie's stricter libcurl headers trip. decoder_raw follows PostgreSQL's development branch
 # without version checks, so it's pinned (without a branch, which Renovate would follow) to the
-# last commits building on 14-16 and on 17-18.
+# last commits building on 14-16 and on 17-18. pg_curl is cloned: its archives, on PGXN as on
+# GitHub, leave out its pg_whitelist submodule.
 COPY --chmod=0755 build/build-github.sh /usr/local/bin/build-github
 COPY build/github-packages.txt /tmp/github-packages.txt
 RUN build-github /tmp/github-packages.txt
@@ -113,8 +115,8 @@ RUN curl --fail --silent --show-error --location --retry 3 --output /tmp/pgactiv
         "https://github.com/aws/pgactive/archive/refs/tags/v${PGACTIVE_VERSION}.tar.gz" \
     && tar -xzf /tmp/pgactive.tar.gz --strip-components=1 \
     && ./configure \
-    && make -j "$(nproc)" \
-    && make install DESTDIR=/out
+    && make -j "$(nproc)" LDFLAGS_EX="-L$(pg_config --pkglibdir)" \
+    && make install DESTDIR=/out LDFLAGS_EX="-L$(pg_config --pkglibdir)"
 
 
 FROM build-base AS pguint

@@ -14,7 +14,10 @@ set -Eeuo pipefail
 . /etc/os-release
 
 fetch() {
-	curl --fail --silent --show-error --location --retry 3 --output "$1" "$2"
+	if ! curl --fail --silent --show-error --location --retry 3 --output "$1" "$2"; then
+		echo "failed to download $2" >&2
+		return 1
+	fi
 }
 
 libdir="/out$(pg_config --pkglibdir)"
