@@ -1,40 +1,76 @@
 -- https://github.com/MobilityDB/MobilityDB
 CREATE EXTENSION mobilitydb CASCADE;  -- requires postgis
 
-SELECT bigintset '{1,2,3}';
-SELECT asText(floatset '{1.12345678, 2.123456789}', 6);
-SELECT set(ARRAY[date '2000-01-01', '2000-01-02', '2000-01-03']);
-SELECT set(ARRAY[timestamptz '2000-01-01', '2000-01-02', '2000-01-03']);
-SELECT set(ARRAY[geometry 'Point(1 1)', 'Point(2 2)', 'Point(3 3)']);
-SELECT memSize(dateset '{2000-01-01, 2000-01-02, 2000-01-03}');
-SELECT span(tstzset '{2000-01-01, 2000-01-02, 2000-01-03}');
-SELECT shiftScale(intset '{1}', 4, 4);
+-- A point moving 2 units east over two days, and a temperature rising alongside.
+CREATE TABLE trips (id integer PRIMARY KEY, trip tgeompoint, temperature tfloat);
+INSERT INTO trips VALUES (
+	1,
+	tgeompoint '[Point(0 0)@2000-01-01, Point(2 0)@2000-01-03]',
+	tfloat '[10@2000-01-01, 30@2000-01-03]'
+), (
+	2,
+	tgeompoint '[Point(50 50)@2000-01-01, Point(51 50)@2000-01-02]',
+	tfloat '[0@2000-01-01, 1@2000-01-02]'
+);
+CREATE INDEX trips_trip_idx ON trips USING gist (trip);
 
-SELECT asText(floatspan '[1.12345678, 2.123456789]', 6);
-SELECT span(timestamptz '2000-01-01', '2000-01-02');
-SELECT span(timestamptz '2000-01-01', '2000-01-01', TRUE, TRUE);
-SELECT range(datespan '[2000-01-01,2000-01-02)');
-SELECT span(daterange '(2000-01-01,2000-01-03)');
-SELECT span(date '2000-01-01');
-SELECT date '2000-01-01'::datespan;
-SELECT range(tstzspan '[2000-01-01,2000-01-02)');
-SELECT span(tstzrange '(2000-01-01,2000-01-02)');
-SELECT span(timestamptz '2000-01-01');
-SELECT timestamptz '2000-01-01'::tstzspan;
-SELECT intspan '[1,2]';
-SELECT intspan '(1,2]';
-
-SELECT bigintspanset '{[1,2),[3,4),[5,6)}';
-SELECT
-	spanset_cmp(
-		datespanset '{[2000-01-01,2000-01-01]}',
-		datespanset '{[2000-01-01,2000-01-02),[2000-01-03,2000-01-04),[2000-01-05,2000-01-06)}'
-	);
-SELECT round(floatspanset '{[1.12345,2.12345),[3.12345,4.12345),[5.12345,6.12345)}', 2);
-SELECT shift(intspanset '{[1,2),[3,4),[5,6)}', 2);
-SELECT
-	shiftScale(
-		tstzspanset '{[2000-01-01,2000-01-02),(2000-01-03,2000-01-04),(2000-01-05,2000-01-06)}',
-		'5 min',
-		'1 hour'
-	);
+SELECT plan(10);
+SELECT is((
+	SELECT numInstants(trip) FROM trips
+	WHERE id = 1
+), 2, 'temporal points keep their instants');
+SELECT is((
+	SELECT length(trip) FROM trips
+	WHERE id = 1
+), 2::float8, 'trajectories are measured');
+SELECT is(
+	(
+		SELECT ST_AsText(valueAtTimestamp(trip, '2000-01-02')) FROM trips
+		WHERE id = 1
+	),
+	'POINT(1 0)',
+	'positions are interpolated'
+);
+SELECT is(
+	(
+		SELECT ST_AsText(trajectory(trip)) FROM trips
+		WHERE id = 1
+	),
+	'LINESTRING(0 0,2 0)',
+	'trajectories are built'
+);
+SELECT is(
+	(
+		SELECT valueAtTimestamp(temperature, '2000-01-02') FROM trips
+		WHERE id = 1
+	),
+	20::float8,
+	'temporal floats are interpolated'
+);
+SELECT is(
+	(
+		SELECT duration(trip) FROM trips
+		WHERE id = 1
+	),
+	'2 days'::interval,
+	'temporal values have a duration'
+);
+SELECT is(
+	(
+		SELECT count(*) FROM trips
+		WHERE trip && stbox 'STBOX X((-1, -1), (1, 1))'
+	),
+	1::bigint,
+	'temporal points are found by bounding box'
+);
+SELECT ok(intspan '[1, 5]' @> 3, 'spans contain values');
+SELECT ok(tstzspan '[2000-01-01, 2000-01-03]' @> timestamptz '2000-01-02', 'time spans contain instants');
+SELECT is(
+	(
+		SELECT twAvg(temperature) FROM trips
+		WHERE id = 1
+	),
+	20::float8,
+	'time-weighted averages are computed'
+);
+SELECT * FROM finish(TRUE);

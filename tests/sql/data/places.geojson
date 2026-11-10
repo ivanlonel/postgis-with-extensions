@@ -1,0 +1,16 @@
+{
+  "type": "FeatureCollection",
+  "name": "places",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Sao Paulo", "population": 11451999 },
+      "geometry": { "type": "Point", "coordinates": [-46.63, -23.55] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Rio de Janeiro", "population": 6211223 },
+      "geometry": { "type": "Point", "coordinates": [-43.2, -22.91] }
+    }
+  ]
+}
