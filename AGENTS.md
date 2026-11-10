@@ -19,8 +19,10 @@ plus 100+ extensions. The images follow upstream's Debian tags (amd64 only); CI 
   scripts, whose file names (`z_conf.sh`, `setup_powa-archivist.sh`) must not change: users may override them.
 - `extensions.toml`: the manifest behind the README table and the catalog tests.
 - `tests/`: pytest drives the docker CLI (`tests/_docker.py`); `tests/sql/*.sql` are per-extension pgTAP scripts with
-  `-- preload:` / `-- pg:` / `-- database:` directives; `tests/baseline/` snapshots the extensions of the pre-rewrite
-  images and must never lose a name; `tests/upgrade/` reopens clusters created by the previous image.
+  `-- preload:` / `-- conflicts:` / `-- pg:` / `-- database:` directives, run on a server preloading just what they
+  need and on the `all` one; `tests/sql/lib/helpers.sql` gives them `wait_until()` and `plan_of()`, and
+  `tests/sql/data/` is served at `http://127.0.0.1:8000/`; `tests/baseline/` snapshots the extensions of the
+  pre-rewrite images and must never lose a name; `tests/upgrade/` reopens clusters created by the previous image.
 
 ## Rules
 
@@ -31,6 +33,9 @@ plus 100+ extensions. The images follow upstream's Debian tags (amd64 only); CI 
 - Python is 3.13+, fully typed, with Sphinx field-list docstrings (`:param:`, `:return:`, `:raise:`); prek runs ruff
   (`ALL`), ty and pydoclint. Every suppression comment carries a reason.
 - Shell scripts use bash with `set -Eeuo pipefail`; shellcheck and shfmt must pass.
-- Run `uv run prek run --all-files` before committing; `uv run python -m scripts.render_readme` after editing
-  `extensions.toml`.
+- Each extension's test must prove it works, not just that it loads: known-answer assertions on its main features,
+  index use checked with `plan_of()`, background workers seen doing their job. Remote-database FDWs, which have no
+  server in CI, must show their client library loading and trying to connect.
+- Run `uv run prek run --all-files` before committing, after `git add`-ing new files (it only checks tracked ones);
+  `uv run python -m scripts.render_readme` after editing `extensions.toml`.
 - Commit messages follow Conventional Commits.
