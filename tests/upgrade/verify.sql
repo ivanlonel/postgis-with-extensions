@@ -5,7 +5,8 @@ SELECT h3_lat_lng_to_cell(geom, 6) FROM places;
 SELECT (standardize_address(
     'us_lex', 'us_gaz', 'us_rules', 'One Devonshire Place, PH 301', 'Boston, MA 02109'
 )).house_num;
-SELECT pprint_addy(normalize_address('1 Devonshire Place, Boston, MA 02109'));
+-- Not every tiger geocoder release puts its schema on the database's search_path.
+SELECT tiger.pprint_addy(tiger.normalize_address('1 Devonshire Place, Boston, MA 02109'));
 
 INSERT INTO readings VALUES (now(), 2.0);
 SELECT count(*) FROM readings;
