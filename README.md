@@ -116,7 +116,7 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [asn1oid](https://github.com/df7cb/pgsql-asn1oid) | all |  |  |
 | [credcheck](https://github.com/HexaCluster/credcheck) | all | `credcheck` |  |
 | [ddlx](https://github.com/lacanoid/pgddl) | all |  |  |
-| [DocumentDB](https://github.com/documentdb/documentdb) | 15+ | `pg_documentdb` | SQL API only (no MongoDB wire-protocol gateway); `documentdb_distributed` needs Citus, which isn't included |
+| [DocumentDB](https://github.com/documentdb/documentdb) | 15+ | `pg_documentdb` | SQL API only (no MongoDB wire-protocol gateway); `documentdb_extended_rum` also needs `pg_documentdb_extended_rum` preloaded; `documentdb_distributed` needs Citus, which isn't included |
 | [extra_window_functions](https://github.com/xocolatl/extra_window_functions) | all |  |  |
 | [first_last_agg](https://github.com/wulczer/first_last_agg) | all |  |  |
 | [h3-pg](https://github.com/postgis/h3-pg) | all |  |  |
@@ -228,6 +228,7 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [temporal_tables](https://github.com/arkhipov/temporal_tables) | all |  |  |
 | [timescaledb](https://github.com/timescale/timescaledb) | all | `timescaledb` | Includes the Timescale License (TSL) features |
 | [TimescaleDB Toolkit](https://github.com/timescale/timescaledb-toolkit) | 15+ |  | Timescale License (TSL) |
+| [timestamp9](https://github.com/optiver/timestamp9) | all |  |  |
 | [toastinfo](https://github.com/credativ/toastinfo) | all |  |  |
 | [unit](https://github.com/df7cb/postgresql-unit) | all |  |  |
 | [VectorChord](https://github.com/supervc-stack/VectorChord) | all | `vchord` | Dual-licensed AGPLv3 / ELv2 |
@@ -244,6 +245,8 @@ docker buildx bake pg18 --load --set pg18.tags=postgis-with-extensions:dev   # o
 uv run pytest --image postgis-with-extensions:dev
 uv run prek run --all-files                                                 # linters and formatters
 ```
+
+Set `PWE_TEST_LOGS` to a directory to keep the output of every server the tests start; CI uploads it as an artifact.
 
 To add an extension:
 
