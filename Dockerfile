@@ -12,10 +12,12 @@ SHELL ["/bin/bash", "-Eeuo", "pipefail", "-c"]
 FROM base AS build-base
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
+		bison \
 		build-essential \
 		ca-certificates \
 		cmake \
 		curl \
+		flex \
 		libcurl4-openssl-dev \
 		libicu-dev \
 		libkrb5-dev \
