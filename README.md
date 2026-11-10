@@ -256,12 +256,18 @@ uv run prek run --all-files                                                 # li
 
 Set `PWE_TEST_LOGS` to a directory to keep the output of every server the tests start; CI uploads it as an artifact.
 
+These and other tasks (dispatching CI, reading its logs) are also [just](https://just.systems) recipes: run `just` to
+list them. Install just with your package manager (`scoop install just`, `brew install just`, ...) or
+`uv tool install rust-just`.
+
 To add an extension:
 
 - Install it: add its PGDG package to `build/apt-packages.txt`, or a build stage to the `Dockerfile` (pinned, with a
   `# renovate:` comment).
 - Describe it in `extensions.toml` and run `uv run python -m scripts.render_readme` to update this table.
-- If it needs preloading, register its library in `image/preload-libraries.txt`.
+- If it needs preloading, register its library in `image/preload-libraries.txt`, with the background workers it
+  starts.
+- If it ships a logical decoding output plugin, add it to `trusted_plugins` in `image/initdb/z_conf.sh`.
 - Add `tests/sql/<extension>.sql`, a pgTAP script proving the extension works (known answers, not just loading).
 
 CI builds and tests every PostgreSQL major on each pull request, and publishes from `master` and the weekly scheduled
