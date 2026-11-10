@@ -49,9 +49,18 @@ docker run -e POSTGRES_PASSWORD=mysecretpassword -e SHARED_PRELOAD_LIBRARIES=tim
 ```
 
 - `all` preloads every library of the [extension table](#extensions)'s Preload column that the image ships for its
-  PostgreSQL version, except DocumentDB's; `legacy` preloads the list the images preloaded by default before 3.7.
+  PostgreSQL version, except Citus's and DocumentDB's; `legacy` preloads the list the images preloaded by default
+  before 3.7.
 - DocumentDB is opt-in (`SHARED_PRELOAD_LIBRARIES=all,pg_documentdb` adds it): until `CREATE EXTENSION documentdb` has
   run in pg_cron's database, its background worker makes every `DROP DATABASE` wait up to 10 seconds.
+- Citus is opt-in too (`SHARED_PRELOAD_LIBRARIES=citus`). It must load before every other library, so it's put
+  first, ahead of the cluster's own list.
+- pg_savior and pg_statement_rollback change how statements behave, so they're preloaded switched off: turn them on
+  with `pg_savior.enabled = on` or `pg_statement_rollback.enabled = on`, per session, role or database.
+- Preloaded, pgsodium and Supabase Vault read a root key from `$(pg_config --sharedir)/extension/pgsodium_getkey`. The
+  image's script generates one and keeps it in the data directory (`pgsodium_root.key`), next to the data it
+  protects: for real protection, point `pgsodium.getkey_script` and `vault.getkey_script` at a script that fetches
+  the key from a key manager.
 - Libraries required by others come along: `powa` brings PoWA's statistics extensions, `pg_documentdb` brings
   `pg_documentdb_core`, `pg_documentdb_extended_rum` and `pg_cron`.
 - The variable only adds libraries: those the cluster's own configuration preloads stay loaded. To remove one of those,
@@ -123,9 +132,15 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [address_standardizer](https://github.com/postgis/address_standardizer) | all |  | Packaged separately from PostGIS since 3.7 |
 | [age](https://github.com/apache/age) | all |  |  |
 | [asn1oid](https://github.com/df7cb/pgsql-asn1oid) | all |  |  |
+| [Citus](https://github.com/citusdata/citus) | all | `citus` | Opt-in (not in `all`); the entrypoint loads it before every other library, as Citus requires. PostgreSQL 14 gets Citus 12.1 and 15 gets 13, the last lines supporting them |
 | [credcheck](https://github.com/HexaCluster/credcheck) | all | `credcheck` |  |
+| [datasketches](https://github.com/apache/datasketches-postgresql) | all |  |  |
+| [db_migrator](https://github.com/cybertec-postgresql/db_migrator) | all |  |  |
 | [ddlx](https://github.com/lacanoid/pgddl) | all |  |  |
-| [DocumentDB](https://github.com/documentdb/documentdb) | 15+ | `pg_documentdb` | SQL API only (no MongoDB wire-protocol gateway); `documentdb_distributed` needs Citus, which isn't included |
+| [decoder_raw](https://github.com/michaelpq/pg_plugins/tree/main/decoder_raw) | all |  | Logical decoding output plugin (SQL statements), not an extension; trusted on new clusters |
+| [decoderbufs](https://github.com/debezium/postgres-decoderbufs) | all |  | Logical decoding output plugin (Protocol Buffers, for Debezium), not an extension; trusted on new clusters |
+| [DocumentDB](https://github.com/documentdb/documentdb) | 15+ | `pg_documentdb` | SQL API only (no MongoDB wire-protocol gateway); `documentdb_distributed` also needs Citus preloaded |
+| [E-Maj](https://github.com/dalibo/emaj) | all |  | Without its Perl and PHP client tools |
 | [extra_window_functions](https://github.com/xocolatl/extra_window_functions) | all |  |  |
 | [first_last_agg](https://github.com/wulczer/first_last_agg) | all |  |  |
 | [h3-pg](https://github.com/postgis/h3-pg) | all |  |  |
@@ -133,34 +148,43 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [http](https://github.com/pramsey/pgsql-http) | all |  |  |
 | [hypopg](https://github.com/HypoPG/hypopg) | all |  |  |
 | [icu_ext](https://github.com/dverite/icu_ext) | all |  |  |
+| [index_advisor](https://github.com/supabase/index_advisor) | all |  |  |
 | [ip4r](https://github.com/RhodiumToad/ip4r) | all |  |  |
 | [json_accessors](https://github.com/theirix/json_accessors) | all |  |  |
 | [jsquery](https://github.com/postgrespro/jsquery) | all |  |  |
+| [kafka_fdw](https://github.com/adjust/kafka_fdw) | all |  |  |
 | [MobilityDB](https://github.com/MobilityDB/MobilityDB) | all |  |  |
 | [mongo_fdw](https://github.com/EnterpriseDB/mongo_fdw) | all |  |  |
 | [mysql_fdw](https://github.com/EnterpriseDB/mysql_fdw) | all |  |  |
 | [numeral](https://github.com/df7cb/postgresql-numeral) | all |  |  |
 | [ogr_fdw](https://github.com/pramsey/pgsql-ogr-fdw) | all |  |  |
+| [ora_migrator](https://github.com/cybertec-postgresql/ora_migrator) | all |  |  |
 | [oracle_fdw](https://github.com/laurenz/oracle_fdw) | all |  |  |
 | [orafce](https://github.com/orafce/orafce) | all |  |  |
 | [parray_gin](https://github.com/theirix/parray_gin) | all |  |  |
 | [periods](https://github.com/xocolatl/periods) | all |  |  |
 | [permuteseq](https://github.com/dverite/permuteseq) | all |  |  |
+| [pg_auto_failover](https://github.com/hapostgres/pg_auto_failover) | all | `pgautofailover` | The monitor's extension, plus the `pg_autoctl` command |
 | [pg_background](https://github.com/vibhorkum/pg_background) | all |  |  |
 | [pg_bigm](https://github.com/pgbigm/pg_bigm) | all |  |  |
+| [pg_bulkload](https://github.com/ossc-db/pg_bulkload) | all |  |  |
 | [pg_cron](https://github.com/citusdata/pg_cron) | all | `pg_cron` |  |
 | [pg_csv](https://github.com/PostgREST/pg_csv) | all |  |  |
+| [pg_curl](https://github.com/RekGRpth/pg_curl) | all |  |  |
 | [pg_dirtyread](https://github.com/df7cb/pg_dirtyread) | all |  |  |
 | [pg_fact_loader](https://salsa.debian.org/postgresql/pg-fact-loader) | up to 17 |  |  |
 | [pg_graphql](https://github.com/supabase/pg_graphql) | all |  |  |
 | [pg_hashids](https://github.com/iCyberon/pg_hashids) | all |  |  |
 | [pg_hint_plan](https://github.com/ossc-db/pg_hint_plan) | all |  |  |
+| [pg_idkit](https://github.com/VADOSWARE/pg_idkit) | 15+ |  |  |
+| [pg_incremental](https://github.com/CrunchyData/pg_incremental) | 16+ |  |  |
 | [pg_ivm](https://github.com/sraoss/pg_ivm) | all | `pg_ivm` | Preloading is recommended, not required |
 | [pg_jobmon](https://github.com/omniti-labs/pg_jobmon) | all |  |  |
 | [pg_jsonschema](https://github.com/supabase/pg_jsonschema) | all |  |  |
 | [pg_net](https://github.com/supabase/pg_net) | all | `pg_net` |  |
 | [pg_partman](https://github.com/pgpartman/pg_partman) | all | `pg_partman_bgw` | Preload only for the background maintenance worker, which runs as `pg_partman_bgw.role` (default `partman_maintainer`, a role you create) |
 | [pg_permissions](https://github.com/cybertec-postgresql/pg_permissions) | all |  |  |
+| [pg_plan_filter](https://github.com/pgexperts/pg_plan_filter) | all | `plan_filter` | A library, not an extension: set `plan_filter.statement_cost_limit` to reject costlier statements |
 | [pg_profile](https://github.com/zubkov-andrei/pg_profile) | all |  |  |
 | [pg_pwhash](https://github.com/cybertec-postgresql/pg_pwhash) | all |  |  |
 | [pg_qualstats](https://github.com/powa-team/pg_qualstats) | all | `pg_qualstats` |  |
@@ -170,25 +194,33 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [pg_roaringbitmap](https://github.com/ChenHuajun/pg_roaringbitmap) | all |  |  |
 | [pg_rowalesce](https://github.com/bigsmoke/pg_rowalesce) | all |  |  |
 | [pg_rrule](https://github.com/petropavel13/pg_rrule) | all |  |  |
+| [pg_savior](https://github.com/viggy28/pg_savior) | all | `pg_savior` | Off unless `pg_savior.enabled = on` when `SHARED_PRELOAD_LIBRARIES` adds it |
 | [pg_show_plans](https://github.com/cybertec-postgresql/pg_show_plans) | all | `pg_show_plans` | Off by default, as it [crashes inserts into TimescaleDB hypertables](https://github.com/timescale/timescaledb/pull/10417); enable with `pg_show_plans.is_enabled = on`, which applies to the whole server even when `SET` in a session (on PostgreSQL 14, only at server start) |
 | [pg_similarity](https://github.com/eulerto/pg_similarity) | all |  |  |
 | [pg_squeeze](https://github.com/cybertec-postgresql/pg_squeeze) | all | `pg_squeeze` |  |
 | [pg_stat_kcache](https://github.com/powa-team/pg_stat_kcache) | all | `pg_stat_kcache` |  |
 | [pg_stat_log](https://github.com/fabriziomello/pg_stat_log) | 18+ | `pg_stat_log` |  |
 | [pg_stat_monitor](https://github.com/percona/pg_stat_monitor) | all | `pg_stat_monitor` |  |
+| [pg_statement_rollback](https://github.com/HexaCluster/pg_statement_rollback) | all | `pg_statement_rollback` | Off unless `pg_statement_rollback.enabled = on` when `SHARED_PRELOAD_LIBRARIES` adds it |
 | [pg_statviz](https://github.com/vyruss/pg_statviz) | all |  |  |
+| [pg_store_plans](https://github.com/ossc-db/pg_store_plans) | all | `pg_store_plans` |  |
 | [pg_textsearch](https://github.com/timescale/pg_textsearch) | 17+ | `pg_textsearch` |  |
 | [pg_tle](https://github.com/aws/pg_tle) | all | `pg_tle` |  |
+| [pg_tracing](https://github.com/DataDog/pg_tracing) | all | `pg_tracing` |  |
 | [pg_track_settings](https://github.com/rjuju/pg_track_settings) | all |  |  |
 | [pg_uuidv7](https://github.com/fboulnois/pg_uuidv7) | all |  |  |
 | [pg_wait_sampling](https://github.com/postgrespro/pg_wait_sampling) | all | `pg_wait_sampling` |  |
 | [pg_xenophile](https://github.com/bigsmoke/pg_xenophile) | all |  |  |
 | [pg_xxhash](https://github.com/hatarist/pg_xxhash) | all |  |  |
+| [pgactive](https://github.com/aws/pgactive) | all | `pgactive` | A pgactive node can't also subscribe through pglogical or built-in logical replication |
 | [pgagent](https://github.com/pgadmin-org/pgagent) | all |  |  |
 | [pgaudit](https://github.com/pgaudit/pgaudit) | all | `pgaudit` |  |
 | [pgauditlogtofile](https://github.com/fmbiete/pgauditlogtofile) | all | `pgauditlogtofile` |  |
+| [pgdd](https://github.com/rustprooflabs/pgdd) | all |  |  |
+| [pgextwlist](https://github.com/dimitri/pgextwlist) | all |  | A library, not an extension: load it per session (`session_preload_libraries`) to let non-superusers create the extensions listed in `extwlist.extensions` |
 | [pgfaceting](https://github.com/cybertec-postgresql/pgfaceting) | all |  |  |
 | [pgfincore](https://github.com/klando/pgfincore) | all |  |  |
+| [pgJQ](https://github.com/Florents-Tselai/pgJQ) | all |  |  |
 | [pgl_ddl_deploy](https://github.com/enova/pgl_ddl_deploy) | up to 17 |  |  |
 | [pglogical](https://github.com/2ndQuadrant/pglogical) | all | `pglogical` |  |
 | [pglogical_ticker](https://github.com/enova/pglogical_ticker) | up to 17 | `pglogical_ticker` |  |
@@ -197,21 +229,27 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [pgmq](https://github.com/pgmq/pgmq) | all |  |  |
 | [pgnodemx](https://github.com/CrunchyData/pgnodemx) | all | `pgnodemx` |  |
 | [pgpcre](https://github.com/petere/pgpcre) | all |  |  |
+| [pgpdf](https://github.com/Florents-Tselai/pgpdf) | all |  |  |
 | [pgq](https://github.com/pgq/pgq) | all |  |  |
 | [pgq_node](https://github.com/pgq/pgq-node) | all |  |  |
 | [pgrouting](https://github.com/pgRouting/pgrouting) | all |  |  |
 | [pgsentinel](https://github.com/pgsentinel/pgsentinel) | all | `pgsentinel` |  |
+| [pgsodium](https://github.com/michelp/pgsodium) | all | `pgsodium` | Preloading enables its server-key functions; the image's `pgsodium_getkey` keeps a generated root key in the data directory (point `pgsodium.getkey_script` at a key manager instead) |
 | [pgsphere](https://github.com/postgrespro/pgsphere) | all |  |  |
+| [pgsql-gzip](https://github.com/pramsey/pgsql-gzip) | all |  |  |
 | [pgsql_tweaks](https://codeberg.org/pgsql_tweaks/pgsql_tweaks) | all |  |  |
 | [pgtap](https://github.com/theory/pgtap) | all |  |  |
 | [pgtt](https://github.com/darold/pgtt) | all |  |  |
 | [pguint](https://github.com/petere/pguint) | all |  |  |
+| [pguri](https://github.com/petere/pguri) | all |  |  |
 | [pgvector](https://github.com/pgvector/pgvector) | all |  |  |
 | [pgvectorscale](https://github.com/timescale/pgvectorscale) | all |  |  |
+| [pgx_ulid](https://github.com/pksunkara/pgx_ulid) | all |  |  |
 | [PL/JS](https://github.com/plv8/pljs) | all |  |  |
 | [PL/Lua](https://github.com/pllua/pllua) | all |  |  |
 | [PL/Perl](https://www.postgresql.org/docs/current/plperl.html) | all |  |  |
 | [PL/Proxy](https://github.com/plproxy/plproxy) | all |  |  |
+| [PL/PRQL](https://github.com/kaspermarstal/plprql) | all |  |  |
 | [PL/Python](https://www.postgresql.org/docs/current/plpython.html) | all |  |  |
 | [PL/sh](https://github.com/petere/plsh) | all |  |  |
 | [PL/Tcl](https://www.postgresql.org/docs/current/pltcl.html) | all |  |  |
@@ -221,15 +259,20 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [pointcloud](https://github.com/pgpointcloud/pointcloud) | all |  |  |
 | [PostGIS](https://github.com/postgis/postgis) | all | `postgis-3` | From the base image; preloading it is optional |
 | [postgis_tiger_geocoder](https://postgis.net/docs/Extras.html#Tiger_Geocoder) | all |  | Packaged separately from PostGIS since 3.7 |
+| [postgres-protobuf](https://github.com/mpartel/postgres-protobuf) | all |  |  |
 | [postgresql-debversion](https://salsa.debian.org/postgresql/postgresql-debversion) | all |  |  |
 | [PoWA (archivist)](https://github.com/powa-team/powa-archivist) | all | `powa` | Preloading it also preloads its statistics extensions and creates the `powa` database on new clusters |
 | [prefix](https://github.com/dimitri/prefix) | all |  |  |
 | [prioritize](https://github.com/schmiddy/pg_prioritize) | all |  |  |
 | [q3c](https://github.com/segasai/q3c) | all |  |  |
+| [redis_fdw](https://github.com/pg-redis-fdw/redis_fdw) | all |  |  |
+| [repmgr](https://github.com/EnterpriseDB/repmgr) | all | `repmgr` | Plus the `repmgr` and `repmgrd` commands |
 | [rum](https://github.com/postgrespro/rum) | all |  |  |
 | [semver](https://github.com/theory/pg-semver) | all |  |  |
 | [set_user](https://github.com/pgaudit/set_user) | all | `set_user` |  |
+| [smlar](https://github.com/jirutka/smlar) | all |  |  |
 | [sqlite_fdw](https://github.com/pgspider/sqlite_fdw) | up to 17 |  |  |
+| [Supabase Vault](https://github.com/supabase/vault) | all | `supabase_vault` | Needs preloading; the image's `pgsodium_getkey` keeps a generated root key in the data directory (point `vault.getkey_script` at a key manager instead) |
 | [table_log](https://github.com/credativ/table_log) | all |  |  |
 | [tdigest](https://github.com/tvondra/tdigest) | all |  |  |
 | [tds_fdw](https://github.com/tds-fdw/tds_fdw) | all |  |  |
@@ -238,6 +281,7 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [TimescaleDB Toolkit](https://github.com/timescale/timescaledb-toolkit) | 15+ |  | Timescale License (TSL) |
 | [timestamp9](https://github.com/optiver/timestamp9) | all |  |  |
 | [toastinfo](https://github.com/credativ/toastinfo) | all |  |  |
+| [TopN](https://github.com/citusdata/postgresql-topn) | all |  |  |
 | [unit](https://github.com/df7cb/postgresql-unit) | all |  |  |
 | [VectorChord](https://github.com/supervc-stack/VectorChord) | all | `vchord` | Dual-licensed AGPLv3 / ELv2 |
 | [wal2json](https://github.com/eulerto/wal2json) | all |  | Logical decoding output plugin, not an extension |
@@ -262,8 +306,9 @@ list them. Install just with your package manager (`scoop install just`, `brew i
 
 To add an extension:
 
-- Install it: add its PGDG package to `build/apt-packages.txt`, or a build stage to the `Dockerfile` (pinned, with a
-  `# renovate:` comment).
+- Install it: add its PGDG package to `build/apt-packages.txt`; a PGXS source to `build/pgxn-packages.txt` (PGXN)
+  or `build/github-packages.txt` (GitHub); an upstream binary to `build/fetch-vendor.sh`; or a build stage to the
+  `Dockerfile`. Pin everything but PGDG packages (with a `# renovate:` comment in the `Dockerfile`).
 - Describe it in `extensions.toml` and run `uv run python -m scripts.render_readme` to update this table.
 - If it needs preloading, register its library in `image/preload-libraries.txt`, with the background workers it
   starts.

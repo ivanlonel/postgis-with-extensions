@@ -27,13 +27,40 @@ name = "asn1oid"
 url = "https://github.com/df7cb/pgsql-asn1oid"
 
 [[extension]]
+name = "Citus"
+url = "https://github.com/citusdata/citus"
+provides = ["citus", "citus_columnar"]
+preload = "citus"
+note = "Opt-in (not in `all`); the entrypoint loads it before every other library, as Citus requires. PostgreSQL 14 gets Citus 12.1 and 15 gets 13, the last lines supporting them"
+
+[[extension]]
 name = "credcheck"
 url = "https://github.com/HexaCluster/credcheck"
 preload = "credcheck"
 
 [[extension]]
+name = "datasketches"
+url = "https://github.com/apache/datasketches-postgresql"
+
+[[extension]]
+name = "db_migrator"
+url = "https://github.com/cybertec-postgresql/db_migrator"
+
+[[extension]]
 name = "ddlx"
 url = "https://github.com/lacanoid/pgddl"
+
+[[extension]]
+name = "decoder_raw"
+url = "https://github.com/michaelpq/pg_plugins/tree/main/decoder_raw"
+provides = []
+note = "Logical decoding output plugin (SQL statements), not an extension; trusted on new clusters"
+
+[[extension]]
+name = "decoderbufs"
+url = "https://github.com/debezium/postgres-decoderbufs"
+provides = []
+note = "Logical decoding output plugin (Protocol Buffers, for Debezium), not an extension; trusted on new clusters"
 
 [[extension]]
 name = "DocumentDB"
@@ -46,7 +73,13 @@ provides = [
 ]
 pg = ">=15"
 preload = "pg_documentdb"
-note = "SQL API only (no MongoDB wire-protocol gateway); `documentdb_distributed` needs Citus, which isn't included"
+note = "SQL API only (no MongoDB wire-protocol gateway); `documentdb_distributed` also needs Citus preloaded"
+
+[[extension]]
+name = "E-Maj"
+url = "https://github.com/dalibo/emaj"
+provides = ["emaj"]
+note = "Without its Perl and PHP client tools"
 
 [[extension]]
 name = "extra_window_functions"
@@ -78,6 +111,10 @@ name = "icu_ext"
 url = "https://github.com/dverite/icu_ext"
 
 [[extension]]
+name = "index_advisor"
+url = "https://github.com/supabase/index_advisor"
+
+[[extension]]
 name = "ip4r"
 url = "https://github.com/RhodiumToad/ip4r"
 
@@ -88,6 +125,10 @@ url = "https://github.com/theirix/json_accessors"
 [[extension]]
 name = "jsquery"
 url = "https://github.com/postgrespro/jsquery"
+
+[[extension]]
+name = "kafka_fdw"
+url = "https://github.com/adjust/kafka_fdw"
 
 [[extension]]
 name = "MobilityDB"
@@ -111,6 +152,10 @@ name = "ogr_fdw"
 url = "https://github.com/pramsey/pgsql-ogr-fdw"
 
 [[extension]]
+name = "ora_migrator"
+url = "https://github.com/cybertec-postgresql/ora_migrator"
+
+[[extension]]
 name = "oracle_fdw"
 url = "https://github.com/laurenz/oracle_fdw"
 
@@ -131,12 +176,23 @@ name = "permuteseq"
 url = "https://github.com/dverite/permuteseq"
 
 [[extension]]
+name = "pg_auto_failover"
+url = "https://github.com/hapostgres/pg_auto_failover"
+provides = ["pgautofailover"]
+preload = "pgautofailover"
+note = "The monitor's extension, plus the `pg_autoctl` command"
+
+[[extension]]
 name = "pg_background"
 url = "https://github.com/vibhorkum/pg_background"
 
 [[extension]]
 name = "pg_bigm"
 url = "https://github.com/pgbigm/pg_bigm"
+
+[[extension]]
+name = "pg_bulkload"
+url = "https://github.com/ossc-db/pg_bulkload"
 
 [[extension]]
 name = "pg_cron"
@@ -146,6 +202,10 @@ preload = "pg_cron"
 [[extension]]
 name = "pg_csv"
 url = "https://github.com/PostgREST/pg_csv"
+
+[[extension]]
+name = "pg_curl"
+url = "https://github.com/RekGRpth/pg_curl"
 
 [[extension]]
 name = "pg_dirtyread"
@@ -167,6 +227,16 @@ url = "https://github.com/iCyberon/pg_hashids"
 [[extension]]
 name = "pg_hint_plan"
 url = "https://github.com/ossc-db/pg_hint_plan"
+
+[[extension]]
+name = "pg_idkit"
+url = "https://github.com/VADOSWARE/pg_idkit"
+pg = ">=15"
+
+[[extension]]
+name = "pg_incremental"
+url = "https://github.com/CrunchyData/pg_incremental"
+pg = ">=16"
 
 [[extension]]
 name = "pg_ivm"
@@ -196,6 +266,13 @@ note = "Preload only for the background maintenance worker, which runs as `pg_pa
 [[extension]]
 name = "pg_permissions"
 url = "https://github.com/cybertec-postgresql/pg_permissions"
+
+[[extension]]
+name = "pg_plan_filter"
+url = "https://github.com/pgexperts/pg_plan_filter"
+provides = []
+preload = "plan_filter"
+note = "A library, not an extension: set `plan_filter.statement_cost_limit` to reject costlier statements"
 
 [[extension]]
 name = "pg_profile"
@@ -238,6 +315,12 @@ name = "pg_rrule"
 url = "https://github.com/petropavel13/pg_rrule"
 
 [[extension]]
+name = "pg_savior"
+url = "https://github.com/viggy28/pg_savior"
+preload = "pg_savior"
+note = "Off unless `pg_savior.enabled = on` when `SHARED_PRELOAD_LIBRARIES` adds it"
+
+[[extension]]
 name = "pg_show_plans"
 url = "https://github.com/cybertec-postgresql/pg_show_plans"
 preload = "pg_show_plans"
@@ -269,8 +352,19 @@ url = "https://github.com/percona/pg_stat_monitor"
 preload = "pg_stat_monitor"
 
 [[extension]]
+name = "pg_statement_rollback"
+url = "https://github.com/HexaCluster/pg_statement_rollback"
+preload = "pg_statement_rollback"
+note = "Off unless `pg_statement_rollback.enabled = on` when `SHARED_PRELOAD_LIBRARIES` adds it"
+
+[[extension]]
 name = "pg_statviz"
 url = "https://github.com/vyruss/pg_statviz"
+
+[[extension]]
+name = "pg_store_plans"
+url = "https://github.com/ossc-db/pg_store_plans"
+preload = "pg_store_plans"
 
 [[extension]]
 name = "pg_textsearch"
@@ -282,6 +376,11 @@ preload = "pg_textsearch"
 name = "pg_tle"
 url = "https://github.com/aws/pg_tle"
 preload = "pg_tle"
+
+[[extension]]
+name = "pg_tracing"
+url = "https://github.com/DataDog/pg_tracing"
+preload = "pg_tracing"
 
 [[extension]]
 name = "pg_track_settings"
@@ -307,6 +406,12 @@ url = "https://github.com/hatarist/pg_xxhash"
 provides = ["xxhash"]
 
 [[extension]]
+name = "pgactive"
+url = "https://github.com/aws/pgactive"
+preload = "pgactive"
+note = "A pgactive node can't also subscribe through pglogical or built-in logical replication"
+
+[[extension]]
 name = "pgagent"
 url = "https://github.com/pgadmin-org/pgagent"
 
@@ -321,12 +426,27 @@ url = "https://github.com/fmbiete/pgauditlogtofile"
 preload = "pgauditlogtofile"
 
 [[extension]]
+name = "pgdd"
+url = "https://github.com/rustprooflabs/pgdd"
+
+[[extension]]
+name = "pgextwlist"
+url = "https://github.com/dimitri/pgextwlist"
+provides = []
+note = "A library, not an extension: load it per session (`session_preload_libraries`) to let non-superusers create the extensions listed in `extwlist.extensions`"
+
+[[extension]]
 name = "pgfaceting"
 url = "https://github.com/cybertec-postgresql/pgfaceting"
 
 [[extension]]
 name = "pgfincore"
 url = "https://github.com/klando/pgfincore"
+
+[[extension]]
+name = "pgJQ"
+url = "https://github.com/Florents-Tselai/pgJQ"
+provides = ["pgjq"]
 
 [[extension]]
 name = "pgl_ddl_deploy"
@@ -369,6 +489,10 @@ name = "pgpcre"
 url = "https://github.com/petere/pgpcre"
 
 [[extension]]
+name = "pgpdf"
+url = "https://github.com/Florents-Tselai/pgpdf"
+
+[[extension]]
 name = "pgq"
 url = "https://github.com/pgq/pgq"
 
@@ -386,9 +510,20 @@ url = "https://github.com/pgsentinel/pgsentinel"
 preload = "pgsentinel"
 
 [[extension]]
+name = "pgsodium"
+url = "https://github.com/michelp/pgsodium"
+preload = "pgsodium"
+note = "Preloading enables its server-key functions; the image's `pgsodium_getkey` keeps a generated root key in the data directory (point `pgsodium.getkey_script` at a key manager instead)"
+
+[[extension]]
 name = "pgsphere"
 url = "https://github.com/postgrespro/pgsphere"
 provides = ["pg_sphere"]
+
+[[extension]]
+name = "pgsql-gzip"
+url = "https://github.com/pramsey/pgsql-gzip"
+provides = ["gzip"]
 
 [[extension]]
 name = "pgsql_tweaks"
@@ -408,6 +543,11 @@ url = "https://github.com/petere/pguint"
 provides = ["uint"]
 
 [[extension]]
+name = "pguri"
+url = "https://github.com/petere/pguri"
+provides = ["uri"]
+
+[[extension]]
 name = "pgvector"
 url = "https://github.com/pgvector/pgvector"
 provides = ["vector"]
@@ -416,6 +556,11 @@ provides = ["vector"]
 name = "pgvectorscale"
 url = "https://github.com/timescale/pgvectorscale"
 provides = ["vectorscale"]
+
+[[extension]]
+name = "pgx_ulid"
+url = "https://github.com/pksunkara/pgx_ulid"
+provides = ["ulid"]
 
 [[extension]]
 name = "PL/JS"
@@ -445,6 +590,11 @@ provides = [
 name = "PL/Proxy"
 url = "https://github.com/plproxy/plproxy"
 provides = ["plproxy"]
+
+[[extension]]
+name = "PL/PRQL"
+url = "https://github.com/kaspermarstal/plprql"
+provides = ["plprql"]
 
 [[extension]]
 name = "PL/Python"
@@ -511,6 +661,11 @@ provides = ["postgis_tiger_geocoder", "postgis_tiger_geocoder-3"]
 note = "Packaged separately from PostGIS since 3.7"
 
 [[extension]]
+name = "postgres-protobuf"
+url = "https://github.com/mpartel/postgres-protobuf"
+provides = ["postgres_protobuf"]
+
+[[extension]]
 name = "postgresql-debversion"
 url = "https://salsa.debian.org/postgresql/postgresql-debversion"
 provides = ["debversion"]
@@ -535,6 +690,16 @@ name = "q3c"
 url = "https://github.com/segasai/q3c"
 
 [[extension]]
+name = "redis_fdw"
+url = "https://github.com/pg-redis-fdw/redis_fdw"
+
+[[extension]]
+name = "repmgr"
+url = "https://github.com/EnterpriseDB/repmgr"
+preload = "repmgr"
+note = "Plus the `repmgr` and `repmgrd` commands"
+
+[[extension]]
 name = "rum"
 url = "https://github.com/postgrespro/rum"
 
@@ -548,9 +713,20 @@ url = "https://github.com/pgaudit/set_user"
 preload = "set_user"
 
 [[extension]]
+name = "smlar"
+url = "https://github.com/jirutka/smlar"
+
+[[extension]]
 name = "sqlite_fdw"
 url = "https://github.com/pgspider/sqlite_fdw"
 pg = "<=17"
+
+[[extension]]
+name = "Supabase Vault"
+url = "https://github.com/supabase/vault"
+provides = ["supabase_vault"]
+preload = "supabase_vault"
+note = "Needs preloading; the image's `pgsodium_getkey` keeps a generated root key in the data directory (point `vault.getkey_script` at a key manager instead)"
 
 [[extension]]
 name = "table_log"
@@ -588,6 +764,11 @@ url = "https://github.com/optiver/timestamp9"
 [[extension]]
 name = "toastinfo"
 url = "https://github.com/credativ/toastinfo"
+
+[[extension]]
+name = "TopN"
+url = "https://github.com/citusdata/postgresql-topn"
+provides = ["topn"]
 
 [[extension]]
 name = "unit"

@@ -18,6 +18,8 @@ plus 100+ extensions. The images follow upstream's Debian tags (amd64 only); CI 
   (`preload-libraries.txt`, shared by the wrapper, the init scripts and the tests), `preload.sh` helpers, and the init
   scripts, whose file names (`z_conf.sh`, `setup_powa-archivist.sh`) must not change: users may override them.
 - `extensions.toml`: the manifest behind the README table and the catalog tests.
+- `build/github-packages.txt`: PGXS extensions built from GitHub tags (or commits, with the branch Renovate follows),
+  next to `build/pgxn-packages.txt` for PGXN; the `vendor` stage (`build/fetch-vendor.sh`) takes upstream binaries.
 - `justfile`: the common tasks (`just --list`): lint, static tests, README rendering, image builds and tests, CI
   dispatch and logs.
 - `tests/`: pytest drives the docker CLI (`tests/_docker.py`); `tests/sql/*.sql` are per-extension pgTAP scripts with

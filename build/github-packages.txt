@@ -1,0 +1,19 @@
+# <owner/repo> <tag, or commit branch=<branch>> [subdir=<dir>] [pg>=N] [pg<=N] [make variables]
+CrunchyData/pg_incremental v1.6.1 pg>=16
+DataDog/pg_tracing v0.1.3
+Florents-Tselai/pgJQ 57a326b591117adfc2d2709bfdc545c1be905cc0 branch=main JQ_PREFIX=/usr
+HexaCluster/pg_statement_rollback v1.6
+adjust/kafka_fdw 8615082d986ba11ed70191bb4ca53c8cb7e4def3 branch=master
+citusdata/postgresql-topn v2.7.1
+cybertec-postgresql/db_migrator RELEASE_1_0_0
+cybertec-postgresql/ora_migrator RELEASE_1_0_0
+dalibo/emaj v5.0.1 DOCS= SCRIPTS=
+jirutka/smlar 6259352edd179544c6f0e7c81bb68dcb81317f8c branch=master USE_PGXS=1
+michaelpq/pg_plugins ae57c1f3df697fb942f4576f873a655187193ace branch=main subdir=decoder_raw
+ossc-db/pg_store_plans 1.10 USE_PGXS=1
+petere/pguri 1.20251029
+pg-redis-fdw/redis_fdw 247721b9c2e10fe998af2fc21ec55ff21173c688 branch=master
+pgexperts/pg_plan_filter v1.0.0
+pramsey/pgsql-gzip v1.1.1
+supabase/index_advisor v0.2.1
+supabase/vault v0.3.2

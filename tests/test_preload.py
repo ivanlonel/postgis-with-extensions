@@ -120,6 +120,24 @@ def test_user_preload_option_is_extended(image: Image) -> None:
         server.remove()
 
 
+def test_first_libraries_go_first(image: Image) -> None:
+    """Citus, which must load before every other library, goes ahead of a cluster's own list."""
+    with scratch_volume() as volume:
+        server = start_server(image, volume=volume)
+        try:
+            server.query("ALTER SYSTEM SET shared_preload_libraries = 'pg_stat_statements'")
+            server.stop()
+        finally:
+            server.remove()
+
+        server = start_server(image, volume=volume, env={"SHARED_PRELOAD_LIBRARIES": "citus"})
+        try:
+            assert server.preloaded() == ["citus", "pg_stat_statements"]
+            server.query("CREATE EXTENSION citus")
+        finally:
+            server.remove()
+
+
 def test_existing_cluster(image: Image) -> None:
     """On an existing cluster, the variable adds to the configured list; unset, nothing changes."""
     with scratch_volume() as volume:

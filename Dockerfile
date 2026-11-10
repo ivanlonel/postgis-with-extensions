@@ -18,14 +18,29 @@ RUN apt-get update \
         cmake \
         curl \
         flex \
+        libboost-dev \
         libcurl4-openssl-dev \
+        libhiredis-dev \
         libicu-dev \
+        libjq-dev \
         libkrb5-dev \
+        liblz4-dev \
+        libnuma-dev \
+        libpam0g-dev \
+        libpoppler-glib-dev \
+        librdkafka-dev \
+        libreadline-dev \
+        libselinux1-dev \
+        libsodium-dev \
         libsqlite3-dev \
         libssl-dev \
+        liburiparser-dev \
+        libzstd-dev \
+        pkgconf \
         "postgresql-server-dev-${PG_MAJOR}" \
         python3 \
         unzip \
+        zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 COPY --chmod=0755 build/build-pgxs.sh /usr/local/bin/build-pgxs
 
@@ -53,6 +68,47 @@ RUN while read -r dist version; do \
         case "$dist" in ''|'#'*) continue ;; esac; \
         build-pgxs "https://api.pgxn.org/dist/${dist}/${version}/${dist}-${version}.zip" USE_PGXS=1; \
     done < /tmp/pgxn-packages.txt
+
+
+FROM build-base AS github
+COPY --chmod=0755 build/build-github.sh /usr/local/bin/build-github
+COPY build/github-packages.txt /tmp/github-packages.txt
+RUN build-github /tmp/github-packages.txt
+
+
+FROM build-base AS citus
+# Each Citus line supports three PostgreSQL majors and still gets fixes: 14 for PostgreSQL 16 to 18,
+# 13 for 15 to 17 and 12.1 for 14 to 16 (Renovate keeps the older lines on their major).
+# renovate: datasource=github-releases depName=citusdata/citus extractVersion=^v(?<version>.+)$
+ARG CITUS_VERSION=14.3.0
+# renovate: datasource=github-releases depName=citusdata/citus extractVersion=^v(?<version>.+)$
+ARG CITUS_13_VERSION=13.5.0
+# renovate: datasource=github-releases depName=citusdata/citus extractVersion=^v(?<version>.+)$
+ARG CITUS_12_VERSION=12.1.14
+WORKDIR /src/citus
+RUN case "$PG_MAJOR" in \
+        14) version="$CITUS_12_VERSION" ;; \
+        15) version="$CITUS_13_VERSION" ;; \
+        *) version="$CITUS_VERSION" ;; \
+    esac \
+    && curl --fail --silent --show-error --location --retry 3 --output /tmp/citus.tar.gz \
+        "https://github.com/citusdata/citus/archive/refs/tags/v${version}.tar.gz" \
+    && tar -xzf /tmp/citus.tar.gz --strip-components=1 \
+    && ./configure \
+    && make -j "$(nproc)" \
+    && make install DESTDIR=/out
+
+
+FROM build-base AS pgactive
+# renovate: datasource=github-releases depName=aws/pgactive extractVersion=^v(?<version>.+)$
+ARG PGACTIVE_VERSION=2.1.9
+WORKDIR /src/pgactive
+RUN curl --fail --silent --show-error --location --retry 3 --output /tmp/pgactive.tar.gz \
+        "https://github.com/aws/pgactive/archive/refs/tags/v${PGACTIVE_VERSION}.tar.gz" \
+    && tar -xzf /tmp/pgactive.tar.gz --strip-components=1 \
+    && ./configure \
+    && make -j "$(nproc)" \
+    && make install DESTDIR=/out
 
 
 FROM build-base AS pguint
@@ -124,6 +180,16 @@ ARG PG_GRAPHQL_VERSION=1.6.3
 ARG PG_JSONSCHEMA_VERSION=0.3.4
 # renovate: datasource=github-releases depName=timescale/timescaledb-toolkit extractVersion=^(?<version>\d+\.\d+\.\d+)
 ARG TIMESCALEDB_TOOLKIT_VERSION=1.27.0
+# renovate: datasource=github-releases depName=pksunkara/pgx_ulid extractVersion=^v(?<version>.+)$
+ARG PGX_ULID_VERSION=0.2.3
+# renovate: datasource=github-releases depName=kaspermarstal/plprql extractVersion=^v(?<version>.+)$
+ARG PLPRQL_VERSION=18.0.2
+# renovate: datasource=github-releases depName=rustprooflabs/pgdd
+ARG PGDD_VERSION=0.6.1
+# renovate: datasource=github-releases depName=mpartel/postgres-protobuf extractVersion=^v(?<version>.+)$
+ARG POSTGRES_PROTOBUF_VERSION=0.3.3
+# renovate: datasource=github-releases depName=VADOSWARE/pg_idkit extractVersion=^v(?<version>.+)$
+ARG PG_IDKIT_VERSION=0.4.0
 COPY --chmod=0755 build/fetch-vendor.sh /usr/local/bin/fetch-vendor
 RUN fetch-vendor
 
@@ -140,6 +206,10 @@ RUN --mount=type=bind,source=build,target=/build \
 
 COPY --link --from=timescaledb /out/ /
 COPY --link --from=pgxn /out/ /
+COPY --link --from=github /out/ /
+COPY --link --from=citus /out/ /
+COPY --link --from=pgactive /out/ /
+COPY --link --from=vendor /out/ /
 COPY --link --from=pguint /out/ /
 COPY --link --from=sqlite-fdw /out/ /
 COPY --link --from=pg-stat-monitor /out/ /
@@ -152,6 +222,9 @@ COPY --link --from=pg-profile /out/ /
 COPY --chmod=0755 image/postgis-with-extensions-entrypoint.sh /usr/local/bin/
 # No --chmod here: it would also apply to the directory COPY creates, leaving it unsearchable.
 COPY image/preload-libraries.txt image/preload.sh /usr/local/share/postgis-with-extensions/
+# pgsodium and Supabase Vault run $sharedir/extension/pgsodium_getkey for their root key when preloaded.
+COPY --chmod=0755 image/pgsodium_getkey.sh /usr/local/bin/pgsodium_getkey
+RUN ln -sf /usr/local/bin/pgsodium_getkey "/usr/share/postgresql/${PG_MAJOR}/extension/pgsodium_getkey"
 COPY image/powa/install_all_powa_ext.sql /usr/local/src/
 COPY --chmod=0755 image/initdb/ /docker-entrypoint-initdb.d/
 

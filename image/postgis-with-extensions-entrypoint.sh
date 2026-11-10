@@ -146,6 +146,20 @@ mapfile -t added < <(
 )
 effective+=("${added[@]}")
 
+# Libraries that must load before every other one (Citus refuses to start otherwise) go first.
+ordered=()
+for lib in "${effective[@]}"; do
+	if [[ -n "${pwe_first[$lib]:-}" ]]; then
+		ordered+=("$lib")
+	fi
+done
+for lib in "${effective[@]}"; do
+	if [[ -z "${pwe_first[$lib]:-}" ]]; then
+		ordered+=("$lib")
+	fi
+done
+effective=("${ordered[@]}")
+
 flags=()
 if ((fresh || ${#added[@]})); then
 	value="$(

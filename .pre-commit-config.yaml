@@ -38,7 +38,7 @@ repos:
       - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
       - id: file-contents-sorter
-        files: ^(build/(apt|pgxn)-packages\.txt|tests/baseline/pg\d+\.txt)$
+        files: ^(build/(apt|github|pgxn)-packages\.txt|tests/baseline/pg\d+\.txt)$
 
   - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
     rev: 3.11.1

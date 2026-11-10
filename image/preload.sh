@@ -6,12 +6,12 @@ readonly PWE_REGISTRY=/usr/local/share/postgis-with-extensions/preload-libraries
 readonly PWE_LIBDIR="/usr/lib/postgresql/${PG_MAJOR}/lib"
 
 declare -ga pwe_order=()
-declare -gA pwe_rank=() pwe_preset=() pwe_requires=() pwe_workers=() pwe_settings=()
+declare -gA pwe_rank=() pwe_preset=() pwe_requires=() pwe_workers=() pwe_settings=() pwe_first=()
 
 # Load the registry into the pwe_* arrays.
 pwe_load_registry() {
-	local lib preset requires workers settings
-	while IFS='|' read -r lib preset requires workers settings; do
+	local lib preset requires workers settings position
+	while IFS='|' read -r lib preset requires workers settings position; do
 		if [[ -z "$lib" || "$lib" == \#* ]]; then
 			continue
 		fi
@@ -21,6 +21,9 @@ pwe_load_registry() {
 		pwe_requires[$lib]="$requires"
 		pwe_workers[$lib]="${workers:-0}"
 		pwe_settings[$lib]="$settings"
+		if [[ "$position" == first ]]; then
+			pwe_first[$lib]=1
+		fi
 	done <"$PWE_REGISTRY"
 }
 
