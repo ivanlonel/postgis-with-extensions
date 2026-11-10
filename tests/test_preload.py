@@ -39,14 +39,12 @@ def test_opt_in_library_brings_its_requirements(image: Image, default_server: Se
     """A library outside the presets is preloaded when named, with what it requires."""
     if "pg_documentdb" not in default_server.libraries():
         pytest.skip(f"DocumentDB isn't shipped for PostgreSQL {image.pg_major}")
+    opt_in = ["pg_cron", "pg_documentdb_core", "pg_documentdb", "pg_documentdb_extended_rum"]
     server = start_server(image, role="opt-in", env={"SHARED_PRELOAD_LIBRARIES": "pg_documentdb"})
     try:
-        assert server.preloaded() == [
-            "pg_cron",
-            "pg_documentdb_core",
-            "pg_documentdb",
-            "pg_documentdb_extended_rum",
-        ]
+        preloaded = server.preloaded()
+        assert [library for library in preloaded if library in opt_in] == opt_in
+        assert set(preloaded) == set(default_server.preloaded()) | set(opt_in)
         assert server.setting("documentdb.bg_worker_database_name") == server.setting(
             "cron.database_name"
         )

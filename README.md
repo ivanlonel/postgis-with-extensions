@@ -94,6 +94,13 @@ New clusters also get `wal_level = logical`, 10 WAL senders and replication slot
 After an update that brings a new TimescaleDB version, run `ALTER EXTENSION timescaledb UPDATE;` as the first command
 of a new session (`psql -X`) in each database that uses it.
 
+### Background worker slots
+
+Clusters created with images published before November 2026 set `max_worker_processes = 10`, fewer than the default
+preloaded libraries need: some of their background workers fail to start ("worker registration failed"), such as
+pglogical's, TimescaleDB's job schedulers and pg_partman's maintenance. New clusters get 8 plus what their libraries
+need. On older clusters, raise it (`ALTER SYSTEM SET max_worker_processes = 20;`) and restart.
+
 ### Security advisory: replication trusted from any host
 
 Clusters created with images published before November 2026 trust replication connections from any IPv4 address,
@@ -159,11 +166,11 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [pg_qualstats](https://github.com/powa-team/pg_qualstats) | all | `pg_qualstats` |  |
 | [pg_rational](https://github.com/begriffs/pg_rational) | all |  |  |
 | [pg_repack](https://github.com/reorg/pg_repack) | all |  |  |
-| [pg_rewrite](https://github.com/cybertec-postgresql/pg_rewrite) | all | `pg_rewrite` |  |
+| [pg_rewrite](https://github.com/cybertec-postgresql/pg_rewrite) | all | `pg_rewrite` | Needs `pg_rewrite` in `output_plugin_libraries`, which new clusters get |
 | [pg_roaringbitmap](https://github.com/ChenHuajun/pg_roaringbitmap) | all |  |  |
 | [pg_rowalesce](https://github.com/bigsmoke/pg_rowalesce) | all |  |  |
 | [pg_rrule](https://github.com/petropavel13/pg_rrule) | all |  |  |
-| [pg_show_plans](https://github.com/cybertec-postgresql/pg_show_plans) | all | `pg_show_plans` | Off by default, as it [crashes inserts into TimescaleDB hypertables](https://github.com/timescale/timescaledb/pull/10417); enable with `pg_show_plans.is_enabled = on` (on PostgreSQL 14, only at server start) |
+| [pg_show_plans](https://github.com/cybertec-postgresql/pg_show_plans) | all | `pg_show_plans` | Off by default, as it [crashes inserts into TimescaleDB hypertables](https://github.com/timescale/timescaledb/pull/10417); enable with `pg_show_plans.is_enabled = on`, which applies to the whole server even when `SET` in a session (on PostgreSQL 14, only at server start) |
 | [pg_similarity](https://github.com/eulerto/pg_similarity) | all |  |  |
 | [pg_squeeze](https://github.com/cybertec-postgresql/pg_squeeze) | all | `pg_squeeze` |  |
 | [pg_stat_kcache](https://github.com/powa-team/pg_stat_kcache) | all | `pg_stat_kcache` |  |

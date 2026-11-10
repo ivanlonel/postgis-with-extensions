@@ -3,11 +3,12 @@
 -- https://github.com/enova/pglogical_ticker
 CREATE EXTENSION pglogical_ticker CASCADE;  -- requires pglogical
 
--- One ticker table per replication set of this provider node. (tick() compares set names with
--- their quote_ident() form, so the set named "default", a reserved word, never ticks: check
--- default_insert_only.)
+-- One ticker table per replication set of this provider node, which tick() only ticks once it's
+-- replicated. (tick() compares set names with their quote_ident() form, so the set named
+-- "default", a reserved word, never ticks: check default_insert_only.)
 SELECT pglogical.create_node(node_name := 'pwe_ticker_provider', dsn := format('dbname=%s', current_database()));
 SELECT pglogical_ticker.deploy_ticker_tables();
+SELECT pglogical_ticker.add_ticker_tables_to_replication();
 SELECT pglogical_ticker.tick();
 
 SELECT plan(2);

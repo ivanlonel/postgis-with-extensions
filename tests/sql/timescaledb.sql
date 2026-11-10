@@ -34,9 +34,12 @@ GROUP BY bucket, location
 WITH NO DATA;
 CALL refresh_continuous_aggregate('conditions_hourly', NULL, NULL);
 
--- Policies are jobs; run one by hand.
+-- Policies are jobs; run one by hand, dropping readings over a year old.
+CREATE TABLE old_readings (time timestamptz NOT NULL, reading integer);
+SELECT create_hypertable('old_readings', 'time', chunk_time_interval => interval '1 day');
+INSERT INTO old_readings VALUES ('2020-01-01 12:00+00', 1), ('2020-01-05 12:00+00', 2);
 CREATE TEMPORARY TABLE jobs AS
-SELECT add_retention_policy('conditions', drop_after => interval '10 years') AS retention;
+SELECT add_retention_policy('old_readings', drop_after => interval '1 year') AS retention;
 -- (CALL takes no subquery argument.)
 DO $$
 DECLARE
@@ -75,14 +78,7 @@ SELECT is(
 	1440::bigint,
 	'compressed rows are filtered'
 );
-SELECT is(
-	(
-		SELECT total_successes FROM timescaledb_information.job_stats
-		WHERE job_id = (SELECT min(retention) FROM jobs)
-	),
-	1::bigint,
-	'policies run'
-);
+SELECT is((SELECT count(*) FROM show_chunks('old_readings')), 0::bigint, 'retention policies drop old chunks');
 SELECT ok(wait_until('SELECT count(*) > 0 FROM ticks'), 'the job scheduler runs jobs');
 SELECT * FROM finish(TRUE);
 
