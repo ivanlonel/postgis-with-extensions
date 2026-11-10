@@ -46,7 +46,7 @@ provides = [
 ]
 pg = ">=15"
 preload = "pg_documentdb"
-note = "SQL API only (no MongoDB wire-protocol gateway); `documentdb_extended_rum` also needs `pg_documentdb_extended_rum` preloaded; `documentdb_distributed` needs Citus, which isn't included"
+note = "SQL API only (no MongoDB wire-protocol gateway); `documentdb_distributed` needs Citus, which isn't included"
 
 [[extension]]
 name = "extra_window_functions"

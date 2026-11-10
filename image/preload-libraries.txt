@@ -36,5 +36,5 @@ pg_ivm|no||0|
 pg_rewrite|no||0|
 pg_textsearch|no||0|
 pg_documentdb_core|no||0|
-pg_documentdb|no|pg_documentdb_core,pg_cron|1|
+pg_documentdb|no|pg_documentdb_core,pg_cron,pg_documentdb_extended_rum|1|
 pg_documentdb_extended_rum|no||0|
