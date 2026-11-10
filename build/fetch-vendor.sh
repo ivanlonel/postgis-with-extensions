@@ -74,7 +74,7 @@ extract_deb pgdd \
 protobuf="postgres-protobuf-v${POSTGRES_PROTOBUF_VERSION}-linux-x86_64-for-pg${PG_MAJOR}"
 fetch "$workdir/protobuf.tar.gz" \
 	"https://github.com/mpartel/postgres-protobuf/releases/download/v${POSTGRES_PROTOBUF_VERSION}/${protobuf}.tar.gz"
-tar -xzf "$workdir/protobuf.tar.gz" -C "$workdir"
+tar -xf "$workdir/protobuf.tar.gz" -C "$workdir" # despite its name, not gzip-compressed
 install -m 0755 "$workdir/$protobuf/lib/postgres_protobuf.so" "$libdir"
 strip --strip-unneeded "$libdir/postgres_protobuf.so"
 install -m 0644 -t "$extdir" "$workdir/$protobuf"/extension/*
@@ -84,6 +84,6 @@ if ((PG_MAJOR >= 15)); then
 	fetch "$workdir/pg_idkit.tar.gz" \
 		"https://github.com/VADOSWARE/pg_idkit/releases/download/v${PG_IDKIT_VERSION}/pg_idkit-${PG_IDKIT_VERSION}-pg${PG_MAJOR}-gnu.tar.gz"
 	mkdir "$workdir/pg_idkit"
-	tar -xzf "$workdir/pg_idkit.tar.gz" -C "$workdir/pg_idkit"
+	tar -xf "$workdir/pg_idkit.tar.gz" -C "$workdir/pg_idkit"
 	install_extension_files "$workdir/pg_idkit"
 fi

@@ -1,6 +1,5 @@
-# <owner/repo> <tag, or commit branch=<branch>> [subdir=<dir>] [pg>=N] [pg<=N] [make variables]
-CrunchyData/pg_incremental v1.6.1 pg>=16
-DataDog/pg_tracing v0.1.3
+# <owner/repo> <tag, or commit branch=<branch>> [subdir=<dir>] [pg>=N] [pg<=N] [make variables]CrunchyData/pg_incremental v1.6.1 pg>=16
+DataDog/pg_tracing v0.1.3 PG_CFLAGS=
 Florents-Tselai/pgJQ 57a326b591117adfc2d2709bfdc545c1be905cc0 branch=main JQ_PREFIX=/usr
 HexaCluster/pg_statement_rollback v1.6
 adjust/kafka_fdw 8615082d986ba11ed70191bb4ca53c8cb7e4def3 branch=master
