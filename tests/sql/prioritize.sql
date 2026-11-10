@@ -6,7 +6,7 @@ SELECT set_backend_priority(pg_backend_pid(), get_backend_priority(pg_backend_pi
 
 SELECT plan(2);
 SELECT cmp_ok(get_backend_priority(pg_backend_pid()), '>=', 5, 'backend priorities are lowered');
-SELECT throws_ok(
-	'SELECT set_backend_priority(pg_backend_pid(), 0)', NULL, NULL, 'raising them back takes root'
-);
+-- The attempt raises no error: it just doesn't take effect.
+SELECT error_of('SELECT set_backend_priority(pg_backend_pid(), 0)');
+SELECT cmp_ok(get_backend_priority(pg_backend_pid()), '>=', 5, 'raising them back takes root');
 SELECT * FROM finish(TRUE);

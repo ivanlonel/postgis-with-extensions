@@ -88,6 +88,27 @@ def test_user_options_win(image: Image) -> None:
         server.remove()
 
 
+def test_show_plans_turned_on_at_startup(image: Image) -> None:
+    """
+    pg_show_plans, which the wrapper turns off, collects plans when turned on at startup.
+
+    That's the only way on PostgreSQL 14; ``tests/sql/pg_show_plans.sql`` turns it on per session.
+    """
+    server = start_server(
+        image,
+        env={"SHARED_PRELOAD_LIBRARIES": "pg_show_plans"},
+        command=["postgres", "-c", "pg_show_plans.is_enabled=on"],
+    )
+    try:
+        server.query("CREATE EXTENSION pg_show_plans")
+        plans = server.scalar(
+            "SELECT string_agg(plan, ' ') FROM pg_show_plans WHERE pid = pg_backend_pid()"
+        )
+        assert "Function Scan on pg_show_plans" in plans
+    finally:
+        server.remove()
+
+
 def test_user_preload_option_is_extended(image: Image) -> None:
     """A shared_preload_libraries option passed by the user is extended, not overridden."""
     server = start_server(

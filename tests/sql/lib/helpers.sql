@@ -22,6 +22,22 @@ BEGIN
 END;
 $$;
 
+-- The error a statement raises, with its detail, or NULL when it succeeds.
+CREATE OR REPLACE FUNCTION error_of(statement text)
+RETURNS text
+LANGUAGE plpgsql
+AS $$
+DECLARE
+	detail text;
+BEGIN
+	EXECUTE statement;
+	RETURN NULL;
+EXCEPTION WHEN OTHERS THEN
+	GET STACKED DIAGNOSTICS detail = PG_EXCEPTION_DETAIL;
+	RETURN concat_ws(E'\n', SQLERRM, nullif(detail, ''));
+END;
+$$;
+
 -- The plan of a query, to check that it uses an index (or a custom scan).
 CREATE OR REPLACE FUNCTION plan_of(query text)
 RETURNS text

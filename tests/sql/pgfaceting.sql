@@ -153,10 +153,14 @@ SELECT is(
 SELECT is(
 	(
 		SELECT sum(cardinality)::bigint
-		FROM faceting.count_results('documents'::regclass, filters => ARRAY[]::faceting.facet_filter[])
-		WHERE facet_name = 'type'
+		FROM
+			faceting.count_results(
+				'documents'::regclass,
+				filters => ARRAY[ROW('type', 'text/csv')]::faceting.facet_filter[]
+			)
+		WHERE facet_name = 'category_id'
 	),
-	11::bigint,
+	1::bigint,
 	'new rows reach the facets'
 );
 SELECT ok(

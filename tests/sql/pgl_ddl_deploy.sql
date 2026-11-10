@@ -1,7 +1,9 @@
 -- preload: pglogical
 -- pg: <=17
 -- https://github.com/enova/pgl_ddl_deploy
-CREATE EXTENSION pgl_ddl_deploy CASCADE;  -- requires pglogical
+-- pgl_ddl_deploy needs pglogical but doesn't declare it, so CASCADE doesn't bring it.
+CREATE EXTENSION pglogical;
+CREATE EXTENSION pgl_ddl_deploy;
 
 -- Replicate the DDL of schemas matching "happy" through pglogical's queue.
 SELECT pglogical.create_node(node_name := 'pwe_ddl_provider', dsn := format('dbname=%s', current_database()));

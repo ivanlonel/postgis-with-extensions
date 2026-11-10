@@ -9,8 +9,9 @@ CREATE TABLE public.bgw_events (id integer, at date NOT NULL) PARTITION BY RANGE
 SELECT partman.create_parent('public.bgw_events', p_control := 'at', p_interval := '1 day', p_premake := 1);
 CREATE TEMPORARY TABLE initial AS
 SELECT count(*) AS partitions FROM partman.show_partitions('public.bgw_events');
--- Four more days ahead: the next maintenance run creates their partitions.
-UPDATE partman.part_config SET premake = 5
+-- Four more days ahead: the next maintenance run creates their partitions (even though the set
+-- holds no data, which otherwise stops time-based sets from growing).
+UPDATE partman.part_config SET premake = 5, infinite_time_partitions = TRUE
 WHERE parent_table = 'public.bgw_events';
 
 -- Have the worker run every second, as the superuser, then put the settings back. (sqlfluff

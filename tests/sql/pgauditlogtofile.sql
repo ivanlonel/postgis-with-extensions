@@ -1,11 +1,14 @@
 -- preload: pgaudit, pgauditlogtofile
 -- https://github.com/fmbiete/pgauditlogtofile
+-- Each backend buffers its audit file writes until it exits: audit a session of its own.
 CREATE EXTENSION pgaudit;
 CREATE EXTENSION pgauditlogtofile;
+CREATE EXTENSION dblink;
 
-SELECT set_config('pgaudit.log', 'ddl', FALSE);
-CREATE TABLE pwe_ddl_audited (id integer);
-SELECT set_config('pgaudit.log', 'none', FALSE);
+SELECT dblink_exec(
+	format('dbname=%s', current_database()),
+	'SET pgaudit.log = ddl; CREATE TABLE pwe_ddl_audited (id integer)'
+);
 
 SELECT plan(2);
 SELECT ok(

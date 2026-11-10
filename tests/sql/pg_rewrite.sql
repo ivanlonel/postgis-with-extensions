@@ -16,7 +16,7 @@ CREATE TABLE measurement_aux_low PARTITION OF measurement_aux FOR VALUES FROM (m
 CREATE TABLE measurement_aux_high PARTITION OF measurement_aux FOR VALUES FROM (501) TO (maxvalue);
 ALTER TABLE measurement_aux ADD PRIMARY KEY (id);
 
-SELECT partition_table('measurement', 'measurement_aux', 'measurement_old');
+SELECT rewrite_table('measurement', 'measurement_aux', 'measurement_old');
 
 SELECT plan(3);
 SELECT is(
