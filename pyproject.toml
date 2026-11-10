@@ -56,6 +56,7 @@ skip-checking-short-docstrings = false
 
 [tool.typos]
 default.extend-words.dateset = "dateset"  # MobilityDB's set-of-dates type
+default.extend-words.BUI = "BUI"  # PostGIS raster pixel types: 8BUI, 16BUI, 32BUI
 
 [tool.ty]
 environment.python-version = "3.13"

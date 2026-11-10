@@ -21,3 +21,19 @@ BEGIN
 	END LOOP;
 END;
 $$;
+
+-- The plan of a query, to check that it uses an index (or a custom scan).
+CREATE OR REPLACE FUNCTION plan_of(query text)
+RETURNS text
+LANGUAGE plpgsql
+AS $$
+DECLARE
+	line text;
+	plan text := '';
+BEGIN
+	FOR line IN EXECUTE 'EXPLAIN (COSTS OFF) ' || query LOOP
+		plan := plan || line || E'\n';
+	END LOOP;
+	RETURN plan;
+END;
+$$;
