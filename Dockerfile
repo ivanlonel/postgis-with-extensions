@@ -71,6 +71,8 @@ RUN while read -r dist version; do \
 
 
 FROM build-base AS github
+# Make variables in the list work around upstream issues: pg_tracing's PG_CFLAGS= drops its -Werror,
+# which trixie's stricter libcurl headers trip.
 COPY --chmod=0755 build/build-github.sh /usr/local/bin/build-github
 COPY build/github-packages.txt /tmp/github-packages.txt
 RUN build-github /tmp/github-packages.txt
