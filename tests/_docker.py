@@ -150,6 +150,14 @@ class Server:
             "exec", *options, "--user", "postgres", self.name, *args, check=False, stdin=stdin
         )
 
+    def spawn(self, *args: str) -> None:
+        """
+        Start a command in the container as the postgres user, without waiting for it.
+
+        :param *args: The command and its arguments.
+        """
+        docker("exec", "--detach", "--user", "postgres", self.name, *args)
+
     def psql(
         self, *args: str, database: str = "postgres", stdin: str | None = None
     ) -> subprocess.CompletedProcess[str]:

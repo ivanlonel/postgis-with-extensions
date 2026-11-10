@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
@@ -22,7 +23,10 @@ SQL_DIR: Final = TESTS_DIR / "sql"
 """Per-extension SQL scripts, mounted at ``/tests/sql`` in the servers."""
 
 ALL_DATABASE: Final = "extensions"
-"""``POSTGRES_DB`` of the server preloading everything, which is also its pg_cron database."""
+"""``POSTGRES_DB`` of the servers running the SQL scripts, which is also their pg_cron database."""
+
+HTTP_PORT: Final = 8000
+"""Port of the HTTP server that serves ``tests/sql/data`` inside the servers, on 127.0.0.1."""
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
@@ -73,6 +77,63 @@ def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
     metafunc.parametrize("extension_name", names)
 
 
+def start_sql_server(image: Image, *, role: str, preload: str | None = None) -> Server:
+    """
+    Start a server for the SQL scripts: they're mounted, and their data is served over HTTP.
+
+    :param image: The image to run.
+    :param role: Short name for what the server is for.
+    :param preload: ``SHARED_PRELOAD_LIBRARIES``, if any.
+    :return: The running server.
+    """
+    env = {"POSTGRES_DB": ALL_DATABASE}
+    if preload:
+        env["SHARED_PRELOAD_LIBRARIES"] = preload
+    server = start_server(image, role=role, env=env, mounts={str(SQL_DIR): "/tests/sql"})
+    server.spawn(
+        "python3",
+        "-m",
+        "http.server",
+        str(HTTP_PORT),
+        "--bind",
+        "127.0.0.1",
+        "--directory",
+        "/tests/sql/data",
+    )
+    return server
+
+
+@dataclass(slots=True)
+class ServerPool:
+    """Servers preloading given sets of libraries, started on demand, one alive at a time."""
+
+    image: Image
+    """The image the servers run."""
+
+    _current: tuple[frozenset[str], Server] | None = field(default=None, init=False)
+
+    def get(self, preload: frozenset[str]) -> Server:
+        """
+        Get a server that preloads exactly these libraries (and those they require).
+
+        :param preload: The libraries.
+        :return: The running server, reused while the same set is asked for.
+        """
+        if self._current is not None and self._current[0] == preload:
+            return self._current[1]
+        self.close()
+        role = "own." + ".".join(sorted(preload))[:40]
+        server = start_sql_server(self.image, role=role, preload=",".join(sorted(preload)))
+        self._current = (preload, server)
+        return server
+
+    def close(self) -> None:
+        """Remove the server the pool holds, if any."""
+        if self._current is not None:
+            self._current[1].remove()
+            self._current = None
+
+
 @pytest.fixture(scope="session")
 def image(pytestconfig: pytest.Config) -> Image:
     """
@@ -95,7 +156,7 @@ def default_server(image: Image) -> Iterator[Server]:
     :param image: The image under test.
     :yield: The running server.
     """
-    server = start_server(image, role="default", mounts={str(SQL_DIR): "/tests/sql"})
+    server = start_sql_server(image, role="default")
     yield server
     server.remove()
 
@@ -103,16 +164,24 @@ def default_server(image: Image) -> Iterator[Server]:
 @pytest.fixture(scope="session")
 def all_server(image: Image) -> Iterator[Server]:
     """
-    Run the image with every preloadable library enabled.
+    Run the image with the ``all`` preset: every preloadable library but the opt-in ones.
 
     :param image: The image under test.
     :yield: The running server.
     """
-    server = start_server(
-        image,
-        role="all",
-        env={"SHARED_PRELOAD_LIBRARIES": "all", "POSTGRES_DB": ALL_DATABASE},
-        mounts={str(SQL_DIR): "/tests/sql"},
-    )
+    server = start_sql_server(image, role="all", preload="all")
     yield server
     server.remove()
+
+
+@pytest.fixture(scope="session")
+def server_pool(image: Image) -> Iterator[ServerPool]:
+    """
+    Provide servers preloading only what a test needs.
+
+    :param image: The image under test.
+    :yield: The pool.
+    """
+    pool = ServerPool(image)
+    yield pool
+    pool.close()
