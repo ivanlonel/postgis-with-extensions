@@ -5,6 +5,9 @@ CREATE EXTENSION postgis;
 CREATE EXTENSION address_standardizer;
 CREATE EXTENSION address_standardizer_data_us;
 CREATE EXTENSION postgis_tiger_geocoder CASCADE;
+-- The tiger geocoder's script puts its schema first in the session's search_path, where the
+-- extensions created next would land.
+RESET search_path;
 CREATE EXTENSION h3_postgis CASCADE;
 CREATE EXTENSION pgrouting;
 CREATE EXTENSION timescaledb;

@@ -23,13 +23,11 @@ RUN apt-get update \
         libcurl4-openssl-dev \
         libhiredis-dev \
         libicu-dev \
-        libjq-dev \
         libkrb5-dev \
         liblz4-dev \
         libnuma-dev \
         libpam0g-dev \
         libpoppler-glib-dev \
-        librdkafka-dev \
         libreadline-dev \
         libselinux1-dev \
         libsodium-dev \
@@ -83,12 +81,9 @@ RUN build-pgxs "https://api.pgxn.org/dist/datasketches/${DATASKETCHES_VERSION}/d
 
 
 FROM build-base AS github
-# Make variables in the list work around upstream issues: pg_tracing's PG_CFLAGS= drops its -Werror,
-# which trixie's stricter libcurl headers trip. decoder_raw follows PostgreSQL's development branch
-# without version checks, so it's pinned (without a branch, which Renovate would follow) to the
-# last commits building on 14-16 and on 17-18. pg_curl is cloned: its archives, on PGXN as on
-# GitHub, leave out its pg_whitelist submodule. smlar comes from the fork of jirutka/smlar that adds
-# a one-line fix for PostgreSQL 18.
+# decoder_raw follows PostgreSQL's development branch without version checks, so it's pinned
+# (without a branch, which Renovate would follow) to the last commits building on 14-16 and on
+# 17-18. pg_curl is cloned: its archives, on PGXN as on GitHub, leave out its pg_whitelist submodule.
 COPY --chmod=0755 build/build-github.sh /usr/local/bin/build-github
 COPY build/github-packages.txt /tmp/github-packages.txt
 RUN build-github /tmp/github-packages.txt

@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
 UNCREATABLE: Final = {
     "documentdb_distributed": "needs Citus and DocumentDB preloaded together, which isn't tested",
+    "decoderbufs": "a logical decoding plugin whose package ships a control file but no script",
 }
 """Extensions that can't be created on purpose, with the reason."""
 

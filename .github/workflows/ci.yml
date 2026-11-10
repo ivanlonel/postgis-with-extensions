@@ -146,6 +146,8 @@ jobs:
           enable-cache: false
 
       - name: Test
+        # The tests take about 15 minutes: fail a hung run in time to collect its server logs.
+        timeout-minutes: 45
         env:
           TARGET: ${{ matrix.target }}
           STRICT_DRIFT: ${{ github.event_name == 'pull_request' }}
@@ -162,6 +164,18 @@ jobs:
             args+=(--strict-drift)
           fi
           uv run --exact pytest "${args[@]}"
+
+      - name: Save the logs of the servers left running
+        # The tests save each server's log as its container goes away, which a timeout prevents.
+        if: ${{ !cancelled() }}
+        env:
+          PWE_TEST_LOGS: ${{ runner.temp }}/container-logs
+        run: |
+          mkdir -p "$PWE_TEST_LOGS"
+          docker ps --all --filter label=io.github.ivanlonel.postgis-with-extensions.test --format '{{.Names}}' |
+            while read -r name; do
+              docker logs "$name" > "$PWE_TEST_LOGS/$name.log" 2>&1
+            done
 
       - name: Upload the test report
         if: ${{ !cancelled() }}

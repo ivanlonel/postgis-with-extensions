@@ -3,6 +3,7 @@
 -- A single-node cluster: the coordinator holds the shards too.
 CREATE EXTENSION citus;
 SELECT citus_set_coordinator_host('localhost', current_setting('port')::integer);
+SELECT citus_set_node_property('localhost', current_setting('port')::integer, 'shouldhaveshards', TRUE);
 -- Should a shard query connect back to the coordinator, give Citus the password of the test
 -- containers (the same throwaway one as tests/_docker.py's PASSWORD).
 INSERT INTO pg_dist_authinfo (nodeid, rolename, authinfo)

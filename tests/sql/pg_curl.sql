@@ -1,7 +1,9 @@
 -- https://github.com/RekGRpth/pg_curl
--- Fetch a file from the tests' local HTTP server.
+-- Fetch a file from the tests' local HTTP server. pg_curl frees its handle when the transaction
+-- ends (pg_curl.transaction): the request and its answer share one.
 CREATE EXTENSION pg_curl;
 
+BEGIN;
 SELECT curl_easy_reset();
 SELECT curl_easy_setopt_url('http://127.0.0.1:8000/hello.json');
 SELECT curl_easy_perform();
@@ -13,3 +15,4 @@ SELECT is(
     'libcurl fetches URLs'
 );
 SELECT * FROM finish(TRUE);
+COMMIT;
