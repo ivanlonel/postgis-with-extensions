@@ -63,8 +63,22 @@ SELECT is(
 	1::bigint,
 	'temporal points are found by bounding box'
 );
-SELECT ok(intspan '[1, 5]' @> 3, 'spans contain values');
-SELECT ok(tstzspan '[2000-01-01, 2000-01-03]' @> timestamptz '2000-01-02', 'time spans contain instants');
+SELECT is(
+	(
+		SELECT ST_AsText(startValue(trip)) FROM trips
+		WHERE id = 1
+	),
+	'POINT(0 0)',
+	'temporal values start where they start'
+);
+SELECT is(
+	(
+		SELECT endTimestamp(trip) FROM trips
+		WHERE id = 1
+	),
+	'2000-01-03'::timestamptz,
+	'temporal values end when they end'
+);
 SELECT is(
 	(
 		SELECT twAvg(temperature) FROM trips
