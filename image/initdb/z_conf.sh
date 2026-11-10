@@ -14,7 +14,7 @@ source /usr/local/share/postgis-with-extensions/preload.sh
 pwe_load_registry
 
 conf="$PGDATA/postgresql.conf"
-trusted_plugins='pgoutput, test_decoding, wal2json, pglogical_output, pg_squeeze'
+trusted_plugins='pgoutput, test_decoding, wal2json, pglogical_output, pg_squeeze, pg_rewrite'
 
 if [[ -z "${PWE_DEFAULT_PRELOAD:-}" ]]; then
 	cat >>"$conf" <<-EOT
@@ -47,6 +47,11 @@ preload="$(
 	IFS=,
 	printf '%s' "${libraries[*]}"
 )"
+# Earlier releases set 10, which left some of these libraries' background workers without a slot.
+workers=8
+for lib in "${libraries[@]}"; do
+	workers=$((workers + ${pwe_workers[$lib]:-0}))
+done
 
 cat >>"$conf" <<-EOT
 	listen_addresses = '*'
@@ -75,8 +80,10 @@ cat >>"$conf" <<-EOT
 
 	# pglogical
 	wal_level = 'logical'
-	max_worker_processes = 10   # one per database needed on provider node, one per node on subscriber node
 	max_replication_slots = 10  # one per node needed on provider node
 	max_wal_senders = 10        # one per node needed on provider node
 	track_commit_timestamp = on # needed for last/first update wins conflict resolution
+
+	# PostgreSQL's 8 background workers, plus those of the preloaded libraries
+	max_worker_processes = $workers
 EOT

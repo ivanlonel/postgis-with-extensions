@@ -1,10 +1,12 @@
 -- preload: pg_show_plans
+-- conflicts: timescaledb
 -- pg: >=15
 -- https://github.com/cybertec-postgresql/pg_show_plans
--- (On PostgreSQL 14, plan collection can only be turned on at startup: see tests/test_preload.py.)
+-- The image turns plan collection off, as it crashes inserts into TimescaleDB hypertables. Turning
+-- it on, even from a session, turns it on for the whole server: hence the conflict. (On PostgreSQL
+-- 14, it can only be turned on at startup: see tests/test_preload.py.)
 CREATE EXTENSION pg_show_plans;
 
--- The image turns plan collection off (it crashes TimescaleDB inserts): turn it on for this session.
 SELECT set_config('pg_show_plans.is_enabled', 'on', FALSE);
 
 SELECT plan(1);

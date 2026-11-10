@@ -25,9 +25,17 @@ psql=(psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --no-password --no-psq
 
 loaded="$(PGHOST='' PGHOSTADDR='' "${psql[@]}" --dbname postgres --tuples-only --no-align \
 	--command 'SHOW shared_preload_libraries')"
-if [[ ",${loaded//[[:space:]]/}," != *,pg_stat_statements,* ]]; then
-	echo "postgis-with-extensions: skipping the PoWA setup: pg_stat_statements isn't preloaded" \
-		"(was the image's entrypoint overridden?)" >&2
+loaded=",${loaded//[[:space:]]/},"
+# A shared_preload_libraries option, or an overridden entrypoint, can leave them out.
+IFS=',' read -r -a required <<<"${pwe_requires[powa]:-}"
+missing=()
+for lib in "${required[@]}"; do
+	if [[ "$loaded" != *",$lib,"* ]]; then
+		missing+=("$lib")
+	fi
+done
+if ((${#missing[@]})); then
+	echo "postgis-with-extensions: skipping the PoWA setup, which needs ${missing[*]} preloaded" >&2
 	exit 0
 fi
 

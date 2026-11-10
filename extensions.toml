@@ -222,6 +222,7 @@ url = "https://github.com/reorg/pg_repack"
 name = "pg_rewrite"
 url = "https://github.com/cybertec-postgresql/pg_rewrite"
 preload = "pg_rewrite"
+note = "Needs `pg_rewrite` in `output_plugin_libraries`, which new clusters get"
 
 [[extension]]
 name = "pg_roaringbitmap"
@@ -240,7 +241,7 @@ url = "https://github.com/petropavel13/pg_rrule"
 name = "pg_show_plans"
 url = "https://github.com/cybertec-postgresql/pg_show_plans"
 preload = "pg_show_plans"
-note = "Off by default, as it [crashes inserts into TimescaleDB hypertables](https://github.com/timescale/timescaledb/pull/10417); enable with `pg_show_plans.is_enabled = on` (on PostgreSQL 14, only at server start)"
+note = "Off by default, as it [crashes inserts into TimescaleDB hypertables](https://github.com/timescale/timescaledb/pull/10417); enable with `pg_show_plans.is_enabled = on`, which applies to the whole server even when `SET` in a session (on PostgreSQL 14, only at server start)"
 
 [[extension]]
 name = "pg_similarity"

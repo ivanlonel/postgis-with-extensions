@@ -17,7 +17,7 @@ pg_show_plans|legacy||0|pg_show_plans.is_enabled=off
 pg_similarity|legacy||0|
 pg_squeeze|legacy||1|
 pgaudit|legacy||0|
-pgauditlogtofile|legacy|pgaudit|0|
+pgauditlogtofile|legacy|pgaudit|1|
 pglogical|legacy||2|wal_level=logical;track_commit_timestamp=on
 pgmemcache|legacy||0|
 plprofiler|legacy||0|

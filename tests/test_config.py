@@ -28,7 +28,9 @@ def test_new_cluster_defaults(default_server: Server, image: Image) -> None:
         assert default_server.setting("timescaledb.telemetry_level") == "off"
         assert default_server.setting("pg_show_plans.is_enabled") == "off"
         assert default_server.setting("track_commit_timestamp") == "on"
-        assert default_server.setting("max_worker_processes") == "10"
+        preloaded = set(default_server.preloaded())
+        workers = sum(library.workers for library in load_registry() if library.name in preloaded)
+        assert int(default_server.setting("max_worker_processes")) == 8 + workers
 
 
 def test_enabled_library_settings(all_server: Server) -> None:
