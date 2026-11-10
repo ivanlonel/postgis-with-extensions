@@ -1,12 +1,20 @@
 # <package, % = PG major> [pg>=N] [pg<=N] [postgis>=X.Y] [postgis<=X.Y]
+libhiredis1.1.0
+libjq1
+libpoppler-glib8t64
+librdkafka1
+libsodium23
 libsqlite3-mod-spatialite pg<=17
+liburiparser1
 pgagent
 postgresql-%-address-standardizer postgis>=3.7
 postgresql-%-age
 postgresql-%-asn1oid
+postgresql-%-auto-failover
 postgresql-%-credcheck
 postgresql-%-cron
 postgresql-%-debversion
+postgresql-%-decoderbufs
 postgresql-%-dirtyread
 postgresql-%-documentdb pg>=15
 postgresql-%-extra-window-functions
@@ -44,6 +52,7 @@ postgresql-%-pg-uuidv7
 postgresql-%-pg-wait-sampling
 postgresql-%-pgaudit
 postgresql-%-pgauditlogtofile
+postgresql-%-pgextwlist
 postgresql-%-pgfaceting
 postgresql-%-pgfincore
 postgresql-%-pgl-ddl-deploy pg<=17
@@ -76,6 +85,7 @@ postgresql-%-prioritize
 postgresql-%-q3c
 postgresql-%-rational
 postgresql-%-repack
+postgresql-%-repmgr
 postgresql-%-roaringbitmap
 postgresql-%-rum
 postgresql-%-semver

@@ -1,10 +1,12 @@
 # Registry of the libraries this image can add to shared_preload_libraries, in canonical order.
 # Columns (|-separated): library | preset | required libraries | background workers | settings
-# applied when SHARED_PRELOAD_LIBRARIES adds the library.
+# applied when SHARED_PRELOAD_LIBRARIES adds the library | optional "first" for a library that
+# must load before every other one (the entrypoint puts it ahead of the cluster's own list).
 # Presets: "legacy" libraries are in both the "legacy" preset (the pre-3.7 default) and "all";
 # "all" ones only in "all"; "none" ones are preloaded only when named (or required).
 # Settings are ;-separated name=value pairs: extension (dotted) GUCs only apply when not already
 # configured, core GUCs are enforced. @CRON_DB@ and @PARTMAN_DB@ expand to the target databases.
+citus|none||2||first
 pg_stat_statements|legacy||0|
 powa|legacy|pg_stat_statements,pg_qualstats,pg_stat_kcache,pg_wait_sampling|1|powa.frequency=30s
 pg_qualstats|legacy||0|
@@ -36,6 +38,16 @@ vchord|all||0|
 pg_ivm|all||0|
 pg_rewrite|all||0|
 pg_textsearch|all||0|
+pg_store_plans|all||0|
+pg_tracing|all||0|
+plan_filter|all||0|
+pg_savior|all||0|pg_savior.enabled=off
+pg_statement_rollback|all||0|pg_statement_rollback.enabled=off
+pgsodium|all||0|
+supabase_vault|all||0|
+repmgr|all||0|
+pgautofailover|all||1|
+pgactive|all||2|wal_level=logical;track_commit_timestamp=on
 pg_documentdb_core|none||0|
 pg_documentdb|none|pg_documentdb_core,pg_cron,pg_documentdb_extended_rum|1|documentdb.bg_worker_database_name=@CRON_DB@
 pg_documentdb_extended_rum|none||0|

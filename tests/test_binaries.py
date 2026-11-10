@@ -1,4 +1,4 @@
-"""Client programs that come with extensions: pg_repack and the pgAgent daemon."""
+"""Client programs that come with extensions: pg_repack, the pgAgent daemon and repmgr."""
 
 from __future__ import annotations
 
@@ -26,6 +26,17 @@ END
 $$;
 """
 """A pgAgent job with one SQL step, due now."""
+
+REPMGR_CONF: Final = """\
+node_id=1
+node_name='primary'
+conninfo='host=/var/run/postgresql dbname=postgres user=postgres'
+data_directory='{data_directory}'
+"""
+"""Configuration of a one-node repmgr cluster on the test server."""
+
+REPMGR_CONF_PATH: Final = "/tmp/repmgr.conf"  # noqa: S108 -- inside the throwaway test container
+"""Where repmgr's configuration is written, in the container."""
 
 
 def test_pg_repack_rewrites_a_table(default_server: Server) -> None:
@@ -64,5 +75,22 @@ def test_pgagent_runs_jobs(image: Image) -> None:
             time.sleep(1)
         assert server.scalar("SELECT count(*) FROM ran") != "0", server.logs()
         assert server.scalar("SELECT jlgstatus FROM pgagent.pga_joblog LIMIT 1") == "s"
+    finally:
+        server.remove()
+
+
+def test_repmgr_registers_the_primary(image: Image) -> None:
+    """The repmgr command registers the server as its cluster's primary, then reports it."""
+    server = start_server(image, role="repmgr", env={"SHARED_PRELOAD_LIBRARIES": "repmgr"})
+    try:
+        config = REPMGR_CONF.format(data_directory=server.setting("data_directory"))
+        written = server.exec("sh", "-c", f"cat > {REPMGR_CONF_PATH}", stdin=config)
+        assert written.returncode == 0, written.stderr
+        register = server.exec("repmgr", "-f", REPMGR_CONF_PATH, "primary", "register")
+        assert register.returncode == 0, register.stderr
+        assert server.scalar("SELECT type FROM repmgr.nodes WHERE node_id = 1") == "primary"
+        show = server.exec("repmgr", "-f", REPMGR_CONF_PATH, "cluster", "show")
+        assert show.returncode == 0, show.stderr
+        assert "primary" in show.stdout
     finally:
         server.remove()

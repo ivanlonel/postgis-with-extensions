@@ -131,6 +131,9 @@ class PreloadLibrary:
     settings: tuple[tuple[str, str], ...]
     """Settings the entrypoint applies when it adds the library, as ``(name, value)`` pairs."""
 
+    first: bool
+    """Whether the library must load before every other one (Citus refuses to start otherwise)."""
+
     @property
     def legacy(self) -> bool:
         """Whether the ``legacy`` preset (the pre-3.7 default) includes the library."""
@@ -170,18 +173,20 @@ def load_registry(path: Path = REGISTRY_PATH) -> tuple[PreloadLibrary, ...]:
 
     :param path: The registry file.
     :return: The libraries, in canonical order.
-    :raise ValueError: If a line doesn't have the five ``|``-separated columns, or names an
-        unknown preset.
+    :raise ValueError: If a line doesn't have five ``|``-separated columns (or six, the last
+        being ``first`` or empty), or names an unknown preset.
     """
     libraries: list[PreloadLibrary] = []
     for line in path.read_text(encoding="utf-8").splitlines():
         if not line.strip() or line.startswith("#"):
             continue
         columns = line.split("|")
-        if len(columns) != 5:  # noqa: PLR2004 -- the registry's documented column count
+        if len(columns) == 5:  # noqa: PLR2004 -- the documented columns, without the optional last one
+            columns.append("")
+        if len(columns) != 6 or columns[5] not in {"", "first"}:  # noqa: PLR2004 -- documented column count
             msg = f"malformed registry line: {line!r}"
             raise ValueError(msg)
-        name, preset, requires, workers, settings = columns
+        name, preset, requires, workers, settings, position = columns
         if preset not in get_args(Preset.__value__):
             msg = f"unknown preset {preset!r} in registry line: {line!r}"
             raise ValueError(msg)
@@ -196,6 +201,7 @@ def load_registry(path: Path = REGISTRY_PATH) -> tuple[PreloadLibrary, ...]:
                     for key, _, value in (item.partition("=") for item in settings.split(";"))
                     if key
                 ),
+                first=position == "first",
             )
         )
     return tuple(libraries)

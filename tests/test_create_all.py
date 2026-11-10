@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from tests.conftest import ServerPool
 
 UNCREATABLE: Final = {
-    "documentdb_distributed": "needs Citus, which the image doesn't ship",
+    "documentdb_distributed": "needs Citus and DocumentDB preloaded together, which isn't tested",
 }
 """Extensions that can't be created on purpose, with the reason."""
 

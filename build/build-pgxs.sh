@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
 # Download a source archive and build it with PGXS, installing into the /out staging tree.
 #
-# Usage: build-pgxs <archive URL (.tar.* or .zip)> [make variable assignments...]
+# Usage: build-pgxs [--subdir=<dir>] <archive URL (.tar.* or .zip)> [make variable assignments...]
+# --subdir builds a directory of the archive instead of its root.
 set -Eeuo pipefail
 
+subdir=
+if [[ "${1:-}" == --subdir=* ]]; then
+	subdir="${1#--subdir=}"
+	shift
+fi
+
 if (($# < 1)); then
-	echo "usage: ${0##*/} <archive URL> [make variables...]" >&2
+	echo "usage: ${0##*/} [--subdir=<dir>] <archive URL> [make variables...]" >&2
 	exit 64
 fi
 
@@ -28,6 +35,9 @@ srcdir="$workdir/src"
 mapfile -t entries < <(find "$srcdir" -mindepth 1 -maxdepth 1)
 if ((${#entries[@]} == 1)) && [[ -d "${entries[0]}" ]]; then
 	srcdir="${entries[0]}"
+fi
+if [[ -n "$subdir" ]]; then
+	srcdir="$srcdir/$subdir"
 fi
 
 make -C "$srcdir" -j "$(nproc)" PG_CONFIG=pg_config "$@"

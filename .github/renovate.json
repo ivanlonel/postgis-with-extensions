@@ -73,6 +73,30 @@
         "(?m)^(?<depName>[a-z0-9_]+) (?<currentValue>\\S+)$"
       ],
       "datasourceTemplate": "custom.pgxn"
+    },
+    {
+      // "<owner/repo> <tag> ..." lines of the GitHub package list. A tag has a non-hex character,
+      // which tells it from a commit (Renovate's regex engine has no lookahead).
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^build/github-packages\\.txt$/"
+      ],
+      "matchStrings": [
+        "(?m)^(?<depName>[\\w.-]+/[\\w.-]+) (?<currentValue>[^\\s]*[^0-9a-f\\s][^\\s]*)"
+      ],
+      "datasourceTemplate": "github-tags"
+    },
+    {
+      // "<owner/repo> <commit> branch=<branch> ..." lines: follow the branch's head.
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^build/github-packages\\.txt$/"
+      ],
+      "matchStrings": [
+        "(?m)^(?<depName>[\\w.-]+/[\\w.-]+) (?<currentDigest>[0-9a-f]{40}) branch=(?<currentValue>\\S+)"
+      ],
+      "datasourceTemplate": "git-refs",
+      "packageNameTemplate": "https://github.com/{{{depName}}}"
     }
   ],
   "packageRules": [
@@ -112,6 +136,29 @@
         "prek"
       ],
       "groupName": "python tooling"
+    },
+    {
+      // CYBERTEC tags its releases RELEASE_<major>_<minor>_<patch>.
+      "matchDepNames": [
+        "cybertec-postgresql/db_migrator",
+        "cybertec-postgresql/ora_migrator"
+      ],
+      "versioning": "regex:^RELEASE_(?<major>\\d+)_(?<minor>\\d+)_(?<patch>\\d+)$"
+    },
+    {
+      // The Citus lines built for older PostgreSQL majors stay on their own major (see Dockerfile).
+      "matchDepNames": [
+        "citusdata/citus"
+      ],
+      "matchCurrentValue": "/^13\\./",
+      "allowedVersions": "/^13\\./"
+    },
+    {
+      "matchDepNames": [
+        "citusdata/citus"
+      ],
+      "matchCurrentValue": "/^12\\./",
+      "allowedVersions": "/^12\\./"
     },
     {
       // A new major (e.g. of TimescaleDB) can require users to update their databases: review it.
