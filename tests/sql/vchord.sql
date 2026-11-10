@@ -3,10 +3,12 @@
 CREATE EXTENSION vchord CASCADE;  -- requires vector
 
 CREATE TABLE items (id bigint PRIMARY KEY, embedding vector(3));
+-- Seeded random vectors: no near-duplicates, the same on every run.
+SELECT setseed(0.42);
 INSERT INTO items
 SELECT
 	i,
-	ARRAY[sin(i), cos(i), sin(2 * i)]::vector(3)
+	ARRAY[random(), random(), random()]::vector(3)
 FROM generate_series(1, 2000) AS i;
 CREATE INDEX items_vchordrq_idx ON items USING vchordrq (embedding vector_l2_ops);
 ANALYZE items;

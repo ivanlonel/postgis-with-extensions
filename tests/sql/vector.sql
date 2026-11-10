@@ -2,10 +2,12 @@
 CREATE EXTENSION vector;
 
 CREATE TABLE items (id bigint PRIMARY KEY, embedding vector(3));
+-- Seeded random vectors: no near-duplicates, the same on every run.
+SELECT setseed(0.42);
 INSERT INTO items
 SELECT
 	i,
-	ARRAY[sin(i), cos(i), sin(2 * i)]::vector(3)
+	ARRAY[random(), random(), random()]::vector(3)
 FROM generate_series(1, 2000) AS i;
 CREATE INDEX items_hnsw_idx ON items USING hnsw (embedding vector_l2_ops);
 CREATE INDEX items_ivfflat_idx ON items USING ivfflat (embedding vector_cosine_ops) WITH (lists = 10);
