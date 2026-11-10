@@ -1,5 +1,4 @@
 # <PGXN distribution> <version>
-datasketches 1.7.0
 ddlx 0.30.0
 json_accessors 1.3.6
 parray_gin 1.5.0
