@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import pytest
+
 from scripts.manifest import load_registry
 from tests._docker import run_once, scratch_volume, start_server
 
@@ -16,7 +18,7 @@ def _registry_libraries(server: Server, *, legacy_only: bool) -> list[str]:
     return [
         library.name
         for library in load_registry()
-        if library.name in installed and (library.legacy or not legacy_only)
+        if library.name in installed and (library.legacy if legacy_only else library.in_all)
     ]
 
 
@@ -29,8 +31,29 @@ def test_default_preload(default_server: Server, image: Image) -> None:
 
 
 def test_all_preset(all_server: Server) -> None:
-    """``all`` preloads every registry library the image ships, in canonical order."""
+    """``all`` preloads the registry libraries the image ships, except opt-in ones, in order."""
     assert all_server.preloaded() == _registry_libraries(all_server, legacy_only=False)
+
+
+def test_opt_in_library_brings_its_requirements(image: Image) -> None:
+    """A library outside the presets is preloaded when named, with what it requires."""
+    if "pg_documentdb" not in {library.name for library in load_registry()}:
+        pytest.skip("no opt-in library in the registry")
+    server = start_server(image, role="opt-in", env={"SHARED_PRELOAD_LIBRARIES": "pg_documentdb"})
+    try:
+        if "pg_documentdb" not in server.libraries():
+            pytest.skip(f"DocumentDB isn't shipped for PostgreSQL {image.pg_major}")
+        assert server.preloaded() == [
+            "pg_cron",
+            "pg_documentdb_core",
+            "pg_documentdb",
+            "pg_documentdb_extended_rum",
+        ]
+        assert server.setting("documentdb.bg_worker_database_name") == server.setting(
+            "cron.database_name"
+        )
+    finally:
+        server.remove()
 
 
 def test_legacy_preset(image: Image) -> None:

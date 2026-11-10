@@ -6,15 +6,27 @@ from typing import TYPE_CHECKING, Final
 
 import pytest
 
+from scripts.manifest import load_manifest
 from tests.conftest import ALL_DATABASE
 
 if TYPE_CHECKING:
     from tests._docker import Server
+    from tests.conftest import ServerPool
 
 UNCREATABLE: Final = {
     "documentdb_distributed": "needs Citus, which the image doesn't ship",
 }
 """Extensions that can't be created on purpose, with the reason."""
+
+PREREQUISITES: Final = {
+    "documentdb_extended_rum": ("documentdb_core",),
+}
+"""Extensions to create first: needed by an extension whose control file doesn't require them."""
+
+PRELOAD_OF: Final = {
+    name: entry.preload for entry in load_manifest() if entry.preload for name in entry.provides
+}
+"""Extensions mapped to the library they need preloaded."""
 
 
 @pytest.fixture(scope="module")
@@ -53,6 +65,7 @@ def versions_to_choose(all_server: Server) -> dict[str, str]:
 
 def test_extension_can_be_created(
     all_server: Server,
+    server_pool: ServerPool,
     without_scripts: set[str],
     versions_to_choose: dict[str, str],
     extension_name: str,
@@ -60,18 +73,30 @@ def test_extension_can_be_created(
     """
     Create the extension, with its requirements, in a transaction that is rolled back.
 
-    The extension database is also pg_cron's, which pg_cron and DocumentDB require. Rolling back
-    keeps the extensions from conflicting with one another.
+    This happens on the ``all`` server, or for an opt-in library's extensions on a server that
+    preloads that library. The database is also pg_cron's, which pg_cron and DocumentDB require.
+    Rolling back keeps the extensions from conflicting with one another.
     """
     if extension_name in UNCREATABLE:
         pytest.skip(UNCREATABLE[extension_name])
     if extension_name.endswith("-3") and extension_name in without_scripts:
         pytest.skip("PostGIS's upgrade-only alias, which has no installation script")
+    library = PRELOAD_OF.get(extension_name)
+    server = (
+        server_pool.get(frozenset({library}))
+        if library is not None and library not in all_server.preloaded()
+        else all_server
+    )
     version = versions_to_choose.get(extension_name)
     clause = f" VERSION '{version}'" if version else ""
-    process = all_server.psql(
-        "--command",
-        f'BEGIN; CREATE EXTENSION IF NOT EXISTS "{extension_name}"{clause} CASCADE; ROLLBACK;',
-        database=ALL_DATABASE,
+    statements = [
+        *(
+            f'CREATE EXTENSION IF NOT EXISTS "{name}" CASCADE;'
+            for name in PREREQUISITES.get(extension_name, ())
+        ),
+        f'CREATE EXTENSION IF NOT EXISTS "{extension_name}"{clause} CASCADE;',
+    ]
+    process = server.psql(
+        "--command", f"BEGIN; {' '.join(statements)} ROLLBACK;", database=ALL_DATABASE
     )
     assert process.returncode == 0, process.stderr
