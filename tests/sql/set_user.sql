@@ -6,9 +6,9 @@ CREATE EXTENSION set_user;
 CREATE FUNCTION assert_that(condition boolean, description text) RETURNS void
 LANGUAGE plpgsql AS $$
 BEGIN
-	IF NOT condition THEN
-		RAISE EXCEPTION 'assertion failed: %', description;
-	END IF;
+    IF NOT condition THEN
+        RAISE EXCEPTION 'assertion failed: %', description;
+    END IF;
 END
 $$;
 

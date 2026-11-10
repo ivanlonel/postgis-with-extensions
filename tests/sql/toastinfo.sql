@@ -19,15 +19,15 @@ INSERT INTO t VALUES ('lz4-1000000', repeat('x', 1000000));
 
 SELECT plan(1);
 SELECT results_eq(
-	'SELECT a, pg_toastinfo(b)::text FROM t ORDER BY a COLLATE "C"',
-	$$VALUES
-		('default', 'short inline varlena'),
-		('extended-10000', 'long inline varlena, compressed (pglz)'),
-		('extended-1000000', 'toasted varlena, compressed (pglz)'),
-		('external-10000', 'toasted varlena, uncompressed'),
-		('external-200', 'long inline varlena, uncompressed'),
-		('lz4-1000000', 'toasted varlena, compressed (lz4)'),
-		('null', 'null')$$,
-	'values report how they are stored'
+    'SELECT a, pg_toastinfo(b)::text FROM t ORDER BY a COLLATE "C"',
+    $$VALUES
+        ('default', 'short inline varlena'),
+        ('extended-10000', 'long inline varlena, compressed (pglz)'),
+        ('extended-1000000', 'toasted varlena, compressed (pglz)'),
+        ('external-10000', 'toasted varlena, uncompressed'),
+        ('external-200', 'long inline varlena, uncompressed'),
+        ('lz4-1000000', 'toasted varlena, compressed (lz4)'),
+        ('null', 'null')$$,
+    'values report how they are stored'
 );
 SELECT * FROM finish(TRUE);

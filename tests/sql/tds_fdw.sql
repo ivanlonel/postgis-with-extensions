@@ -8,8 +8,8 @@ OPTIONS (servername '127.0.0.1', port '1433', database 'tds_fdw_test', tds_versi
 CREATE USER MAPPING FOR current_user SERVER mssql_svr OPTIONS (username 'sa', password 'secret');
 
 CREATE FOREIGN TABLE mssql_table (
-	id integer,
-	title text OPTIONS (column_name 'nm_title')
+    id integer,
+    title text OPTIONS (column_name 'nm_title')
 ) SERVER mssql_svr OPTIONS (schema_name 'dbo', table_name 'mytable', row_estimate_method 'showplan_all');
 
 SELECT plan(1);

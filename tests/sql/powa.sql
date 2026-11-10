@@ -10,17 +10,17 @@ SELECT powa_take_snapshot();
 
 SELECT plan(2);
 SELECT ok(
-	(
-		SELECT count(*) > 0 FROM powa_statements
-		WHERE query LIKE '%pwe_powa_workload%'
-	),
-	'snapshots archive the statements'
+    (
+        SELECT count(*) > 0 FROM powa_statements
+        WHERE query LIKE '%pwe_powa_workload%'
+    ),
+    'snapshots archive the statements'
 );
 SELECT ok(
-	(
-		SELECT count(*) > 0 FROM powa_functions
-		WHERE name = 'pg_stat_statements' AND enabled
-	),
-	'statistics sources are registered'
+    (
+        SELECT count(*) > 0 FROM powa_functions
+        WHERE name = 'pg_stat_statements' AND enabled
+    ),
+    'statistics sources are registered'
 );
 SELECT * FROM finish(TRUE);

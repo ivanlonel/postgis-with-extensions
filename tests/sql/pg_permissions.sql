@@ -11,26 +11,26 @@ VALUES (1, 'pwe_permissions_reader', '{SELECT,INSERT}', 'TABLE', 'public', 'ledg
 
 SELECT plan(3);
 SELECT ok(
-	(
-		SELECT granted FROM table_permissions
-		WHERE role_name = 'pwe_permissions_reader' AND object_name = 'ledger' AND permission = 'SELECT'
-	),
-	'granted permissions are reported'
+    (
+        SELECT granted FROM table_permissions
+        WHERE role_name = 'pwe_permissions_reader' AND object_name = 'ledger' AND permission = 'SELECT'
+    ),
+    'granted permissions are reported'
 );
 SELECT ok(
-	(
-		SELECT NOT granted FROM table_permissions
-		WHERE role_name = 'pwe_permissions_reader' AND object_name = 'ledger' AND permission = 'INSERT'
-	),
-	'missing permissions are reported'
+    (
+        SELECT NOT granted FROM table_permissions
+        WHERE role_name = 'pwe_permissions_reader' AND object_name = 'ledger' AND permission = 'INSERT'
+    ),
+    'missing permissions are reported'
 );
 SELECT is(
-	(
-		SELECT count(*) FROM permission_diffs()
-		WHERE role_name = 'pwe_permissions_reader' AND missing
-	),
-	1::bigint,
-	'differences from the target are found'
+    (
+        SELECT count(*) FROM permission_diffs()
+        WHERE role_name = 'pwe_permissions_reader' AND missing
+    ),
+    1::bigint,
+    'differences from the target are found'
 );
 SELECT * FROM finish(TRUE);
 

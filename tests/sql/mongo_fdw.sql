@@ -9,9 +9,9 @@ OPTIONS (address '127.0.0.1', port '27017');
 CREATE USER MAPPING FOR current_user SERVER mongo_server;
 
 CREATE FOREIGN TABLE warehouse (
-	_id name,
-	warehouse_id integer,
-	warehouse_name text
+    _id name,
+    warehouse_id integer,
+    warehouse_name text
 ) SERVER mongo_server OPTIONS (database 'db', collection 'warehouse');
 
 SELECT plan(2);

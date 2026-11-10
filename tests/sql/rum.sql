@@ -19,31 +19,31 @@ SELECT set_config('enable_seqscan', 'off', FALSE);
 
 SELECT plan(3);
 SELECT is(
-	(
-		SELECT t FROM test_rum
-		WHERE a @@ to_tsquery('english', 'beautiful | place')
-		ORDER BY a <=> to_tsquery('english', 'beautiful | place')
-		LIMIT 1
-	),
-	'It looks like a beautiful place',
-	'RUM ranks the best match first'
+    (
+        SELECT t FROM test_rum
+        WHERE a @@ to_tsquery('english', 'beautiful | place')
+        ORDER BY a <=> to_tsquery('english', 'beautiful | place')
+        LIMIT 1
+    ),
+    'It looks like a beautiful place',
+    'RUM ranks the best match first'
 );
 SELECT is(
-	(
-		SELECT count(*) FROM test_rum
-		WHERE a @@ to_tsquery('english', 'beautiful')
-	),
-	3::bigint,
-	'RUM finds the matches'
+    (
+        SELECT count(*) FROM test_rum
+        WHERE a @@ to_tsquery('english', 'beautiful')
+    ),
+    3::bigint,
+    'RUM finds the matches'
 );
 SELECT matches(
-	plan_of($$
-		SELECT t FROM test_rum
-		WHERE a @@ to_tsquery('english', 'beautiful | place')
-		ORDER BY a <=> to_tsquery('english', 'beautiful | place')
-		LIMIT 1
-	$$),
-	'Index Scan using rumidx',
-	'RUM orders by rank in the index'
+    plan_of($$
+        SELECT t FROM test_rum
+        WHERE a @@ to_tsquery('english', 'beautiful | place')
+        ORDER BY a <=> to_tsquery('english', 'beautiful | place')
+        LIMIT 1
+    $$),
+    'Index Scan using rumidx',
+    'RUM orders by rank in the index'
 );
 SELECT * FROM finish(TRUE);

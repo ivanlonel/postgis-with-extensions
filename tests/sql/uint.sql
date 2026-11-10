@@ -2,11 +2,11 @@
 CREATE EXTENSION uint;
 
 CREATE TEMP TABLE uint_test (
-	i1 int1,  -- signed 8-bit integer
-	u1 uint1, -- unsigned 8-bit integer
-	u2 uint2, -- unsigned 16-bit integer
-	u4 uint4, -- unsigned 32-bit integer
-	u8 uint8  -- unsigned 64-bit integer
+    i1 int1,  -- signed 8-bit integer
+    u1 uint1, -- unsigned 8-bit integer
+    u2 uint2, -- unsigned 16-bit integer
+    u4 uint4, -- unsigned 32-bit integer
+    u8 uint8  -- unsigned 64-bit integer
 );
 INSERT INTO uint_test VALUES (-128, 0, 0, 0, 0), (127, 255, 65535, 4294967295, 18446744073709551615);
 

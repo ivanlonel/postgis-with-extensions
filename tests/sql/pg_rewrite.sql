@@ -6,9 +6,9 @@ CREATE EXTENSION pg_rewrite;
 CREATE TABLE measurement (id integer PRIMARY KEY, city text, logdate date NOT NULL);
 INSERT INTO measurement
 SELECT
-	i,
-	'city ' || (i % 10),
-	'2024-01-01'::date + (i % 365)
+    i,
+    'city ' || (i % 10),
+    '2024-01-01'::date + (i % 365)
 FROM generate_series(1, 1000) AS i;
 
 -- pg_rewrite copies the source's constraints, NOT NULL ones too from PostgreSQL 18 on (which catalogs
@@ -22,12 +22,12 @@ SELECT rewrite_table('measurement', 'measurement_aux', 'measurement_old');
 
 SELECT plan(3);
 SELECT is(
-	(
-		SELECT relkind::text FROM pg_class
-		WHERE oid = 'measurement'::regclass
-	),
-	'p',
-	'the table is now partitioned'
+    (
+        SELECT relkind::text FROM pg_class
+        WHERE oid = 'measurement'::regclass
+    ),
+    'p',
+    'the table is now partitioned'
 );
 SELECT is((SELECT count(*) FROM measurement), 1000::bigint, 'its rows are kept');
 SELECT is((SELECT count(*) FROM measurement_aux_high), 500::bigint, 'and routed to the partitions');

@@ -6,51 +6,51 @@ CREATE EXTENSION hstore_plperl CASCADE;  -- requires hstore
 CREATE EXTENSION bool_plperl;
 
 CREATE FUNCTION concat_array_elements(text[]) RETURNS text AS $$
-	my $arg = shift;
-	my $result = "";
-	return undef if (!defined $arg);
-	for (@$arg) {
-		$result .= $_;
-	}
-	return $result;
+    my $arg = shift;
+    my $result = "";
+    return undef if (!defined $arg);
+    for (@$arg) {
+        $result .= $_;
+    }
+    return $result;
 $$ LANGUAGE plperl;
 
 CREATE FUNCTION perl_count_classes() RETURNS integer AS $$
-	my $rv = spi_exec_query("SELECT count(*) AS n FROM pg_class WHERE relname = 'pg_class'");
-	return $rv->{rows}[0]->{n};
+    my $rv = spi_exec_query("SELECT count(*) AS n FROM pg_class WHERE relname = 'pg_class'");
+    return $rv->{rows}[0]->{n};
 $$ LANGUAGE plperl;
 
 CREATE FUNCTION perl_hash_size(value jsonb) RETURNS integer
 TRANSFORM FOR TYPE jsonb
 AS $$
-	my ($value) = @_;
-	return scalar keys %$value;
+    my ($value) = @_;
+    return scalar keys %$value;
 $$ LANGUAGE plperl;
 
 CREATE FUNCTION perl_hstore_get(value hstore, key text) RETURNS text
 TRANSFORM FOR TYPE hstore
 AS $$
-	my ($value, $key) = @_;
-	return $value->{$key};
+    my ($value, $key) = @_;
+    return $value->{$key};
 $$ LANGUAGE plperl;
 
 CREATE FUNCTION perl_negate(value boolean) RETURNS boolean
 TRANSFORM FOR TYPE boolean
 AS $$
-	my ($value) = @_;
-	return !$value;
+    my ($value) = @_;
+    return !$value;
 $$ LANGUAGE plperl;
 
 -- Untrusted Perl can load modules.
 CREATE FUNCTION perl_floor(value float8) RETURNS integer AS $$
-	use POSIX ();
-	return POSIX::floor($_[0]);
+    use POSIX ();
+    return POSIX::floor($_[0]);
 $$ LANGUAGE plperlu;
 
 CREATE TABLE audited (value text, changed_by text);
 CREATE FUNCTION perl_stamp() RETURNS trigger AS $$
-	$_TD->{new}{changed_by} = 'plperl';
-	return "MODIFY";
+    $_TD->{new}{changed_by} = 'plperl';
+    return "MODIFY";
 $$ LANGUAGE plperl;
 CREATE TRIGGER audited_stamp BEFORE INSERT ON audited FOR EACH ROW EXECUTE FUNCTION perl_stamp();
 INSERT INTO audited (value) VALUES ('x');

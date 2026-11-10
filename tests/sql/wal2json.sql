@@ -14,9 +14,9 @@ SELECT pg_logical_emit_message(TRUE, 'pgoutput', 'this message will be filtered'
 DELETE FROM table2_with_pk
 WHERE a < 3;
 SELECT
-	pg_logical_emit_message(
-		FALSE, 'wal2json', 'this non-transactional message will be delivered even if you rollback the transaction'
-	);
+    pg_logical_emit_message(
+        FALSE, 'wal2json', 'this non-transactional message will be delivered even if you rollback the transaction'
+    );
 
 INSERT INTO table2_without_pk (b, c) VALUES (2.34, 'Tapir');
 -- it is not added to stream because there isn't a pk or a replica identity
@@ -36,6 +36,6 @@ SELECT matches((SELECT json FROM changes), '"kind": "delete"', 'deletes are deco
 SELECT matches((SELECT json FROM changes), 'this message will be delivered', 'messages are decoded');
 SELECT doesnt_match((SELECT json FROM changes), 'will be filtered', 'messages are filtered by prefix');
 SELECT doesnt_match(
-	(SELECT json FROM changes), 'Anta', 'updates of tables without a replica identity are left out'
+    (SELECT json FROM changes), 'Anta', 'updates of tables without a replica identity are left out'
 );
 SELECT * FROM finish(TRUE);

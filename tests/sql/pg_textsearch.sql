@@ -17,14 +17,14 @@ SELECT set_config('enable_seqscan', 'off', FALSE);
 
 SELECT plan(2);
 SELECT is(
-	-- (The linter can't parse pg_textsearch's <@> (BM25 score) operator, nor lay out what follows.)
-	(SELECT id FROM documents ORDER BY content <@> 'geographic objects' LIMIT 1),  -- noqa: PRS, LT14
-	2,
-	'BM25 ranks the best match first'
+    -- (The linter can't parse pg_textsearch's <@> (BM25 score) operator, nor lay out what follows.)
+    (SELECT id FROM documents ORDER BY content <@> 'geographic objects' LIMIT 1),  -- noqa: PRS, LT14
+    2,
+    'BM25 ranks the best match first'
 );
 SELECT matches(
-	plan_of($$SELECT id FROM documents ORDER BY content <@> 'geographic objects' LIMIT 1$$),
-	'docs_idx',
-	'ranked searches use the BM25 index'
+    plan_of($$SELECT id FROM documents ORDER BY content <@> 'geographic objects' LIMIT 1$$),
+    'docs_idx',
+    'ranked searches use the BM25 index'
 );
 SELECT * FROM finish(TRUE);

@@ -13,21 +13,21 @@ SELECT pglogical_ticker.tick();
 
 SELECT plan(2);
 SELECT is(
-	(SELECT count(*) FROM pglogical_ticker.default_insert_only),
-	1::bigint,
-	'ticks are recorded per replication set'
+    (SELECT count(*) FROM pglogical_ticker.default_insert_only),
+    1::bigint,
+    'ticks are recorded per replication set'
 );
 -- The background worker ticks on its own (every pglogical_ticker.naptime, 10 seconds).
 CREATE TEMPORARY TABLE first_tick AS SELECT source_time FROM pglogical_ticker.default_insert_only;
 SELECT pglogical_ticker.launch();
 SELECT ok(
-	wait_until(
-		$$
-			SELECT (SELECT source_time FROM pglogical_ticker.default_insert_only)
-				> (SELECT source_time FROM first_tick)
-		$$,
-		'60 seconds'
-	),
-	'the ticker worker ticks'
+    wait_until(
+        $$
+            SELECT (SELECT source_time FROM pglogical_ticker.default_insert_only)
+                > (SELECT source_time FROM first_tick)
+        $$,
+        '60 seconds'
+    ),
+    'the ticker worker ticks'
 );
 SELECT * FROM finish(TRUE);

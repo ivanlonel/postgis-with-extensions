@@ -8,11 +8,11 @@ SELECT pg_track_settings_snapshot();
 
 SELECT plan(1);
 SELECT is(
-	(
-		SELECT to_setting FROM marks, pg_track_settings_diff(before_change, clock_timestamp())
-		WHERE name = 'work_mem'
-	),
-	'7168',
-	'setting changes are tracked'
+    (
+        SELECT to_setting FROM marks, pg_track_settings_diff(before_change, clock_timestamp())
+        WHERE name = 'work_mem'
+    ),
+    '7168',
+    'setting changes are tracked'
 );
 SELECT * FROM finish(TRUE);
