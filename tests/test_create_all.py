@@ -19,7 +19,7 @@ UNCREATABLE: Final = {
 """Extensions that can't be created on purpose, with the reason."""
 
 PREREQUISITES: Final = {
-    "documentdb_extended_rum": ("documentdb_core",),
+    "documentdb_extended_rum": ("documentdb",),
 }
 """Extensions to create first: needed by an extension whose control file doesn't require them."""
 

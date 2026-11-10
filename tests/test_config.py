@@ -24,7 +24,7 @@ def test_new_cluster_defaults(default_server: Server, image: Image) -> None:
         assert default_server.setting("track_commit_timestamp") == "off"
         assert default_server.setting("max_worker_processes") == "8"
     else:
-        assert default_server.setting("cron.database_name") == "postgres"
+        assert default_server.setting("cron.database_name") == ALL_DATABASE
         assert default_server.setting("timescaledb.telemetry_level") == "off"
         assert default_server.setting("pg_show_plans.is_enabled") == "off"
         assert default_server.setting("track_commit_timestamp") == "on"
@@ -38,8 +38,8 @@ def test_enabled_library_settings(all_server: Server) -> None:
     assert all_server.setting("timescaledb.telemetry_level") == "off"
     assert all_server.setting("pg_show_plans.is_enabled") == "off"
     assert all_server.setting("track_commit_timestamp") == "on"
-    installed = all_server.libraries()
-    workers = sum(library.workers for library in load_registry() if library.name in installed)
+    preloaded = set(all_server.preloaded())
+    workers = sum(library.workers for library in load_registry() if library.name in preloaded)
     assert int(all_server.setting("max_worker_processes")) >= 8 + workers
 
 

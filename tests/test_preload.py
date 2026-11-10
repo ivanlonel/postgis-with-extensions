@@ -35,14 +35,12 @@ def test_all_preset(all_server: Server) -> None:
     assert all_server.preloaded() == _registry_libraries(all_server, legacy_only=False)
 
 
-def test_opt_in_library_brings_its_requirements(image: Image) -> None:
+def test_opt_in_library_brings_its_requirements(image: Image, default_server: Server) -> None:
     """A library outside the presets is preloaded when named, with what it requires."""
-    if "pg_documentdb" not in {library.name for library in load_registry()}:
-        pytest.skip("no opt-in library in the registry")
+    if "pg_documentdb" not in default_server.libraries():
+        pytest.skip(f"DocumentDB isn't shipped for PostgreSQL {image.pg_major}")
     server = start_server(image, role="opt-in", env={"SHARED_PRELOAD_LIBRARIES": "pg_documentdb"})
     try:
-        if "pg_documentdb" not in server.libraries():
-            pytest.skip(f"DocumentDB isn't shipped for PostgreSQL {image.pg_major}")
         assert server.preloaded() == [
             "pg_cron",
             "pg_documentdb_core",
