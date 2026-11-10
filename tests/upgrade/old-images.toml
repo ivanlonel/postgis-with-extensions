@@ -1,0 +1,7 @@
+# The images published before the repository rewrite (2026-11-09), pinned by index digest. The
+# upgrade test starts a cluster with one of them and reopens it with the image under test.
+14 = "ghcr.io/ivanlonel/postgis-with-extensions@sha256:c6fbab6e785ece64f7b39b01767f73a83baf05a9ebd13e5ed6818857ca8cad3c"
+15 = "ghcr.io/ivanlonel/postgis-with-extensions@sha256:a21a9e01cd1e9c0b11f281a09f454b790c0680404b712efaf81ed9ae0d941052"
+16 = "ghcr.io/ivanlonel/postgis-with-extensions@sha256:6d468b117958fe732c0ae2abc931f7897fcdefaf7169b7d7e9dd9731920b596b"
+17 = "ghcr.io/ivanlonel/postgis-with-extensions@sha256:38a3df37919a9e7b6653dee58b9de38c2117cd989c96a4fece27dd4fbfa3af10"
+18 = "ghcr.io/ivanlonel/postgis-with-extensions@sha256:906e248785f556613b3c532e8e7a444fe0efdadd229c6239f13bc42d541dcdef"
