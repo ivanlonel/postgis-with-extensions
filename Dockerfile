@@ -78,7 +78,8 @@ FROM build-base AS github
 # which trixie's stricter libcurl headers trip. decoder_raw follows PostgreSQL's development branch
 # without version checks, so it's pinned (without a branch, which Renovate would follow) to the
 # last commits building on 14-16 and on 17-18. pg_curl is cloned: its archives, on PGXN as on
-# GitHub, leave out its pg_whitelist submodule.
+# GitHub, leave out its pg_whitelist submodule. smlar comes from the fork of jirutka/smlar that adds
+# a one-line fix for PostgreSQL 18.
 COPY --chmod=0755 build/build-github.sh /usr/local/bin/build-github
 COPY build/github-packages.txt /tmp/github-packages.txt
 RUN build-github /tmp/github-packages.txt
@@ -117,6 +118,26 @@ RUN curl --fail --silent --show-error --location --retry 3 --output /tmp/pgactiv
     && ./configure \
     && make -j "$(nproc)" LDFLAGS_EX="-L$(pg_config --pkglibdir)" \
     && make install DESTDIR=/out LDFLAGS_EX="-L$(pg_config --pkglibdir)"
+
+
+FROM build-base AS pgsodium
+# pgsodium needs a newer libsodium than trixie's 1.0.18: it links a pinned build statically, keeping
+# its symbols to itself (Supabase Vault, loaded in the same servers, uses trixie's).
+# renovate: datasource=github-releases depName=jedisct1/libsodium extractVersion=^(?<version>.+)-RELEASE$
+ARG LIBSODIUM_VERSION=1.0.22
+# renovate: datasource=custom.pgxn depName=pgsodium
+ARG PGSODIUM_VERSION=3.1.11
+WORKDIR /src/libsodium
+RUN curl --fail --silent --show-error --location --retry 3 --output /tmp/libsodium.tar.gz \
+        "https://github.com/jedisct1/libsodium/releases/download/${LIBSODIUM_VERSION}-RELEASE/libsodium-${LIBSODIUM_VERSION}.tar.gz" \
+    && tar -xzf /tmp/libsodium.tar.gz --strip-components=1 \
+    && ./configure --prefix=/opt/libsodium --disable-shared --with-pic \
+    && make -j "$(nproc)" \
+    && make install \
+    && build-pgxs "https://api.pgxn.org/dist/pgsodium/${PGSODIUM_VERSION}/pgsodium-${PGSODIUM_VERSION}.zip" \
+        USE_PGXS=1 \
+        PG_CPPFLAGS="-O0 -I/opt/libsodium/include" \
+        SHLIB_LINK="/opt/libsodium/lib/libsodium.a -Wl,--exclude-libs,ALL"
 
 
 FROM build-base AS pguint
@@ -217,6 +238,7 @@ COPY --link --from=pgxn /out/ /
 COPY --link --from=github /out/ /
 COPY --link --from=citus /out/ /
 COPY --link --from=pgactive /out/ /
+COPY --link --from=pgsodium /out/ /
 COPY --link --from=vendor /out/ /
 COPY --link --from=pguint /out/ /
 COPY --link --from=sqlite-fdw /out/ /

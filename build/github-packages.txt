@@ -4,12 +4,12 @@ DataDog/pg_tracing c343277660011200212c4e0833eea0c6b1ee8fa2 branch=main PG_CFLAG
 Florents-Tselai/pgJQ 57a326b591117adfc2d2709bfdc545c1be905cc0 branch=main JQ_PREFIX=/usr
 HexaCluster/pg_statement_rollback v1.6
 RekGRpth/pg_curl 6abdb3dbe81c0e320eebeeb0120cff993d593b31 branch=master submodules USE_PGXS=1
+Vonng/smlar 4b00815790d323d12a5c89cc9ba593efddab10c9 branch=master USE_PGXS=1
 adjust/kafka_fdw 8615082d986ba11ed70191bb4ca53c8cb7e4def3 branch=master
 citusdata/postgresql-topn v2.7.1
 cybertec-postgresql/db_migrator RELEASE_1_0_0
 cybertec-postgresql/ora_migrator RELEASE_1_0_0
 dalibo/emaj v5.0.1 DOCS= SCRIPTS=
-jirutka/smlar 6259352edd179544c6f0e7c81bb68dcb81317f8c branch=master USE_PGXS=1
 michaelpq/pg_plugins 07b0e942042d08ce90422def1d327b34eab5477e subdir=decoder_raw pg<=16
 michaelpq/pg_plugins 0b16666f424b13d7d0a507dff5a4f6f872626927 subdir=decoder_raw pg>=17
 ossc-db/pg_store_plans 1.10 USE_PGXS=1
