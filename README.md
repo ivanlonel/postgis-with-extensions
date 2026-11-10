@@ -49,7 +49,9 @@ docker run -e POSTGRES_PASSWORD=mysecretpassword -e SHARED_PRELOAD_LIBRARIES=tim
 ```
 
 - `all` preloads every library of the [extension table](#extensions)'s Preload column that the image ships for its
-  PostgreSQL version; `legacy` preloads the list the images preloaded by default before 3.7.
+  PostgreSQL version, except DocumentDB's; `legacy` preloads the list the images preloaded by default before 3.7.
+- DocumentDB is opt-in (`SHARED_PRELOAD_LIBRARIES=all,pg_documentdb` adds it): until `CREATE EXTENSION documentdb` has
+  run in pg_cron's database, its background worker makes every `DROP DATABASE` wait up to 10 seconds.
 - Libraries required by others come along: `powa` brings PoWA's statistics extensions, `pg_documentdb` brings
   `pg_documentdb_core`, `pg_documentdb_extended_rum` and `pg_cron`.
 - The variable only adds libraries: those the cluster's own configuration preloads stay loaded. To remove one of those,
@@ -167,7 +169,6 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [pg_stat_kcache](https://github.com/powa-team/pg_stat_kcache) | all | `pg_stat_kcache` |  |
 | [pg_stat_log](https://github.com/fabriziomello/pg_stat_log) | 18+ | `pg_stat_log` |  |
 | [pg_stat_monitor](https://github.com/percona/pg_stat_monitor) | all | `pg_stat_monitor` |  |
-| [pg_stat_plans](https://github.com/pganalyze/pg_stat_plans) | 18+ | `pg_stat_plans` | Not on 16/17: there, background workers that run queries (PoWA, TimescaleDB jobs) crash with it |
 | [pg_statviz](https://github.com/vyruss/pg_statviz) | all |  |  |
 | [pg_textsearch](https://github.com/timescale/pg_textsearch) | 17+ | `pg_textsearch` |  |
 | [pg_tle](https://github.com/aws/pg_tle) | all | `pg_tle` |  |

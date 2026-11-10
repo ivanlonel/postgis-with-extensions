@@ -6,10 +6,13 @@ import re
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Final, Self
+from typing import TYPE_CHECKING, Final, Literal, Self, cast, get_args
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+
+type Preset = Literal["legacy", "all", "none"]
+"""Which presets of ``SHARED_PRELOAD_LIBRARIES`` include a registry library."""
 
 ROOT: Final = Path(__file__).resolve().parent.parent
 """Repository root."""
@@ -116,8 +119,8 @@ class PreloadLibrary:
     name: str
     """Library name, as listed in ``shared_preload_libraries``."""
 
-    legacy: bool
-    """Whether the ``legacy`` preset (the pre-3.7 default) includes it."""
+    preset: Preset
+    """``legacy``: in the pre-3.7 default and ``all``; ``all``: only there; ``none``: neither."""
 
     requires: tuple[str, ...]
     """Libraries preloaded along with it."""
@@ -127,6 +130,16 @@ class PreloadLibrary:
 
     settings: tuple[tuple[str, str], ...]
     """Settings the entrypoint applies when it adds the library, as ``(name, value)`` pairs."""
+
+    @property
+    def legacy(self) -> bool:
+        """Whether the ``legacy`` preset (the pre-3.7 default) includes the library."""
+        return self.preset == "legacy"
+
+    @property
+    def in_all(self) -> bool:
+        """Whether the ``all`` preset includes the library."""
+        return self.preset != "none"
 
 
 def load_manifest(path: Path = MANIFEST_PATH) -> tuple[Extension, ...]:
@@ -157,7 +170,8 @@ def load_registry(path: Path = REGISTRY_PATH) -> tuple[PreloadLibrary, ...]:
 
     :param path: The registry file.
     :return: The libraries, in canonical order.
-    :raise ValueError: If a line doesn't have the five ``|``-separated columns.
+    :raise ValueError: If a line doesn't have the five ``|``-separated columns, or names an
+        unknown preset.
     """
     libraries: list[PreloadLibrary] = []
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -167,11 +181,14 @@ def load_registry(path: Path = REGISTRY_PATH) -> tuple[PreloadLibrary, ...]:
         if len(columns) != 5:  # noqa: PLR2004 -- the registry's documented column count
             msg = f"malformed registry line: {line!r}"
             raise ValueError(msg)
-        name, legacy, requires, workers, settings = columns
+        name, preset, requires, workers, settings = columns
+        if preset not in get_args(Preset.__value__):
+            msg = f"unknown preset {preset!r} in registry line: {line!r}"
+            raise ValueError(msg)
         libraries.append(
             PreloadLibrary(
                 name=name,
-                legacy=legacy == "yes",
+                preset=cast("Preset", preset),
                 requires=tuple(filter(None, requires.split(","))),
                 workers=int(workers or 0),
                 settings=tuple(

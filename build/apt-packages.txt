@@ -38,7 +38,6 @@ postgresql-%-pg-qualstats
 postgresql-%-pg-rewrite
 postgresql-%-pg-rrule
 postgresql-%-pg-stat-kcache
-postgresql-%-pg-stat-plans pg>=18
 postgresql-%-pg-textsearch pg>=17
 postgresql-%-pg-track-settings
 postgresql-%-pg-uuidv7
