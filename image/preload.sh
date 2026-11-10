@@ -6,18 +6,18 @@ readonly PWE_REGISTRY=/usr/local/share/postgis-with-extensions/preload-libraries
 readonly PWE_LIBDIR="/usr/lib/postgresql/${PG_MAJOR}/lib"
 
 declare -ga pwe_order=()
-declare -gA pwe_rank=() pwe_legacy=() pwe_requires=() pwe_workers=() pwe_settings=()
+declare -gA pwe_rank=() pwe_preset=() pwe_requires=() pwe_workers=() pwe_settings=()
 
 # Load the registry into the pwe_* arrays.
 pwe_load_registry() {
-	local lib legacy requires workers settings
-	while IFS='|' read -r lib legacy requires workers settings; do
+	local lib preset requires workers settings
+	while IFS='|' read -r lib preset requires workers settings; do
 		if [[ -z "$lib" || "$lib" == \#* ]]; then
 			continue
 		fi
 		pwe_rank[$lib]="${#pwe_order[@]}"
 		pwe_order+=("$lib")
-		pwe_legacy[$lib]="$legacy"
+		pwe_preset[$lib]="$preset"
 		pwe_requires[$lib]="$requires"
 		pwe_workers[$lib]="${workers:-0}"
 		pwe_settings[$lib]="$settings"
@@ -30,8 +30,8 @@ pwe_available() {
 }
 
 # Print the libraries of the comma-separated list $1, one per line, expanding the presets
-# "legacy" (the libraries preloaded by default before PostGIS 3.7) and "all" (every registry
-# library installed). Whitespace and double quotes are ignored.
+# "legacy" (the libraries preloaded by default before PostGIS 3.7) and "all" (every installed
+# registry library not marked "none"). Whitespace and double quotes are ignored.
 pwe_expand() {
 	local list="${1//[[:space:]\"]/}" item lib
 	local -a items=()
@@ -41,9 +41,13 @@ pwe_expand() {
 		'') ;;
 		legacy | all)
 			for lib in "${pwe_order[@]}"; do
-				if [[ "$item" == all || "${pwe_legacy[$lib]}" == yes ]] && pwe_available "$lib"; then
-					printf '%s\n' "$lib"
-				fi
+				case "$item:${pwe_preset[$lib]}" in
+				legacy:legacy | all:legacy | all:all)
+					if pwe_available "$lib"; then
+						printf '%s\n' "$lib"
+					fi
+					;;
+				esac
 			done
 			;;
 		*) printf '%s\n' "$item" ;;
