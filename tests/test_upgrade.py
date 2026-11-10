@@ -102,6 +102,29 @@ def _seed(server: Server) -> dict[str, str]:
     return {name: f"u_{name}" for name in created.stdout.split()}
 
 
+def _start_old(image: Image, volume: str, mounts: dict[str, str]) -> Server:
+    """
+    Start the previous image on the cluster's volume, preloading TimescaleDB, which the seed uses.
+
+    Images from PostGIS 3.7 on preload nothing unless asked to: a cluster of theirs that uses
+    TimescaleDB preloads it through its own configuration, which the image under test must keep.
+
+    :param image: The previous image.
+    :param volume: The cluster's volume.
+    :param mounts: Host paths to mount read-only, mapped to container paths.
+    :return: The running server.
+    """
+    server = start_server(image, role="old", volume=volume, mounts=mounts)
+    if "timescaledb" in server.preloaded():
+        return server
+    try:
+        server.query("ALTER SYSTEM SET shared_preload_libraries = 'timescaledb'")
+        server.stop()
+    finally:
+        server.remove()
+    return start_server(image, role="old", volume=volume, mounts=mounts)
+
+
 @pytest.fixture(scope="module")
 def upgrade(image: Image, pytestconfig: pytest.Config) -> Iterator[Upgrade]:
     """
@@ -115,7 +138,7 @@ def upgrade(image: Image, pytestconfig: pytest.Config) -> Iterator[Upgrade]:
     docker("pull", reference)
     mounts = {str(UPGRADE_DIR): "/tests/upgrade"}
     with scratch_volume() as volume:
-        old = start_server(Image.inspect(reference), role="old", volume=volume, mounts=mounts)
+        old = _start_old(Image.inspect(reference), volume, mounts)
         try:
             seeded = _seed(old)
             old.query("CREATE DATABASE upgrade")
