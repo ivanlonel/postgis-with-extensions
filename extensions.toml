@@ -46,7 +46,7 @@ provides = [
 ]
 pg = ">=15"
 preload = "pg_documentdb"
-note = "SQL API only (no MongoDB wire-protocol gateway); `documentdb_distributed` needs Citus, which isn't included"
+note = "SQL API only (no MongoDB wire-protocol gateway); `documentdb_extended_rum` also needs `pg_documentdb_extended_rum` preloaded; `documentdb_distributed` needs Citus, which isn't included"
 
 [[extension]]
 name = "extra_window_functions"
@@ -584,6 +584,10 @@ url = "https://github.com/timescale/timescaledb-toolkit"
 provides = ["timescaledb_toolkit"]
 pg = ">=15"
 note = "Timescale License (TSL)"
+
+[[extension]]
+name = "timestamp9"
+url = "https://github.com/optiver/timestamp9"
 
 [[extension]]
 name = "toastinfo"
