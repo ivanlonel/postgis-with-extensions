@@ -1,0 +1,39 @@
+name: Auto-merge
+
+# Turn on rebase auto-merge for the owner's pull requests to master, from branches of this
+# repository: GitHub merges them once master's ruleset is satisfied (the "CI passed" check).
+# Renovate turns it on for its own pull requests.
+#
+# The token is the owner's (a fine-grained token with Contents, Pull requests and Workflows read and
+# write on this repository), not GITHUB_TOKEN: GitHub starts no workflows for a merge made with
+# GITHUB_TOKEN, which would skip master's publishing run, and GITHUB_TOKEN can't merge changes to
+# workflow files.
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - ready_for_review
+
+permissions: {}
+
+jobs:
+  enable:
+    if: >-
+      github.event.pull_request.user.login == github.repository_owner
+      && github.event.pull_request.head.repo.full_name == github.repository
+      && github.event.pull_request.base.ref == 'master'
+      && !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Turn on auto-merge
+        env:
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          if [[ -z "$GH_TOKEN" ]]; then
+            echo "::error::The AUTO_MERGE_TOKEN secret is missing (see this workflow's comment)"
+            exit 1
+          fi
+          gh pr merge --auto --rebase "$PR_URL"

@@ -47,3 +47,6 @@ plus 100+ extensions. The images follow upstream's Debian tags (amd64 only); CI 
 - Run `uv run prek run --all-files` before committing, after `git add`-ing new files (it only checks tracked ones);
   `uv run python -m scripts.render_readme` after editing `extensions.toml`.
 - Commit messages follow Conventional Commits.
+- Pull requests to master from the owner (`.github/workflows/auto-merge.yml`) and from Renovate merge themselves, by
+  rebase, once the `CI passed` check succeeds, and master's push run then publishes the images: open work that isn't
+  ready to ship as a draft.
