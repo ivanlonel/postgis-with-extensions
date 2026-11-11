@@ -1,7 +1,8 @@
 -- preload: pg_partman_bgw
 -- database: partman
 -- https://github.com/pgpartman/pg_partman
--- The background worker runs maintenance in pg_partman_bgw.dbname, as pg_partman_bgw.role.
+-- The background worker runs maintenance in pg_partman_bgw.dbname, as pg_partman_bgw.role: the
+-- superuser on the test servers (see tests/conftest.py).
 CREATE SCHEMA IF NOT EXISTS partman;
 CREATE EXTENSION IF NOT EXISTS pg_partman SCHEMA partman;
 
@@ -14,10 +15,9 @@ SELECT count(*) AS partitions FROM partman.show_partitions('public.bgw_events');
 UPDATE partman.part_config SET premake = 5, infinite_time_partitions = TRUE
 WHERE parent_table = 'public.bgw_events';
 
--- Have the worker run every second, as the superuser, then put the settings back. (sqlfluff
--- can't parse ALTER SYSTEM.)
+-- Have the worker run every second, then put the setting back. (sqlfluff can't parse ALTER
+-- SYSTEM.)
 ALTER SYSTEM SET pg_partman_bgw.interval = 1;  -- noqa: PRS
-ALTER SYSTEM SET pg_partman_bgw.role = 'postgres';  -- noqa: PRS
 SELECT pg_reload_conf();
 
 SELECT plan(1);
@@ -30,7 +30,6 @@ SELECT ok(
 );
 
 ALTER SYSTEM RESET pg_partman_bgw.interval;  -- noqa: PRS
-ALTER SYSTEM RESET pg_partman_bgw.role;  -- noqa: PRS
 SELECT pg_reload_conf();
 SELECT * FROM finish(TRUE);
 
