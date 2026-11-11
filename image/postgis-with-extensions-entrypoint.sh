@@ -146,7 +146,8 @@ mapfile -t added < <(
 )
 effective+=("${added[@]}")
 
-# Libraries that must load before every other one (Citus refuses to start otherwise) go first.
+# Libraries that must load before every other one (Citus refuses to start otherwise) go first,
+# even when the cluster's own list already has them after others: that list couldn't start.
 ordered=()
 for lib in "${effective[@]}"; do
 	if [[ -n "${pwe_first[$lib]:-}" ]]; then
@@ -158,10 +159,14 @@ for lib in "${effective[@]}"; do
 		ordered+=("$lib")
 	fi
 done
+reordered=0
+if [[ "${ordered[*]}" != "${effective[*]}" ]]; then
+	reordered=1
+fi
 effective=("${ordered[@]}")
 
 flags=()
-if ((fresh || ${#added[@]})); then
+if ((fresh || ${#added[@]} || reordered)); then
 	value="$(
 		IFS=,
 		printf '%s' "${effective[*]}"

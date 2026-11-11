@@ -120,12 +120,21 @@ def test_user_preload_option_is_extended(image: Image) -> None:
         server.remove()
 
 
-def test_first_libraries_go_first(image: Image) -> None:
-    """Citus, which must load before every other library, goes ahead of a cluster's own list."""
+@pytest.mark.parametrize(
+    "configured",
+    ["pg_stat_statements", "pg_stat_statements, citus"],
+    ids=["added", "already-listed"],
+)
+def test_first_libraries_go_first(image: Image, configured: str) -> None:
+    """
+    Citus, which must load before every other library, goes ahead of a cluster's own list.
+
+    That holds when the list already has Citus after another library, too, which wouldn't start.
+    """
     with scratch_volume() as volume:
         server = start_server(image, volume=volume)
         try:
-            server.query("ALTER SYSTEM SET shared_preload_libraries = 'pg_stat_statements'")
+            server.query(f"ALTER SYSTEM SET shared_preload_libraries = '{configured}'")
             server.stop()
         finally:
             server.remove()
