@@ -215,6 +215,29 @@ jobs:
           set: |
             ${{ matrix.target }}.cache-from=type=registry,ref=${{ env.CACHE_REF }}
 
+  passed:
+    # The one check master's ruleset requires (auto-merge waits for it), whatever the build matrix holds.
+    name: CI passed
+    if: always()
+    needs:
+      - lint
+      - matrix
+      - build-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Check that every job succeeded
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          for result in $RESULTS; do
+            if [[ "$result" != success ]]; then
+              echo "::error::A job this check depends on ended with: $result"
+              exit 1
+            fi
+          done
+
   dockerhub-description:
     needs: build-test
     if: github.event_name == 'push' || github.event_name == 'schedule'

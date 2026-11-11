@@ -14,7 +14,7 @@
   "prHourlyLimit": 5,
   // Merge automatically once CI passes; major updates wait for a review (see packageRules).
   "automerge": true,
-  "automergeStrategy": "squash",
+  "automergeStrategy": "rebase",
   "rebaseWhen": "conflicted",
   // Raise PRs for known vulnerabilities from the osv.dev database, independent of the schedule.
   "osvVulnerabilityAlerts": true,
