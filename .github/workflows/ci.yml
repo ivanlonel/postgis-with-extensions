@@ -217,6 +217,7 @@ jobs:
 
   passed:
     # The one check master's ruleset requires (auto-merge waits for it), whatever the build matrix holds.
+    # The ruleset names it by this job name: rename both together.
     name: CI passed
     if: always()
     needs:
