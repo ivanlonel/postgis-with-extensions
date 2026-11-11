@@ -81,6 +81,10 @@ def start_sql_server(image: Image, *, role: str, preload: str | None = None) -> 
     """
     Start a server for the SQL scripts: they're mounted, and their data is served over HTTP.
 
+    pg_partman's background worker runs as the superuser. Its default role, partman_maintainer,
+    doesn't exist on these servers, and a worker that fails to launch maintenance as that role can
+    give up before a script gets to change the setting.
+
     :param image: The image to run.
     :param role: Short name for what the server is for.
     :param preload: ``SHARED_PRELOAD_LIBRARIES``, if any.
@@ -89,7 +93,13 @@ def start_sql_server(image: Image, *, role: str, preload: str | None = None) -> 
     env = {"POSTGRES_DB": ALL_DATABASE}
     if preload:
         env["SHARED_PRELOAD_LIBRARIES"] = preload
-    server = start_server(image, role=role, env=env, mounts={str(SQL_DIR): "/tests/sql"})
+    server = start_server(
+        image,
+        role=role,
+        env=env,
+        mounts={str(SQL_DIR): "/tests/sql"},
+        command=["postgres", "-c", "pg_partman_bgw.role=postgres"],
+    )
     server.spawn(
         "python3",
         "-m",
