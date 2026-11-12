@@ -38,7 +38,7 @@ def test_all_preset(all_server: Server) -> None:
 def test_opt_in_library_brings_its_requirements(image: Image, default_server: Server) -> None:
     """A library outside the presets is preloaded when named, with what it requires."""
     if "pg_documentdb" not in default_server.libraries():
-        pytest.skip(f"DocumentDB isn't shipped for PostgreSQL {image.pg_major}")
+        pytest.skip("this image doesn't ship DocumentDB")
     opt_in = ["pg_cron", "pg_documentdb_core", "pg_documentdb", "pg_documentdb_extended_rum"]
     server = start_server(image, role="opt-in", env={"SHARED_PRELOAD_LIBRARIES": "pg_documentdb"})
     try:
@@ -62,10 +62,15 @@ def test_legacy_preset(image: Image) -> None:
 
 
 def test_unknown_library_fails_fast(image: Image) -> None:
-    """A library the image doesn't ship stops the container with an explanation."""
+    """
+    A library the image doesn't ship stops the container with an explanation.
+
+    The regular images point at the extended ones, which ship more.
+    """
     process = run_once(image, env={"SHARED_PRELOAD_LIBRARIES": "pg_stat_statements,no_such_lib"})
     assert process.returncode != 0
     assert "no shared library 'no_such_lib'" in process.stderr
+    assert ("The -full tags ship more" in process.stderr) != image.extended
 
 
 def test_user_options_win(image: Image) -> None:
@@ -125,12 +130,14 @@ def test_user_preload_option_is_extended(image: Image) -> None:
     ["pg_stat_statements", "pg_stat_statements, citus"],
     ids=["added", "already-listed"],
 )
-def test_first_libraries_go_first(image: Image, configured: str) -> None:
+def test_first_libraries_go_first(image: Image, default_server: Server, configured: str) -> None:
     """
     Citus, which must load before every other library, goes ahead of a cluster's own list.
 
     That holds when the list already has Citus after another library, too, which wouldn't start.
     """
+    if "citus" not in default_server.libraries():
+        pytest.skip("this image doesn't ship Citus")
     with scratch_volume() as volume:
         server = start_server(image, volume=volume)
         try:

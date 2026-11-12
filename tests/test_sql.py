@@ -17,6 +17,8 @@ restrict where a script runs:
 ``-- database: cron|partman|net|sentinel``
     Run in the database a background worker uses (pg_cron's, pg_partman's, pg_net's or
     pgsentinel's) instead of a scratch one.
+``-- image: extended``
+    Skip on the regular images: the extension is only in the extended ones (the ``-full`` tags).
 
 Scripts can fetch the files of ``tests/sql/data`` from ``http://127.0.0.1:8000/``; the scripts'
 directory is mounted at ``/tests/sql``, so server-side functions can read it too.
@@ -39,7 +41,9 @@ if TYPE_CHECKING:
     from tests._docker import Image, Server
     from tests.conftest import ServerPool
 
-_DIRECTIVE: Final = re.compile(r"--\s*(?P<key>preload|conflicts|pg|database):\s*(?P<value>.*?)\s*")
+_DIRECTIVE: Final = re.compile(
+    r"--\s*(?P<key>preload|conflicts|pg|database|image):\s*(?P<value>.*?)\s*"
+)
 
 HELPERS: Final = "/tests/sql/lib/helpers.sql"
 """Functions installed in every database a script runs in."""
@@ -76,6 +80,9 @@ class SqlScript:
     database_setting: str | None
     """Setting naming the database to run in, or ``None`` for a scratch database."""
 
+    extended_only: bool
+    """Whether only the extended images ship the extension."""
+
     @classmethod
     def parse(cls, path: Path) -> Self:
         """
@@ -95,12 +102,17 @@ class SqlScript:
         if database is not None and database not in WORKER_DATABASES:
             msg = f"{path.name}: unsupported database directive {database!r}"
             raise ValueError(msg)
+        image = directives.get("image")
+        if image not in {None, "extended"}:
+            msg = f"{path.name}: unsupported image directive {image!r}"
+            raise ValueError(msg)
         return cls(
             path=path,
             preload=_libraries(directives.get("preload")),
             conflicts=_libraries(directives.get("conflicts")),
             majors=MajorRange.parse(directives.get("pg")),
             database_setting=WORKER_DATABASES[database] if database else None,
+            extended_only=image == "extended",
         )
 
 
@@ -126,6 +138,8 @@ def test_sql_script(
     script: SqlScript,
 ) -> None:
     """The script passes on a server preloading what it needs, and alongside everything else."""
+    if script.extended_only and not image.extended:
+        pytest.skip("only in the extended images")
     if image.pg_major not in script.majors:
         pytest.skip(f"not shipped for PostgreSQL {image.pg_major}")
     server: Server

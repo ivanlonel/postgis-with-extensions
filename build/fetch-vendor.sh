@@ -5,40 +5,15 @@
 # The versions come from the build arguments declared in the Dockerfile's vendor stage.
 set -Eeuo pipefail
 
-: "${PG_MAJOR:?}" "${VCHORD_VERSION:?}" "${PGVECTORSCALE_VERSION:?}"
+: "${VCHORD_VERSION:?}" "${PGVECTORSCALE_VERSION:?}"
 : "${PG_GRAPHQL_VERSION:?}" "${PG_JSONSCHEMA_VERSION:?}" "${TIMESCALEDB_TOOLKIT_VERSION:?}"
 : "${PGX_ULID_VERSION:?}" "${PLPRQL_VERSION:?}" "${PGDD_VERSION:?}"
 : "${POSTGRES_PROTOBUF_VERSION:?}" "${PG_IDKIT_VERSION:?}"
 
-# shellcheck source=/dev/null
-. /etc/os-release
+# shellcheck source=vendor-lib.sh
+. /usr/local/lib/postgis-with-extensions/vendor-lib.sh
 
-fetch() {
-	if ! curl --fail --silent --show-error --location --retry 3 --output "$1" "$2"; then
-		echo "failed to download $2" >&2
-		return 1
-	fi
-}
-
-libdir="/out$(pg_config --pkglibdir)"
-extdir="/out$(pg_config --sharedir)/extension"
-mkdir -p /debs "$libdir" "$extdir"
-workdir="$(mktemp -d)"
-trap 'rm -rf "$workdir"' EXIT
-
-# Copy the libraries and extension files found anywhere under directory $1 into /out. Some
-# upstream packages install them under paths PostgreSQL doesn't read, or bundle stray files.
-install_extension_files() {
-	find "$1" -type f -name '*.so' -exec install -m 0755 -t "$libdir" {} +
-	find "$1" -type f \( -name '*.control' -o -name '*.sql' \) -exec install -m 0644 -t "$extdir" {} +
-}
-
-# Unpack the .deb at URL $2 and copy its extension files (see install_extension_files).
-extract_deb() {
-	fetch "$workdir/$1.deb" "$2"
-	dpkg-deb --extract "$workdir/$1.deb" "$workdir/$1"
-	install_extension_files "$workdir/$1"
-}
+mkdir -p /debs
 
 fetch /debs/vchord.deb \
 	"https://github.com/supervc-stack/VectorChord/releases/download/${VCHORD_VERSION}/postgresql-${PG_MAJOR}-vchord_${VCHORD_VERSION}-1_amd64.deb"
@@ -79,7 +54,7 @@ fetch "$workdir/protobuf.tar.gz" \
 	"https://github.com/mpartel/postgres-protobuf/releases/download/v${POSTGRES_PROTOBUF_VERSION}/${protobuf}.tar.gz"
 tar -xf "$workdir/protobuf.tar.gz" -C "$workdir" # despite its name, not gzip-compressed
 install -m 0755 "$workdir/$protobuf/lib/postgres_protobuf.so" "$libdir"
-strip --strip-unneeded "$libdir/postgres_protobuf.so"
+strip_libraries postgres_protobuf.so
 install -m 0644 -t "$extdir" "$workdir/$protobuf"/extension/*
 
 # pg_idkit publishes builds for PostgreSQL 15 and later.

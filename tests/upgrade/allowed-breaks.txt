@@ -1,3 +1,11 @@
 # Extensions whose shared libraries may disappear across an image update, one per line, each
 # with a README migration note telling users what to run (e.g. ALTER EXTENSION ... UPDATE).
 # Must be empty for the final PostGIS 3.6 release.
+# Citus and DocumentDB moved to the -full tags in November 2026 (README: "Citus and DocumentDB
+# moved to the -full images"): the regular images no longer ship them.
+citus
+citus_columnar
+documentdb
+documentdb_core
+documentdb_distributed
+documentdb_extended_rum

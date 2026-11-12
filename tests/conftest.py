@@ -28,6 +28,21 @@ ALL_DATABASE: Final = "extensions"
 HTTP_PORT: Final = 8000
 """Port of the HTTP server that serves ``tests/sql/data`` inside the servers, on 127.0.0.1."""
 
+EMBEDDINGS_PORT: Final = 8001
+"""Port of the fake embeddings API (``tests/sql/lib/embeddings.py``) in extended servers."""
+
+EMBEDDINGS_OPTIONS: Final = (
+    "-c",
+    f"vectorize.openai_service_url=http://127.0.0.1:{EMBEDDINGS_PORT}/v1",
+    "-c",
+    "vectorize.openai_key=test",
+)
+"""
+Server options pointing pg_vectorize at the fake embeddings API.
+
+Its background worker never reloads the configuration, so they're set at server start.
+"""
+
 
 def pytest_addoption(parser: pytest.Parser) -> None:
     """
@@ -61,7 +76,9 @@ def expected_extensions(image: Image) -> set[str]:
     :return: The extension names.
     """
     baseline = load_baseline(image.pg_major) or {}
-    return set(baseline) | provided_extensions(load_manifest(), image.pg_major)
+    return set(baseline) | provided_extensions(
+        load_manifest(), image.pg_major, extended=image.extended
+    )
 
 
 def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
@@ -83,7 +100,8 @@ def start_sql_server(image: Image, *, role: str, preload: str | None = None) -> 
 
     pg_partman's background worker runs as the superuser. Its default role, partman_maintainer,
     doesn't exist on these servers, and a worker that fails to launch maintenance as that role can
-    give up before a script gets to change the setting.
+    give up before a script gets to change the setting. Extended images also get a fake embeddings
+    API, which pg_vectorize is pointed at.
 
     :param image: The image to run.
     :param role: Short name for what the server is for.
@@ -98,8 +116,15 @@ def start_sql_server(image: Image, *, role: str, preload: str | None = None) -> 
         role=role,
         env=env,
         mounts={str(SQL_DIR): "/tests/sql"},
-        command=["postgres", "-c", "pg_partman_bgw.role=postgres"],
+        command=[
+            "postgres",
+            "-c",
+            "pg_partman_bgw.role=postgres",
+            *(EMBEDDINGS_OPTIONS if image.extended else ()),
+        ],
     )
+    if image.extended:
+        server.spawn("python3", "/tests/sql/lib/embeddings.py", str(EMBEDDINGS_PORT))
     server.spawn(
         "python3",
         "-m",

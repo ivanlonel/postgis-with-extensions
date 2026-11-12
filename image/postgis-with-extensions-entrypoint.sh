@@ -118,8 +118,12 @@ select_library() {
 	if ! pwe_available "$lib"; then
 		local -a known=()
 		mapfile -t known < <(pwe_expand all)
+		local more=
+		if [[ -z "${PWE_VARIANT:-}" ]]; then
+			more=" The -full tags ship more, such as citus, pg_documentdb, pg_duckdb and pg_search."
+		fi
 		die "SHARED_PRELOAD_LIBRARIES: no shared library '$lib' in this image (PostgreSQL $PG_MAJOR)." \
-			"Available presets: legacy, all. Libraries: ${known[*]}."
+			"Available presets: legacy, all. Libraries: ${known[*]}.$more"
 	fi
 	selected[$lib]=1
 	IFS=',' read -r -a dependencies <<<"${pwe_requires[$lib]:-}"

@@ -100,10 +100,13 @@ class Image:
     volume: str
     """The image's data volume path."""
 
+    variant: str = ""
+    """``PWE_VARIANT``: ``extended`` for the ``-full`` images, empty for the regular ones."""
+
     @classmethod
     def inspect(cls, reference: str) -> Self:
         """
-        Read the versions and volume path from an image's configuration.
+        Read the versions, variant and volume path from an image's configuration.
 
         :param reference: A local image reference.
         :return: The image description.
@@ -119,7 +122,13 @@ class Image:
             pg_major=int(env["PG_MAJOR"]),
             postgis=(int(major), int(minor)),
             volume=volume,
+            variant=env.get("PWE_VARIANT", ""),
         )
+
+    @property
+    def extended(self) -> bool:
+        """Whether the image is an extended one, which ships extensions the regular ones don't."""
+        return self.variant == "extended"
 
     @property
     def libdir(self) -> str:

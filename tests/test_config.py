@@ -5,6 +5,8 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING
 
+import pytest
+
 from scripts.manifest import load_registry
 from tests._docker import start_server
 from tests.conftest import ALL_DATABASE
@@ -31,6 +33,14 @@ def test_new_cluster_defaults(default_server: Server, image: Image) -> None:
         preloaded = set(default_server.preloaded())
         workers = sum(library.workers for library in load_registry() if library.name in preloaded)
         assert int(default_server.setting("max_worker_processes")) == 8 + workers
+
+
+def test_jvm_defaults(default_server: Server, image: Image) -> None:
+    """New clusters of the extended images set what PL/Java and hdfs_fdw need to start a JVM."""
+    if not image.extended:
+        pytest.skip("only the extended images ship PL/Java and hdfs_fdw")
+    assert default_server.setting("pljava.vmoptions") == "-Djava.security.manager=allow"
+    assert default_server.setting("hdfs_fdw.jvmpath") == "/usr/lib/jvm/default-java/lib/server"
 
 
 def test_enabled_library_settings(all_server: Server) -> None:

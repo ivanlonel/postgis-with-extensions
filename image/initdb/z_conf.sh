@@ -15,6 +15,25 @@ pwe_load_registry
 
 conf="$PGDATA/postgresql.conf"
 trusted_plugins='pgoutput, test_decoding, wal2json, pglogical_output, pg_squeeze, pg_rewrite, decoderbufs, decoder_raw, pgactive'
+extdir="/usr/share/postgresql/$PG_MAJOR/extension"
+
+# The JVM-based extensions of the extended images don't work without these.
+append_jvm_defaults() {
+	if [[ -e "$extdir/pljava.control" ]]; then
+		cat >>"$conf" <<-EOT
+
+			# PL/Java: from Java 18 on, the JVM only starts once the security manager mode is chosen
+			pljava.vmoptions = '-Djava.security.manager=allow'
+		EOT
+	fi
+	if [[ -e "$extdir/hdfs_fdw.control" ]]; then
+		cat >>"$conf" <<-EOT
+
+			# hdfs_fdw: the JVM to load (hdfs_fdw.classpath also needs the Hive JDBC driver's jars)
+			hdfs_fdw.jvmpath = '/usr/lib/jvm/default-java/lib/server'
+		EOT
+	fi
+}
 
 if [[ -z "${PWE_DEFAULT_PRELOAD:-}" ]]; then
 	cat >>"$conf" <<-EOT
@@ -32,6 +51,7 @@ if [[ -z "${PWE_DEFAULT_PRELOAD:-}" ]]; then
 		max_replication_slots = 10
 		max_wal_senders = 10
 	EOT
+	append_jvm_defaults
 	exit 0
 fi
 
@@ -87,3 +107,4 @@ cat >>"$conf" <<-EOT
 	# PostgreSQL's 8 background workers, plus those of the preloaded libraries
 	max_worker_processes = $workers
 EOT
+append_jvm_defaults

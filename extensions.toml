@@ -6,6 +6,7 @@
 #   pg        PostgreSQL majors shipped, as constraints such as ">=15" or "<=17"
 #   preload   library to list in SHARED_PRELOAD_LIBRARIES to use it
 #   note      remark for the README
+#   extended  true when only the extended images (the -full tags) ship it
 
 [[extension]]
 name = "address_standardizer"
@@ -31,7 +32,8 @@ name = "Citus"
 url = "https://github.com/citusdata/citus"
 provides = ["citus", "citus_columnar"]
 preload = "citus"
-note = "Opt-in (not in `all`); the entrypoint loads it before every other library, as Citus requires. PostgreSQL 14 gets Citus 12.1 and 15 gets 13, the last lines supporting them"
+note = "Opt-in; loaded before every other library, as Citus requires. PostgreSQL 14 gets Citus 12.1 and 15 gets 13"
+extended = true
 
 [[extension]]
 name = "credcheck"
@@ -72,7 +74,8 @@ provides = [
 ]
 pg = ">=15"
 preload = "pg_documentdb"
-note = "SQL API only (no MongoDB wire-protocol gateway); `documentdb_distributed` also needs Citus preloaded"
+note = "Opt-in. SQL API only (no MongoDB wire-protocol gateway); `documentdb_distributed` also needs Citus preloaded"
+extended = true
 
 [[extension]]
 name = "E-Maj"
@@ -87,6 +90,12 @@ url = "https://github.com/xocolatl/extra_window_functions"
 [[extension]]
 name = "first_last_agg"
 url = "https://github.com/wulczer/first_last_agg"
+
+[[extension]]
+name = "hdfs_fdw"
+url = "https://github.com/EnterpriseDB/hdfs_fdw"
+note = "`hdfs_fdw.classpath` needs `HiveJdbcClient-1.0.jar` (in the library directory) and Hive's JDBC driver jars (not shipped). Can't share a session with PL/Java (one JVM each)"
+extended = true
 
 [[extension]]
 name = "h3-pg"
@@ -175,7 +184,7 @@ name = "pg_auto_failover"
 url = "https://github.com/hapostgres/pg_auto_failover"
 provides = ["pgautofailover"]
 preload = "pgautofailover"
-note = "The monitor's extension, plus the `pg_autoctl` command. Opt-in (not in `all`): preloaded, it makes `DROP DATABASE` hang on PostgreSQL 15 and later ([pg_auto_failover#1063](https://github.com/hapostgres/pg_auto_failover/issues/1063), fixed after 2.2)"
+note = "The monitor's extension, plus `pg_autoctl`. Opt-in: preloaded, it makes `DROP DATABASE` hang on PostgreSQL 15+ ([#1063](https://github.com/hapostgres/pg_auto_failover/issues/1063), fixed after 2.2)"
 
 [[extension]]
 name = "pg_background"
@@ -205,6 +214,13 @@ url = "https://github.com/RekGRpth/pg_curl"
 [[extension]]
 name = "pg_dirtyread"
 url = "https://github.com/df7cb/pg_dirtyread"
+
+[[extension]]
+name = "pg_duckdb"
+url = "https://github.com/duckdb/pg_duckdb"
+preload = "pg_duckdb"
+note = "Opt-in. DuckDB downloads extensions (httpfs, iceberg...) on first use unless `duckdb.autoinstall_known_extensions` is off"
+extended = true
 
 [[extension]]
 name = "pg_fact_loader"
@@ -251,6 +267,13 @@ url = "https://github.com/supabase/pg_jsonschema"
 name = "pg_net"
 url = "https://github.com/supabase/pg_net"
 preload = "pg_net"
+
+[[extension]]
+name = "pg_parquet"
+url = "https://github.com/CrunchyData/pg_parquet"
+preload = "pg_parquet"
+note = "Opt-in. Preloaded with pg_duckdb, it handles `COPY ... (format 'parquet')`"
+extended = true
 
 [[extension]]
 name = "pg_partman"
@@ -316,10 +339,18 @@ preload = "pg_savior"
 note = "Off unless `pg_savior.enabled = on` when `SHARED_PRELOAD_LIBRARIES` adds it"
 
 [[extension]]
+name = "pg_search"
+url = "https://github.com/paradedb/paradedb"
+pg = ">=15"
+preload = "pg_search"
+note = "Opt-in. Its `bm25` access method clashes with pg_textsearch's: don't create both in one database"
+extended = true
+
+[[extension]]
 name = "pg_show_plans"
 url = "https://github.com/cybertec-postgresql/pg_show_plans"
 preload = "pg_show_plans"
-note = "Off by default, as it [crashes inserts into TimescaleDB hypertables](https://github.com/timescale/timescaledb/pull/10417); enable with `pg_show_plans.is_enabled = on`, which applies to the whole server even when `SET` in a session (on PostgreSQL 14, only at server start)"
+note = "Off by default, as it [crashes inserts into TimescaleDB hypertables](https://github.com/timescale/timescaledb/pull/10417). `pg_show_plans.is_enabled = on` applies server-wide, even `SET` in a session (PostgreSQL 14: at server start only)"
 
 [[extension]]
 name = "pg_similarity"
@@ -380,6 +411,14 @@ url = "https://github.com/rjuju/pg_track_settings"
 [[extension]]
 name = "pg_uuidv7"
 url = "https://github.com/fboulnois/pg_uuidv7"
+
+[[extension]]
+name = "pg_vectorize"
+url = "https://github.com/ChuckHend/pg_vectorize"
+provides = ["vectorize"]
+preload = "vectorize"
+note = "Opt-in. Create it in pg_cron's database, where its worker connects as `postgres` (see `vectorize.host`); embeddings come from an external service"
+extended = true
 
 [[extension]]
 name = "pg_wait_sampling"
@@ -487,6 +526,13 @@ name = "pgq_node"
 url = "https://github.com/pgq/pgq-node"
 
 [[extension]]
+name = "PGroonga"
+url = "https://github.com/pgroonga/pgroonga"
+provides = ["pgroonga", "pgroonga_database"]
+note = "Built with Debian's Groonga, without the MeCab tokenizer"
+extended = true
+
+[[extension]]
 name = "pgrouting"
 url = "https://github.com/pgRouting/pgrouting"
 
@@ -499,7 +545,7 @@ preload = "pgsentinel"
 name = "pgsodium"
 url = "https://github.com/michelp/pgsodium"
 preload = "pgsodium"
-note = "Preloading enables its server-key functions; the image's `pgsodium_getkey` keeps a generated root key in the data directory (point `pgsodium.getkey_script` at a key manager instead)"
+note = "Preloading enables its server-key functions (see the root key note above)"
 
 [[extension]]
 name = "pgsphere"
@@ -549,6 +595,13 @@ url = "https://github.com/pksunkara/pgx_ulid"
 provides = ["ulid"]
 
 [[extension]]
+name = "PL/Java"
+url = "https://github.com/tada/pljava"
+provides = ["pljava"]
+note = "Java 21 needs `pljava.vmoptions` to choose the security manager mode: new clusters set `-Djava.security.manager=allow`"
+extended = true
+
+[[extension]]
 name = "PL/JS"
 url = "https://github.com/plv8/pljs"
 provides = ["pljs"]
@@ -591,6 +644,12 @@ provides = [
   "ltree_plpython3u",
   "plpython3u",
 ]
+
+[[extension]]
+name = "PL/R"
+url = "https://github.com/postgres-plr/plr"
+provides = ["plr"]
+extended = true
 
 [[extension]]
 name = "PL/sh"
@@ -676,6 +735,12 @@ name = "q3c"
 url = "https://github.com/segasai/q3c"
 
 [[extension]]
+name = "RDKit"
+url = "https://github.com/rdkit/rdkit"
+provides = ["rdkit"]
+extended = true
+
+[[extension]]
 name = "redis_fdw"
 url = "https://github.com/pg-redis-fdw/redis_fdw"
 
@@ -708,7 +773,14 @@ name = "Supabase Vault"
 url = "https://github.com/supabase/vault"
 provides = ["supabase_vault"]
 preload = "supabase_vault"
-note = "Needs preloading; the image's `pgsodium_getkey` keeps a generated root key in the data directory (point `vault.getkey_script` at a key manager instead)"
+note = "Needs preloading (see the root key note above)"
+
+[[extension]]
+name = "Supabase Wrappers"
+url = "https://github.com/supabase/wrappers"
+provides = ["wrappers"]
+note = "Foreign data wrappers for S3, Iceberg, DuckDB, BigQuery, ClickHouse, Stripe, Airtable and more, plus Wasm ones"
+extended = true
 
 [[extension]]
 name = "table_log"

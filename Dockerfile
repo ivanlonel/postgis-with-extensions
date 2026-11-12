@@ -90,7 +90,7 @@ RUN build-github /tmp/github-packages.txt
 
 
 FROM build-base AS citus
-# Each Citus line supports three PostgreSQL majors and still gets fixes: 14 for PostgreSQL 16 to 18,
+# Only in the extended images. Each Citus line supports three PostgreSQL majors and still gets fixes: 14 for PostgreSQL 16 to 18,
 # 13 for 15 to 17 and 12.1 for 14 to 16 (Renovate keeps the older lines on their major).
 # renovate: datasource=github-releases depName=citusdata/citus extractVersion=^v(?<version>.+)$
 ARG CITUS_VERSION=14.3.0
@@ -223,8 +223,104 @@ ARG PGDD_VERSION=0.6.1
 ARG POSTGRES_PROTOBUF_VERSION=0.3.3
 # renovate: datasource=github-releases depName=VADOSWARE/pg_idkit extractVersion=^v(?<version>.+)$
 ARG PG_IDKIT_VERSION=0.4.0
+COPY build/vendor-lib.sh /usr/local/lib/postgis-with-extensions/
 COPY --chmod=0755 build/fetch-vendor.sh /usr/local/bin/fetch-vendor
 RUN fetch-vendor
+
+
+# The stages from here to `extended` build what only the extended images add.
+
+FROM build-base AS vendor-extended
+# renovate: datasource=github-releases depName=paradedb/paradedb extractVersion=^v(?<version>.+)$
+ARG PG_SEARCH_VERSION=0.26.6
+# renovate: datasource=github-releases depName=duckdb/pg_duckdb extractVersion=^v(?<version>.+)$
+ARG PG_DUCKDB_VERSION=1.2.0
+# renovate: datasource=github-releases depName=supabase/wrappers extractVersion=^v(?<version>.+)$
+ARG WRAPPERS_VERSION=0.6.4
+COPY build/vendor-lib.sh /usr/local/lib/postgis-with-extensions/
+COPY --chmod=0755 build/fetch-vendor-extended.sh /usr/local/bin/fetch-vendor-extended
+RUN fetch-vendor-extended
+
+
+FROM build-base AS rust-base
+# pgrx extensions, which no one publishes builds of for Debian. libclang serves pgrx's bindgen.
+# renovate: datasource=github-releases depName=rust-lang/rust
+ARG RUST_VERSION=1.99.1
+ENV RUSTUP_HOME=/usr/local/rustup \
+    CARGO_HOME=/usr/local/cargo \
+    PATH=/usr/local/cargo/bin:$PATH
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libclang-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl --fail --silent --show-error --location --retry 3 --proto '=https' --tlsv1.2 --output /tmp/rustup.sh \
+        https://sh.rustup.rs \
+    && sh /tmp/rustup.sh -y --no-modify-path --profile minimal --default-toolchain "${RUST_VERSION}" \
+    && rm /tmp/rustup.sh
+COPY --chmod=0755 build/build-pgrx.sh /usr/local/bin/build-pgrx
+
+
+FROM rust-base AS pg-parquet
+# renovate: datasource=github-releases depName=CrunchyData/pg_parquet extractVersion=^v(?<version>.+)$
+ARG PG_PARQUET_VERSION=0.5.1
+RUN build-pgrx "https://github.com/CrunchyData/pg_parquet/archive/refs/tags/v${PG_PARQUET_VERSION}.tar.gz"
+
+
+FROM rust-base AS pg-vectorize
+# The extension's releases are tagged extension-v<version>, apart from those of vectorize's server.
+# Its crate builds next to the ones it shares with the server, and sqlx checks its queries against
+# the metadata the repository caches (SQLX_OFFLINE) instead of a live database.
+# renovate: datasource=github-releases depName=ChuckHend/pg_vectorize extractVersion=^extension-v(?<version>.+)$
+ARG PG_VECTORIZE_VERSION=0.23.0
+RUN SQLX_OFFLINE=true build-pgrx --subdir=extension \
+        "https://github.com/ChuckHend/pg_vectorize/archive/refs/tags/extension-v${PG_VECTORIZE_VERSION}.tar.gz"
+
+
+FROM build-base AS pgroonga
+# Built against Debian's Groonga, whose library apt-packages-extended.txt installs.
+# renovate: datasource=github-releases depName=pgroonga/pgroonga
+ARG PGROONGA_VERSION=4.1.0
+WORKDIR /src/pgroonga
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        libgroonga-dev \
+        libmsgpack-c-dev \
+        libxxhash-dev \
+        meson \
+        ninja-build \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl --fail --silent --show-error --location --retry 3 --output /tmp/pgroonga.tar.gz \
+        "https://github.com/pgroonga/pgroonga/archive/refs/tags/${PGROONGA_VERSION}.tar.gz" \
+    && tar -xzf /tmp/pgroonga.tar.gz --strip-components=1 \
+    && meson setup build -Dtest=false --buildtype=release \
+    && meson compile -C build \
+    && meson install -C build --destdir /out
+
+
+FROM build-base AS hdfs-fdw
+# hdfs_fdw links libhive, its C++ bridge to HiveJdbcClient-1.0.jar, which runs in a JVM they load
+# from hdfs_fdw.jvmpath. The run path lets the server find libhive in its library directory.
+# Debian's slim images leave out the man directory the JDK's postinst links pages into.
+# renovate: datasource=github-releases depName=EnterpriseDB/hdfs_fdw extractVersion=^v(?<version>.+)$
+ARG HDFS_FDW_VERSION=2.3.3
+WORKDIR /src/hdfs_fdw
+RUN mkdir -p /usr/share/man/man1 \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends default-jdk-headless \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl --fail --silent --show-error --location --retry 3 --output /tmp/hdfs_fdw.tar.gz \
+        "https://github.com/EnterpriseDB/hdfs_fdw/archive/refs/tags/v${HDFS_FDW_VERSION}.tar.gz" \
+    && tar -xzf /tmp/hdfs_fdw.tar.gz --strip-components=1 \
+    && pkglibdir="$(pg_config --pkglibdir)" \
+    && jdk_include=/usr/lib/jvm/default-java/include \
+    && shlib_link="-Llibhive -lhive -lstdc++ -Wl,-rpath,$pkglibdir" \
+    && make -C libhive USE_PGXS=1 JDK_INCLUDE="$jdk_include" \
+    && javac -d /tmp/hiveclient libhive/jdbc/*.java \
+    && jar cf /tmp/HiveJdbcClient-1.0.jar -C /tmp/hiveclient . \
+    && make -j "$(nproc)" USE_PGXS=1 JDK_INCLUDE="$jdk_include" SHLIB_LINK="$shlib_link" \
+    && make install USE_PGXS=1 JDK_INCLUDE="$jdk_include" SHLIB_LINK="$shlib_link" DESTDIR=/out \
+    && install -m 0755 libhive/libhive.so "/out$pkglibdir/" \
+    && install -m 0644 /tmp/HiveJdbcClient-1.0.jar "/out$pkglibdir/" \
+    && strip --strip-unneeded "/out$pkglibdir/libhive.so" "/out$pkglibdir/hdfs_fdw.so"
 
 
 FROM base AS final
@@ -241,7 +337,6 @@ COPY --link --from=timescaledb /out/ /
 COPY --link --from=pgxn /out/ /
 COPY --link --from=datasketches /out/ /
 COPY --link --from=github /out/ /
-COPY --link --from=citus /out/ /
 COPY --link --from=pgactive /out/ /
 COPY --link --from=pgsodium /out/ /
 COPY --link --from=vendor /out/ /
@@ -271,3 +366,26 @@ SHELL ["/bin/sh", "-c"]
 
 ENTRYPOINT ["postgis-with-extensions-entrypoint.sh"]
 CMD ["postgres"]
+
+
+# The extended images (the "-full" tags): everything above, plus heavier or more specialized
+# extensions. Debian's slim images leave out the man directory the JRE's postinst links pages into.
+FROM final AS extended
+SHELL ["/bin/bash", "-Eeuo", "pipefail", "-c"]
+ARG APT_CACHE_BUST=
+
+RUN --mount=type=bind,source=build,target=/build \
+    mkdir -p /usr/share/man/man1 \
+    && bash /build/install-runtime.sh /build/apt-packages-extended.txt
+
+COPY --link --from=citus /out/ /
+COPY --link --from=vendor-extended /out/ /
+COPY --link --from=pg-parquet /out/ /
+COPY --link --from=pg-vectorize /out/ /
+COPY --link --from=pgroonga /out/ /
+COPY --link --from=hdfs-fdw /out/ /
+
+# Tells the tests (and anyone inspecting the image) which variant this is.
+ENV PWE_VARIANT=extended
+
+SHELL ["/bin/sh", "-c"]

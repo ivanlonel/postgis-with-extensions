@@ -1,3 +1,4 @@
+-- image: extended
 -- preload: citus
 -- https://github.com/citusdata/citus
 -- A single-node cluster: the coordinator holds the shards too.

@@ -114,6 +114,13 @@ jobs:
         id: args
         run: echo "week=$(date -u +%G-W%V)" >> "$GITHUB_OUTPUT"
 
+      - name: Free disk space for an extended image
+        # Its Rust and Java builds, and the image itself, outgrow the runner's free space otherwise.
+        if: contains(matrix.target, '-')
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+          df -h /
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
@@ -139,6 +146,13 @@ jobs:
             ${{ matrix.target }}.cache-from=type=registry,ref=${{ env.CACHE_REF }}
             ${{ matrix.target }}.cache-to=type=registry,ref=${{ env.CACHE_REF }},mode=max,ignore-error=true
 
+      - name: Report the image size
+        run: |
+          size="$(docker image inspect --format '{{.Size}}' "$TEST_IMAGE")"
+          echo "${TARGET}: $((size / 1024 / 1024)) MiB uncompressed" >> "$GITHUB_STEP_SUMMARY"
+        env:
+          TARGET: ${{ matrix.target }}
+
       - name: Set up uv
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
@@ -156,7 +170,14 @@ jobs:
           args=(--image "$TEST_IMAGE" --junitxml=junit.xml)
           # Upgrade from the image currently published under this tag, if there is one yet;
           # otherwise the test falls back to the pre-rewrite image pinned in tests/upgrade.
-          previous="ghcr.io/${GITHUB_REPOSITORY}:${TARGET#pg}-${POSTGIS_VERSION}"
+          # Targets are pg<major> and pg<major>-<suffix>, tagged <major>-<PostGIS>[-<suffix>].
+          major="${TARGET#pg}"
+          suffix=""
+          if [[ "$major" == *-* ]]; then
+            suffix="-${major#*-}"
+            major="${major%%-*}"
+          fi
+          previous="ghcr.io/${GITHUB_REPOSITORY}:${major}-${POSTGIS_VERSION}${suffix}"
           if docker buildx imagetools inspect "$previous" > /dev/null 2>&1; then
             args+=(--old-image "$previous")
           fi
@@ -252,12 +273,23 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: false
+
+      - name: Write the Docker Hub copy of the README
+        # Docker Hub caps descriptions at 25,000 characters: its copy leaves out the Development section.
+        run: uv run --exact python -m scripts.render_readme --dockerhub dockerhub.md
+
       - name: Update the Docker Hub description
         uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa # v5.0.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
           repository: ${{ github.repository }}
+          readme-filepath: ./dockerhub.md
 
   upstream-drift:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'

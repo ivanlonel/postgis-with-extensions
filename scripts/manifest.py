@@ -102,14 +102,18 @@ class Extension:
     note: str | None
     """Remark shown in the README."""
 
-    def ships_for(self, major: int) -> bool:
+    extended: bool
+    """Whether only the extended images (the ``-full`` tags) ship it."""
+
+    def ships_for(self, major: int, *, extended: bool = False) -> bool:
         """
-        Tell whether the image ships the project for a PostgreSQL major.
+        Tell whether an image ships the project for a PostgreSQL major.
 
         :param major: The PostgreSQL major version.
-        :return: Whether ``major`` is within :attr:`majors`.
+        :param extended: Whether the image is an extended one.
+        :return: Whether ``major`` is within :attr:`majors`, in an image of that variant.
         """
-        return major in self.majors
+        return major in self.majors and (extended or not self.extended)
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -162,6 +166,7 @@ def load_manifest(path: Path = MANIFEST_PATH) -> tuple[Extension, ...]:
             majors=MajorRange.parse(entry.get("pg")),
             preload=entry.get("preload"),
             note=entry.get("note"),
+            extended=entry.get("extended", False),
         )
         for entry in data["extension"]
     )
@@ -258,12 +263,20 @@ def matrix_postgis(path: Path = BAKE_PATH) -> str:
     return _bake_default("POSTGIS_VERSION", path)
 
 
-def provided_extensions(manifest: Iterable[Extension], major: int) -> set[str]:
+def provided_extensions(
+    manifest: Iterable[Extension], major: int, *, extended: bool = False
+) -> set[str]:
     """
     Collect the extension names the manifest ships for a PostgreSQL major.
 
     :param manifest: The manifest entries.
     :param major: The PostgreSQL major version.
+    :param extended: Whether to collect those of the extended images, which add their own.
     :return: The extension names.
     """
-    return {name for entry in manifest if entry.ships_for(major) for name in entry.provides}
+    return {
+        name
+        for entry in manifest
+        if entry.ships_for(major, extended=extended)
+        for name in entry.provides
+    }
