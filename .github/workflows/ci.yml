@@ -149,7 +149,7 @@ jobs:
       - name: Report the image size
         run: |
           size="$(docker image inspect --format '{{.Size}}' "$TEST_IMAGE")"
-          echo "${TARGET}: $((size / 1024 / 1024)) MiB uncompressed" >> "$GITHUB_STEP_SUMMARY"
+          echo "${TARGET}: $((size / 1024 / 1024)) MiB uncompressed" | tee -a "$GITHUB_STEP_SUMMARY"
         env:
           TARGET: ${{ matrix.target }}
 
