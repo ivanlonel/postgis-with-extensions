@@ -29,18 +29,17 @@ HTTP_PORT: Final = 8000
 """Port of the HTTP server that serves ``tests/sql/data`` inside the servers, on 127.0.0.1."""
 
 EMBEDDINGS_PORT: Final = 8001
-"""Port of the fake embeddings API (``tests/sql/lib/embeddings.py``) in extended servers."""
+"""Port of the fake embeddings service (``tests/sql/lib/embeddings.py``) in extended servers."""
 
 EMBEDDINGS_OPTIONS: Final = (
     "-c",
-    f"vectorize.openai_service_url=http://127.0.0.1:{EMBEDDINGS_PORT}/v1",
-    "-c",
-    "vectorize.openai_key=test",
+    f"vectorize.embedding_service_url=http://127.0.0.1:{EMBEDDINGS_PORT}/v1",
 )
 """
-Server options pointing pg_vectorize at the fake embeddings API.
+Server options pointing pg_vectorize's ``sentence-transformers/*`` models at the fake service.
 
-Its background worker never reloads the configuration, so they're set at server start.
+Its background worker never reloads the configuration, so they're set at server start. (Its
+OpenAI models can't be faked: it checks their API key against api.openai.com.)
 """
 
 
@@ -101,7 +100,7 @@ def start_sql_server(image: Image, *, role: str, preload: str | None = None) -> 
     pg_partman's background worker runs as the superuser. Its default role, partman_maintainer,
     doesn't exist on these servers, and a worker that fails to launch maintenance as that role can
     give up before a script gets to change the setting. Extended images also get a fake embeddings
-    API, which pg_vectorize is pointed at.
+    service, which pg_vectorize is pointed at.
 
     :param image: The image to run.
     :param role: Short name for what the server is for.

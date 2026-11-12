@@ -101,8 +101,9 @@ New clusters also get `wal_level = logical`, 10 WAL senders and replication slot
 ### Citus and DocumentDB moved to the `-full` images
 
 Since November 2026, Citus and DocumentDB are only in the `-full` tags: clusters using them must switch (`18-3.7` to
-`18-3.7-full`). Clusters created before switching lack two settings new `-full` clusters get, for PL/Java and hdfs_fdw:
-`pljava.vmoptions = '-Djava.security.manager=allow'`, `hdfs_fdw.jvmpath = '/usr/lib/jvm/default-java/lib/server'`.
+`18-3.7-full`). Clusters created before switching lack settings new `-full` clusters get for PL/Java and hdfs_fdw:
+`pljava.vmoptions = '-Djava.security.manager=allow'`, `hdfs_fdw.jvmpath = '/usr/lib/jvm/default-java/lib/server'`
+and `hdfs_fdw.classpath = '$libdir/HiveJdbcClient-1.0.jar'`, with `$libdir` written out (`pg_config --pkglibdir`).
 
 ### From the 3.6 images to 3.7
 
@@ -303,7 +304,7 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | -- | -- | -- | -- |
 | [Citus](https://github.com/citusdata/citus) | all | `citus` | Opt-in; loaded before every other library, as Citus requires. PostgreSQL 14 gets Citus 12.1 and 15 gets 13 |
 | [DocumentDB](https://github.com/documentdb/documentdb) | 15+ | `pg_documentdb` | Opt-in. SQL API only (no MongoDB wire-protocol gateway); `documentdb_distributed` also needs Citus preloaded |
-| [hdfs_fdw](https://github.com/EnterpriseDB/hdfs_fdw) | all |  | `hdfs_fdw.classpath` needs `HiveJdbcClient-1.0.jar` (in the library directory) and Hive's JDBC driver jars (not shipped). Can't share a session with PL/Java (one JVM each) |
+| [hdfs_fdw](https://github.com/EnterpriseDB/hdfs_fdw) | all |  | New clusters set `hdfs_fdw.jvmpath` and `hdfs_fdw.classpath`: append Hive's JDBC driver jars (not shipped) to the latter. Can't share a session with PL/Java (one JVM each) |
 | [pg_duckdb](https://github.com/duckdb/pg_duckdb) | all | `pg_duckdb` | Opt-in. DuckDB downloads extensions (httpfs, iceberg...) on first use unless `duckdb.autoinstall_known_extensions` is off |
 | [pg_parquet](https://github.com/CrunchyData/pg_parquet) | all | `pg_parquet` | Opt-in. Preloaded with pg_duckdb, it handles `COPY ... (format 'parquet')` |
 | [pg_search](https://github.com/paradedb/paradedb) | 15+ | `pg_search` | Opt-in. Its `bm25` access method clashes with pg_textsearch's: don't create both in one database |

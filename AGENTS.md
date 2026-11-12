@@ -31,7 +31,7 @@ Citus and DocumentDB among them. `X-3.6` tags got a single final release and are
   `-- preload:` / `-- conflicts:` / `-- pg:` / `-- database:` / `-- image: extended` directives, run on a server
   preloading just what they need and on the `all` one; `tests/sql/lib/helpers.sql` gives them `wait_until()` and
   `plan_of()`, `tests/sql/data/` is served at `http://127.0.0.1:8000/`, and on extended images
-  `tests/sql/lib/embeddings.py` fakes an OpenAI embeddings API at `:8001`; `tests/baseline/` snapshots the extensions of the
+  `tests/sql/lib/embeddings.py` fakes pg_vectorize's embeddings service at `:8001`; `tests/baseline/` snapshots the extensions of the
   pre-rewrite images and must never lose a name; `tests/upgrade/` reopens clusters created by the previous image.
 
 ## Rules

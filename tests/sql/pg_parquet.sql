@@ -31,7 +31,7 @@ SELECT set_eq(
 );
 SELECT matches(
     (SELECT created_by FROM parquet.file_metadata('/tmp/pwe_products.parquet')),
-    'parquet-rs',
+    '^pg_parquet',
     'pg_parquet writes the file'
 );
 SELECT * FROM finish(TRUE);

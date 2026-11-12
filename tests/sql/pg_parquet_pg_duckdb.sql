@@ -14,8 +14,8 @@ SELECT sum(r['n']::integer) AS duckdb_sum FROM read_parquet('/tmp/pwe_numbers.pa
 SELECT plan(2);
 SELECT matches(
     (SELECT created_by FROM parquet.file_metadata('/tmp/pwe_numbers.parquet')),
-    'parquet-rs',
-    'pg_parquet handles the COPY'
+    '^pg_parquet',
+    'pg_parquet handles the COPY (DuckDB would sign the file as DuckDB)'
 );
-SELECT is(:'duckdb_sum', '55', 'DuckDB reads the file');
+SELECT is(:'duckdb_sum'::text, '55', 'DuckDB reads the file');
 SELECT * FROM finish(TRUE);

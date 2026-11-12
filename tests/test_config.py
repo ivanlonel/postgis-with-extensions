@@ -41,6 +41,7 @@ def test_jvm_defaults(default_server: Server, image: Image) -> None:
         pytest.skip("only the extended images ship PL/Java and hdfs_fdw")
     assert default_server.setting("pljava.vmoptions") == "-Djava.security.manager=allow"
     assert default_server.setting("hdfs_fdw.jvmpath") == "/usr/lib/jvm/default-java/lib/server"
+    assert default_server.setting("hdfs_fdw.classpath") == f"{image.libdir}/HiveJdbcClient-1.0.jar"
 
 
 def test_enabled_library_settings(all_server: Server) -> None:

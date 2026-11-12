@@ -98,6 +98,8 @@ ARG CITUS_VERSION=14.3.0
 ARG CITUS_13_VERSION=13.5.0
 # renovate: datasource=github-releases depName=citusdata/citus extractVersion=^v(?<version>.+)$
 ARG CITUS_12_VERSION=12.1.14
+# Citus defines its own have_createdb_privilege() for PostgreSQL before 16, which exported it.
+# PostgreSQL 15.20 exports it too: when the server headers declare it, Citus's copy is renamed.
 WORKDIR /src/citus
 RUN case "$PG_MAJOR" in \
         14) version="$CITUS_12_VERSION" ;; \
@@ -107,6 +109,10 @@ RUN case "$PG_MAJOR" in \
     && curl --fail --silent --show-error --location --retry 3 --output /tmp/citus.tar.gz \
         "https://github.com/citusdata/citus/archive/refs/tags/v${version}.tar.gz" \
     && tar -xzf /tmp/citus.tar.gz --strip-components=1 \
+    && if grep -rqs 'bool have_createdb_privilege' "$(pg_config --includedir-server)"; then \
+        sed -i 's/^have_createdb_privilege(void)$/citus_have_createdb_privilege(void)/' \
+            src/include/pg_version_compat.h; \
+    fi \
     && ./configure \
     && make -j "$(nproc)" \
     && make install DESTDIR=/out

@@ -3,9 +3,9 @@
 -- database: cron
 -- https://github.com/ChuckHend/pg_vectorize
 -- pg_vectorize requires pg_cron, so it lives in pg_cron's database, where its background worker
--- connects. Embeddings come from tests/sql/lib/embeddings.py, a fake OpenAI API (see
--- tests/conftest.py) that turns texts into bag-of-words vectors: the row closest to a query is
--- the one sharing the most words with it.
+-- connects. Embeddings come from tests/sql/lib/embeddings.py, a fake of the service its
+-- sentence-transformers models call (see tests/conftest.py), which turns texts into bag-of-words
+-- vectors: the row closest to a query is the one sharing the most words with it.
 CREATE EXTENSION IF NOT EXISTS vectorize CASCADE;
 
 CREATE TABLE pwe_products (
@@ -23,7 +23,7 @@ SELECT vectorize.table(
     relation => 'pwe_products',
     primary_key => 'product_id',
     columns => ARRAY['product_name', 'description'],
-    transformer => 'openai/text-embedding-3-small',
+    transformer => 'sentence-transformers/all-MiniLM-L6-v2',
     schedule => 'realtime'
 );
 
