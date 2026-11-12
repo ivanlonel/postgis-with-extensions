@@ -1,3 +1,4 @@
+-- image: extended
 -- preload: pg_documentdb
 -- pg: >=15
 -- database: cron

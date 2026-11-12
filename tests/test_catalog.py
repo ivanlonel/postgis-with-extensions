@@ -27,17 +27,22 @@ def test_no_extension_was_lost(default_server: Server, image: Image) -> None:
 
 
 def test_manifest_extensions_are_available(default_server: Server, image: Image) -> None:
-    """Every extension the manifest ships for this major is available."""
-    missing = provided_extensions(load_manifest(), image.pg_major) - _available(default_server)
+    """Every extension the manifest ships for this major (and variant) is available."""
+    shipped = provided_extensions(load_manifest(), image.pg_major, extended=image.extended)
+    missing = shipped - _available(default_server)
     assert not missing, f"extensions listed in extensions.toml but missing: {sorted(missing)}"
 
 
 def test_every_extension_is_documented(
     default_server: Server, image: Image, pytestconfig: pytest.Config
 ) -> None:
-    """Every extension the image offers is part of the baseline or of the manifest."""
+    """
+    Every extension the image offers is part of the baseline or of the manifest.
+
+    A regular image offering an extension the manifest keeps to the extended ones fails this too.
+    """
     documented = set(load_baseline(image.pg_major) or {}) | provided_extensions(
-        load_manifest(), image.pg_major
+        load_manifest(), image.pg_major, extended=image.extended
     )
     undocumented = sorted(_available(default_server) - documented)
     if not undocumented:

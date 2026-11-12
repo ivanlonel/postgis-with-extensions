@@ -38,7 +38,7 @@ repos:
       - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
       - id: file-contents-sorter
-        files: ^(build/(apt|github|pgxn)-packages\.txt|tests/baseline/pg\d+\.txt)$
+        files: ^(build/(apt|github|pgxn)-packages(-extended)?\.txt|tests/baseline/pg\d+\.txt)$
 
   - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
     rev: 3.11.1
@@ -142,11 +142,12 @@ repos:
     rev: 4.5.0
     hooks:
       # Configured in pyproject.toml. The PoWA setup is a psql script (\c meta-commands) that
-      # the image and its users run by path, so it stays as upstream wrote it.
+      # the image and its users run by path, so it stays as upstream wrote it. The pg_duckdb tests
+      # need psql meta-commands too (\gset, \o), which sqlfluff can't parse.
       - id: sqlfluff-fix
-        exclude: ^image/powa/
+        exclude: ^(image/powa/|tests/sql/pg_(duckdb|parquet_pg_duckdb)\.sql$)
       - id: sqlfluff-lint
-        exclude: ^image/powa/
+        exclude: ^(image/powa/|tests/sql/pg_(duckdb|parquet_pg_duckdb)\.sql$)
 
   - repo: https://github.com/executablebooks/mdformat
     rev: 1.0.0

@@ -1,0 +1,10 @@
+# The packages the extended images add, in the format of apt-packages.txt
+default-jre-headless
+libgroonga0t64
+libmsgpack-c2
+libopenblas0 pg>=15
+libxxhash0
+postgresql-%-documentdb pg>=15
+postgresql-%-pljava
+postgresql-%-plr
+postgresql-%-rdkit

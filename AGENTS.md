@@ -6,26 +6,32 @@ Guidance for coding agents working in this repository.
 
 Builds and publishes `ivanlonel/postgis-with-extensions` (Docker Hub and GHCR): the `postgis/postgis` Debian images
 plus 100+ extensions. The images follow upstream's Debian tags (amd64 only); CI builds PostGIS 3.7 for PostgreSQL
-14–18. `X-3.6` tags got a single final release and are frozen.
+14–18, each as a regular image (`X-3.7`) and an extended one (`X-3.7-full`) that adds heavy or niche extensions,
+Citus and DocumentDB among them. `X-3.6` tags got a single final release and are frozen.
 
 ## Layout
 
 - `Dockerfile`: one stage per source build (`make install DESTDIR=/out`, copied into `final`); the `vendor` stage
   downloads third-party `.deb`s; `final` installs `build/apt-packages.txt` via `build/install-runtime.sh`, which also
   adds the PostGIS 3.7 compatibility shims (tiger geocoder on PG 14/15, `address_standardizer-3.so`, `-3` aliases).
-- `docker-bake.hcl`: the build matrix (`PG_MAJORS` × `POSTGIS_VERSION`), per-major TimescaleDB pins, tags, labels.
+  `extended` (the `-full` tags) builds on `final`: `build/apt-packages-extended.txt`, `vendor-extended`
+  (`build/fetch-vendor-extended.sh`, stripping upstream's debug info), pgrx sources (`build/build-pgrx.sh` on
+  `rust-base`) and its own stages; it sets `PWE_VARIANT=extended`, which the tests read.
+- `docker-bake.hcl`: the build matrix (`PG_MAJORS` × regular/extended, for `POSTGIS_VERSION`), per-major TimescaleDB
+  pins, tags (`EXTENDED_SUFFIX`), labels.
 - `image/`: the entrypoint wrapper (applies `SHARED_PRELOAD_LIBRARIES` on every start), the preload registry
   (`preload-libraries.txt`, shared by the wrapper, the init scripts and the tests), `preload.sh` helpers, and the init
   scripts, whose file names (`z_conf.sh`, `setup_powa-archivist.sh`) must not change: users may override them.
-- `extensions.toml`: the manifest behind the README table and the catalog tests.
+- `extensions.toml`: the manifest behind the README tables and the catalog tests (`extended = true`: `-full` only).
 - `build/github-packages.txt`: PGXS extensions built from GitHub tags (or commits, with the branch Renovate follows),
   next to `build/pgxn-packages.txt` for PGXN; the `vendor` stage (`build/fetch-vendor.sh`) takes upstream binaries.
 - `justfile`: the common tasks (`just --list`): lint, static tests, README rendering, image builds and tests, CI
   dispatch and logs.
 - `tests/`: pytest drives the docker CLI (`tests/_docker.py`); `tests/sql/*.sql` are per-extension pgTAP scripts with
-  `-- preload:` / `-- conflicts:` / `-- pg:` / `-- database:` directives, run on a server preloading just what they
-  need and on the `all` one; `tests/sql/lib/helpers.sql` gives them `wait_until()` and `plan_of()`, and
-  `tests/sql/data/` is served at `http://127.0.0.1:8000/`; `tests/baseline/` snapshots the extensions of the
+  `-- preload:` / `-- conflicts:` / `-- pg:` / `-- database:` / `-- image: extended` directives, run on a server
+  preloading just what they need and on the `all` one; `tests/sql/lib/helpers.sql` gives them `wait_until()` and
+  `plan_of()`, `tests/sql/data/` is served at `http://127.0.0.1:8000/`, and on extended images
+  `tests/sql/lib/embeddings.py` fakes an OpenAI embeddings API at `:8001`; `tests/baseline/` snapshots the extensions of the
   pre-rewrite images and must never lose a name; `tests/upgrade/` reopens clusters created by the previous image.
 
 ## Rules

@@ -45,6 +45,9 @@ lint.per-file-ignores."tests/**/*.py" = [
   "PLR2004", # Magic values are OK in tests
   "S101",    # assert is a first class citizen in pytest tests
 ]
+lint.per-file-ignores."tests/sql/lib/*.py" = [
+  "INP001", # Scripts the test servers run by path, not modules of a package
+]
 
 [tool.pydoclint]
 style = "sphinx"

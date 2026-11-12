@@ -1,7 +1,8 @@
 # Build definition for ivanlonel/postgis-with-extensions.
 #
-#   docker buildx bake                          # every PostgreSQL major, for POSTGIS_VERSION
-#   docker buildx bake pg18 --load              # a single major
+#   docker buildx bake                          # every PostgreSQL major and variant, for POSTGIS_VERSION
+#   docker buildx bake pg18 --load              # a single major's regular image
+#   docker buildx bake pg18-full --load         # ... or its extended image
 #   POSTGIS_VERSION=3.6 docker buildx bake      # the PostGIS 3.6 line (one-off final release)
 
 # PostgreSQL majors to build, following the postgis/postgis Debian tags.
@@ -17,6 +18,12 @@ variable "POSTGIS_VERSION" {
 # The <PG major>-<PostGIS> tag also published as "latest".
 variable "LATEST" {
   default = "18-3.7"
+}
+
+# Tag suffix of the extended images (<PG major>-<PostGIS>-<suffix>), which add heavier extensions
+# to the regular ones. The extended image of LATEST is also published as just <suffix>.
+variable "EXTENDED_SUFFIX" {
+  default = "full"
 }
 
 # Comma-separated image repositories to tag.
@@ -50,22 +57,33 @@ function "timescaledb_version" {
   : TIMESCALEDB_VERSION)
 }
 
+function "image_tag" {
+  params = [pg, variant]
+  result = "${pg}-${POSTGIS_VERSION}${variant == "extended" ? "-${EXTENDED_SUFFIX}" : ""}"
+}
+
 function "image_tags" {
   params = [tag]
   result = flatten([
     for image in split(",", IMAGES) :
-    concat(["${image}:${tag}"], tag == LATEST ? ["${image}:latest"] : [])
+    concat(
+      ["${image}:${tag}"],
+      tag == LATEST ? ["${image}:latest"] : [],
+      tag == "${LATEST}-${EXTENDED_SUFFIX}" ? ["${image}:${EXTENDED_SUFFIX}"] : [],
+    )
   ])
 }
 
 target "image" {
-  name = "pg${pg}"
+  name = variant == "extended" ? "pg${pg}-${EXTENDED_SUFFIX}" : "pg${pg}"
   matrix = {
     pg = split(",", PG_MAJORS)
+    # The frozen PostGIS 3.6 line has no extended images.
+    variant = POSTGIS_VERSION == "3.6" ? ["regular"] : ["regular", "extended"]
   }
   context    = "."
   dockerfile = "Dockerfile"
-  target     = "final"
+  target     = variant == "extended" ? "extended" : "final"
   platforms  = ["linux/amd64"]
   args = {
     BASE_IMAGE_TAG      = "${pg}-${POSTGIS_VERSION}"
@@ -74,16 +92,18 @@ target "image" {
     DEFAULT_PRELOAD = POSTGIS_VERSION == "3.6" ? "legacy" : ""
     APT_CACHE_BUST  = APT_CACHE_BUST
   }
-  tags = image_tags("${pg}-${POSTGIS_VERSION}")
+  tags = image_tags(image_tag(pg, variant))
   labels = {
-    "org.opencontainers.image.title"       = "postgis-with-extensions"
-    "org.opencontainers.image.description" = "PostgreSQL ${pg} with PostGIS ${POSTGIS_VERSION} and many other extensions"
-    "org.opencontainers.image.source"      = "https://github.com/ivanlonel/postgis-with-extensions"
-    "org.opencontainers.image.url"         = "https://hub.docker.com/r/ivanlonel/postgis-with-extensions"
-    "org.opencontainers.image.licenses"    = "MIT"
-    "org.opencontainers.image.version"     = "${pg}-${POSTGIS_VERSION}"
-    "org.opencontainers.image.revision"    = REVISION
-    "org.opencontainers.image.base.name"   = "docker.io/postgis/postgis:${pg}-${POSTGIS_VERSION}"
+    "org.opencontainers.image.title" = "postgis-with-extensions"
+    "org.opencontainers.image.description" = (variant == "extended"
+      ? "PostgreSQL ${pg} with PostGIS ${POSTGIS_VERSION}, many other extensions and heavier ones (Citus, DocumentDB, pg_duckdb, pg_search, PL/Java, PL/R...)"
+    : "PostgreSQL ${pg} with PostGIS ${POSTGIS_VERSION} and many other extensions")
+    "org.opencontainers.image.source"    = "https://github.com/ivanlonel/postgis-with-extensions"
+    "org.opencontainers.image.url"       = "https://hub.docker.com/r/ivanlonel/postgis-with-extensions"
+    "org.opencontainers.image.licenses"  = "MIT"
+    "org.opencontainers.image.version"   = image_tag(pg, variant)
+    "org.opencontainers.image.revision"  = REVISION
+    "org.opencontainers.image.base.name" = "docker.io/postgis/postgis:${pg}-${POSTGIS_VERSION}"
   }
 }
 

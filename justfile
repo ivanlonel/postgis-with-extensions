@@ -39,15 +39,15 @@ drift:
 hooks:
     uv run prek install
 
-# Build a PostgreSQL major's image and load it as postgis-with-extensions:dev-<major>-<PostGIS> (needs Docker)
+# Build a PostgreSQL major's image (variant "full" for the extended one) and load it as postgis-with-extensions:dev-<major>-<PostGIS>[-full] (needs Docker)
 [group("image")]
-build pg="18" $POSTGIS_VERSION="3.7":
-    docker buildx bake pg{{ pg }} --load --set pg{{ pg }}.tags={{ dev_image }}-{{ pg }}-{{ POSTGIS_VERSION }}
+build pg="18" $POSTGIS_VERSION="3.7" variant="":
+    docker buildx bake pg{{ pg }}{{ if variant == "" { "" } else { "-" + variant } }} --load --set pg{{ pg }}{{ if variant == "" { "" } else { "-" + variant } }}.tags={{ dev_image }}-{{ pg }}-{{ POSTGIS_VERSION }}{{ if variant == "" { "" } else { "-" + variant } }}
 
 # Test an image built by `just build`; further arguments go to pytest (set PWE_TEST_LOGS to keep server logs)
 [group("image")]
-test pg="18" postgis="3.7" *args:
-    uv run --exact pytest --image {{ dev_image }}-{{ pg }}-{{ postgis }} {{ args }}
+test pg="18" postgis="3.7" variant="" *args:
+    uv run --exact pytest --image {{ dev_image }}-{{ pg }}-{{ postgis }}{{ if variant == "" { "" } else { "-" + variant } }} {{ args }}
 
 # Run CI on a branch for one PostGIS line (3.6 checks the final 3.6 release); it never publishes
 [group("ci")]

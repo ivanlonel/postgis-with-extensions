@@ -6,6 +6,8 @@
 # "all" ones only in "all"; "none" ones are preloaded only when named (or required).
 # Settings are ;-separated name=value pairs: extension (dotted) GUCs only apply when not already
 # configured, core GUCs are enforced. @CRON_DB@ and @PARTMAN_DB@ expand to the target databases.
+# Both image variants share this file: a library an image doesn't ship (such as those only the
+# extended images have) is left out of its presets and refused when named.
 citus|none||2||first
 pg_stat_statements|legacy||0|
 powa|legacy|pg_stat_statements,pg_qualstats,pg_stat_kcache,pg_wait_sampling|1|powa.frequency=30s
@@ -50,3 +52,8 @@ pgactive|all||2|wal_level=logical;track_commit_timestamp=on
 pg_documentdb_core|none||0|
 pg_documentdb|none|pg_documentdb_core,pg_cron,pg_documentdb_extended_rum|1|documentdb.bg_worker_database_name=@CRON_DB@
 pg_documentdb_extended_rum|none||0|
+pg_search|none||1|
+pg_duckdb|none||1|
+# Loaded after pg_duckdb, pg_parquet's hook gets COPY ... (format 'parquet') first when both are.
+pg_parquet|none||0|
+vectorize|none|pg_cron|1|vectorize.database_name=@CRON_DB@

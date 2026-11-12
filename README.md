@@ -14,6 +14,8 @@ Tags follow the pattern `X-Y.Z`, where `X` is the PostgreSQL major version and `
 
 - `14-3.7`, `15-3.7`, `16-3.7`, `17-3.7`, `18-3.7`: rebuilt every week from the matching postgis/postgis image, with
   the latest packages. `latest` is `18-3.7`.
+- `14-3.7-full` to `18-3.7-full` (`full` is `18-3.7-full`): the same images plus
+  [heavier extensions](#only-in-the--full-images), such as Citus, DocumentDB, pg_duckdb, pg_search, PL/Java and PL/R.
 - `14-3.6` to `18-3.6`: final release, no longer updated, like upstream's 3.6 images.
 
 The images follow upstream's Debian tags (amd64 only): when postgis/postgis adds or drops a PostgreSQL or PostGIS
@@ -48,13 +50,14 @@ applied on every start, so changing it and restarting the container is enough to
 docker run -e POSTGRES_PASSWORD=mysecretpassword -e SHARED_PRELOAD_LIBRARIES=timescaledb,pg_cron,powa -d ivanlonel/postgis-with-extensions
 ```
 
-- `all` preloads every library of the [extension table](#extensions)'s Preload column that the image ships for its
-  PostgreSQL version, except Citus's, DocumentDB's and pg_auto_failover's; `legacy` preloads the list the images
-  preloaded by default before 3.7.
-- DocumentDB is opt-in (`SHARED_PRELOAD_LIBRARIES=all,pg_documentdb` adds it): until `CREATE EXTENSION documentdb` has
-  run in pg_cron's database, its background worker makes every `DROP DATABASE` wait up to 10 seconds.
-- Citus is opt-in too (`SHARED_PRELOAD_LIBRARIES=citus`). It must load before every other library, so it's put
-  first, ahead of the cluster's own list.
+- `all` preloads every library of the [extension tables](#extensions)' Preload column that the image ships for its
+  PostgreSQL version, except the opt-in ones (marked so); `legacy` preloads the list the images preloaded by default
+  before 3.7.
+- DocumentDB (`-full` images) is opt-in (`SHARED_PRELOAD_LIBRARIES=all,pg_documentdb` adds it): until
+  `CREATE EXTENSION documentdb` has run in pg_cron's database, its background worker makes every `DROP DATABASE` wait
+  up to 10 seconds.
+- Citus (`-full` images) is opt-in too (`SHARED_PRELOAD_LIBRARIES=citus`). It must load before every other library, so
+  it's put first, ahead of the cluster's own list.
 - So is pg_auto_failover's monitor library (`pgautofailover`): on PostgreSQL 15 and later, its background workers make
   `DROP DATABASE` hang for as long as it's preloaded
   ([pg_auto_failover#1063](https://github.com/hapostgres/pg_auto_failover/issues/1063), fixed upstream after 2.2,
@@ -66,7 +69,7 @@ docker run -e POSTGRES_PASSWORD=mysecretpassword -e SHARED_PRELOAD_LIBRARIES=tim
   protects: for real protection, point `pgsodium.getkey_script` and `vault.getkey_script` at a script that fetches
   the key from a key manager.
 - Libraries required by others come along: `powa` brings PoWA's statistics extensions, `pg_documentdb` brings
-  `pg_documentdb_core`, `pg_documentdb_extended_rum` and `pg_cron`.
+  `pg_documentdb_core`, `pg_documentdb_extended_rum` and `pg_cron`, `vectorize` brings `pg_cron`.
 - The variable only adds libraries: those the cluster's own configuration preloads stay loaded. To remove one of those,
   edit the configuration, e.g. `ALTER SYSTEM SET shared_preload_libraries = '...'`, and restart.
 - The settings a library relies on come along too (for instance `cron.database_name`), unless the configuration
@@ -94,6 +97,12 @@ New clusters also get `wal_level = logical`, 10 WAL senders and replication slot
 (as MobilityDB recommends) and trust the logical decoding plugins shipped in the image (`output_plugin_libraries`).
 
 ## Upgrading
+
+### Citus and DocumentDB moved to the `-full` images
+
+Since November 2026, Citus and DocumentDB are only in the `-full` tags: clusters using them must switch (`18-3.7` to
+`18-3.7-full`). Clusters created before switching lack two settings new `-full` clusters get, for PL/Java and hdfs_fdw:
+`pljava.vmoptions = '-Djava.security.manager=allow'`, `hdfs_fdw.jvmpath = '/usr/lib/jvm/default-java/lib/server'`.
 
 ### From the 3.6 images to 3.7
 
@@ -136,14 +145,12 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [address_standardizer](https://github.com/postgis/address_standardizer) | all |  | Packaged separately from PostGIS since 3.7 |
 | [age](https://github.com/apache/age) | all |  |  |
 | [asn1oid](https://github.com/df7cb/pgsql-asn1oid) | all |  |  |
-| [Citus](https://github.com/citusdata/citus) | all | `citus` | Opt-in (not in `all`); the entrypoint loads it before every other library, as Citus requires. PostgreSQL 14 gets Citus 12.1 and 15 gets 13, the last lines supporting them |
 | [credcheck](https://github.com/HexaCluster/credcheck) | all | `credcheck` |  |
 | [datasketches](https://github.com/apache/datasketches-postgresql) | all |  |  |
 | [db_migrator](https://github.com/cybertec-postgresql/db_migrator) | all |  |  |
 | [ddlx](https://github.com/lacanoid/pgddl) | all |  |  |
 | [decoder_raw](https://github.com/michaelpq/pg_plugins/tree/main/decoder_raw) | all |  | Logical decoding output plugin (SQL statements), not an extension; trusted on new clusters |
 | [decoderbufs](https://github.com/debezium/postgres-decoderbufs) | all |  | Logical decoding output plugin (Protocol Buffers, for Debezium), trusted on new clusters; its package lists it as an extension, but there's nothing to create |
-| [DocumentDB](https://github.com/documentdb/documentdb) | 15+ | `pg_documentdb` | SQL API only (no MongoDB wire-protocol gateway); `documentdb_distributed` also needs Citus preloaded |
 | [E-Maj](https://github.com/dalibo/emaj) | all |  | Without its Perl and PHP client tools |
 | [extra_window_functions](https://github.com/xocolatl/extra_window_functions) | all |  |  |
 | [first_last_agg](https://github.com/wulczer/first_last_agg) | all |  |  |
@@ -167,7 +174,7 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [parray_gin](https://github.com/theirix/parray_gin) | all |  |  |
 | [periods](https://github.com/xocolatl/periods) | all |  |  |
 | [permuteseq](https://github.com/dverite/permuteseq) | all |  |  |
-| [pg_auto_failover](https://github.com/hapostgres/pg_auto_failover) | all | `pgautofailover` | The monitor's extension, plus the `pg_autoctl` command. Opt-in (not in `all`): preloaded, it makes `DROP DATABASE` hang on PostgreSQL 15 and later ([pg_auto_failover#1063](https://github.com/hapostgres/pg_auto_failover/issues/1063), fixed after 2.2) |
+| [pg_auto_failover](https://github.com/hapostgres/pg_auto_failover) | all | `pgautofailover` | The monitor's extension, plus `pg_autoctl`. Opt-in: preloaded, it makes `DROP DATABASE` hang on PostgreSQL 15+ ([#1063](https://github.com/hapostgres/pg_auto_failover/issues/1063), fixed after 2.2) |
 | [pg_background](https://github.com/vibhorkum/pg_background) | all |  |  |
 | [pg_bigm](https://github.com/pgbigm/pg_bigm) | all |  |  |
 | [pg_bulkload](https://github.com/ossc-db/pg_bulkload) | all |  |  |
@@ -198,7 +205,7 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [pg_rowalesce](https://github.com/bigsmoke/pg_rowalesce) | all |  |  |
 | [pg_rrule](https://github.com/petropavel13/pg_rrule) | all |  |  |
 | [pg_savior](https://github.com/viggy28/pg_savior) | all | `pg_savior` | Off unless `pg_savior.enabled = on` when `SHARED_PRELOAD_LIBRARIES` adds it |
-| [pg_show_plans](https://github.com/cybertec-postgresql/pg_show_plans) | all | `pg_show_plans` | Off by default, as it [crashes inserts into TimescaleDB hypertables](https://github.com/timescale/timescaledb/pull/10417); enable with `pg_show_plans.is_enabled = on`, which applies to the whole server even when `SET` in a session (on PostgreSQL 14, only at server start) |
+| [pg_show_plans](https://github.com/cybertec-postgresql/pg_show_plans) | all | `pg_show_plans` | Off by default, as it [crashes inserts into TimescaleDB hypertables](https://github.com/timescale/timescaledb/pull/10417). `pg_show_plans.is_enabled = on` applies server-wide, even `SET` in a session (PostgreSQL 14: at server start only) |
 | [pg_similarity](https://github.com/eulerto/pg_similarity) | all |  |  |
 | [pg_squeeze](https://github.com/cybertec-postgresql/pg_squeeze) | all | `pg_squeeze` |  |
 | [pg_stat_kcache](https://github.com/powa-team/pg_stat_kcache) | all | `pg_stat_kcache` |  |
@@ -235,7 +242,7 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [pgq_node](https://github.com/pgq/pgq-node) | all |  |  |
 | [pgrouting](https://github.com/pgRouting/pgrouting) | all |  |  |
 | [pgsentinel](https://github.com/pgsentinel/pgsentinel) | all | `pgsentinel` |  |
-| [pgsodium](https://github.com/michelp/pgsodium) | all | `pgsodium` | Preloading enables its server-key functions; the image's `pgsodium_getkey` keeps a generated root key in the data directory (point `pgsodium.getkey_script` at a key manager instead) |
+| [pgsodium](https://github.com/michelp/pgsodium) | all | `pgsodium` | Preloading enables its server-key functions (see the root key note above) |
 | [pgsphere](https://github.com/postgrespro/pgsphere) | all |  |  |
 | [pgsql-gzip](https://github.com/pramsey/pgsql-gzip) | all |  |  |
 | [pgsql_tweaks](https://codeberg.org/pgsql_tweaks/pgsql_tweaks) | all |  |  |
@@ -272,7 +279,7 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 | [semver](https://github.com/theory/pg-semver) | all |  |  |
 | [set_user](https://github.com/pgaudit/set_user) | all | `set_user` |  |
 | [sqlite_fdw](https://github.com/pgspider/sqlite_fdw) | up to 17 |  |  |
-| [Supabase Vault](https://github.com/supabase/vault) | all | `supabase_vault` | Needs preloading; the image's `pgsodium_getkey` keeps a generated root key in the data directory (point `vault.getkey_script` at a key manager instead) |
+| [Supabase Vault](https://github.com/supabase/vault) | all | `supabase_vault` | Needs preloading (see the root key note above) |
 | [table_log](https://github.com/credativ/table_log) | all |  |  |
 | [tdigest](https://github.com/tvondra/tdigest) | all |  |  |
 | [tds_fdw](https://github.com/tds-fdw/tds_fdw) | all |  |  |
@@ -288,12 +295,33 @@ The extensions shipped with PostgreSQL itself (contrib) are available as well.
 
 <!-- extensions:end -->
 
+### Only in the `-full` images
+
+<!-- extended:start -->
+
+| Extension | PostgreSQL | Preload | Notes |
+| -- | -- | -- | -- |
+| [Citus](https://github.com/citusdata/citus) | all | `citus` | Opt-in; loaded before every other library, as Citus requires. PostgreSQL 14 gets Citus 12.1 and 15 gets 13 |
+| [DocumentDB](https://github.com/documentdb/documentdb) | 15+ | `pg_documentdb` | Opt-in. SQL API only (no MongoDB wire-protocol gateway); `documentdb_distributed` also needs Citus preloaded |
+| [hdfs_fdw](https://github.com/EnterpriseDB/hdfs_fdw) | all |  | `hdfs_fdw.classpath` needs `HiveJdbcClient-1.0.jar` (in the library directory) and Hive's JDBC driver jars (not shipped). Can't share a session with PL/Java (one JVM each) |
+| [pg_duckdb](https://github.com/duckdb/pg_duckdb) | all | `pg_duckdb` | Opt-in. DuckDB downloads extensions (httpfs, iceberg...) on first use unless `duckdb.autoinstall_known_extensions` is off |
+| [pg_parquet](https://github.com/CrunchyData/pg_parquet) | all | `pg_parquet` | Opt-in. Preloaded with pg_duckdb, it handles `COPY ... (format 'parquet')` |
+| [pg_search](https://github.com/paradedb/paradedb) | 15+ | `pg_search` | Opt-in. Its `bm25` access method clashes with pg_textsearch's: don't create both in one database |
+| [pg_vectorize](https://github.com/ChuckHend/pg_vectorize) | all | `vectorize` | Opt-in. Create it in pg_cron's database, where its worker connects as `postgres` (see `vectorize.host`); embeddings come from an external service |
+| [PGroonga](https://github.com/pgroonga/pgroonga) | all |  | Built with Debian's Groonga, without the MeCab tokenizer |
+| [PL/Java](https://github.com/tada/pljava) | all |  | Java 21 needs `pljava.vmoptions` to choose the security manager mode: new clusters set `-Djava.security.manager=allow` |
+| [PL/R](https://github.com/postgres-plr/plr) | all |  |  |
+| [RDKit](https://github.com/rdkit/rdkit) | all |  |  |
+| [Supabase Wrappers](https://github.com/supabase/wrappers) | all |  | Foreign data wrappers for S3, Iceberg, DuckDB, BigQuery, ClickHouse, Stripe, Airtable and more, plus Wasm ones |
+
+<!-- extended:end -->
+
 ## Development
 
 The images are built with [Docker Bake](https://docs.docker.com/build/bake/) and tested with pytest and pgTAP:
 
 ```bash
-docker buildx bake pg18 --load --set pg18.tags=postgis-with-extensions:dev   # or `docker buildx bake` for every major
+docker buildx bake pg18 --load --set pg18.tags=postgis-with-extensions:dev   # pg18-full for the -full image
 uv run pytest --image postgis-with-extensions:dev
 uv run prek run --all-files                                                 # linters and formatters
 ```
@@ -309,11 +337,15 @@ To add an extension:
 - Install it: add its PGDG package to `build/apt-packages.txt`; a PGXS source to `build/pgxn-packages.txt` (PGXN)
   or `build/github-packages.txt` (GitHub); an upstream binary to `build/fetch-vendor.sh`; or a build stage to the
   `Dockerfile`. Pin everything but PGDG packages (with a `# renovate:` comment in the `Dockerfile`).
-- Describe it in `extensions.toml` and run `uv run python -m scripts.render_readme` to update this table.
+- Heavy or niche extensions go in the `-full` images only: `build/apt-packages-extended.txt`,
+  `build/fetch-vendor-extended.sh`, `build/build-pgrx.sh` (pgrx sources) or a stage copied into the `extended` one.
+- Describe it in `extensions.toml` (with `extended = true` for the `-full` images) and run
+  `uv run python -m scripts.render_readme` to update the tables.
 - If it needs preloading, register its library in `image/preload-libraries.txt`, with the background workers it
   starts.
 - If it ships a logical decoding output plugin, add it to `trusted_plugins` in `image/initdb/z_conf.sh`.
-- Add `tests/sql/<extension>.sql`, a pgTAP script proving the extension works (known answers, not just loading).
+- Add `tests/sql/<extension>.sql`, a pgTAP script proving the extension works (known answers, not just loading),
+  marked `-- image: extended` for the `-full` images.
 
 CI builds and tests every PostgreSQL major on each pull request, and publishes from `master` and the weekly scheduled
 run. Renovate keeps the pinned versions current.
