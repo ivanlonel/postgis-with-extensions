@@ -94,7 +94,7 @@ url = "https://github.com/wulczer/first_last_agg"
 [[extension]]
 name = "hdfs_fdw"
 url = "https://github.com/EnterpriseDB/hdfs_fdw"
-note = "`hdfs_fdw.classpath` needs `HiveJdbcClient-1.0.jar` (in the library directory) and Hive's JDBC driver jars (not shipped). Can't share a session with PL/Java (one JVM each)"
+note = "New clusters set `hdfs_fdw.jvmpath` and `hdfs_fdw.classpath`: append Hive's JDBC driver jars (not shipped) to the latter. Can't share a session with PL/Java (one JVM each)"
 extended = true
 
 [[extension]]

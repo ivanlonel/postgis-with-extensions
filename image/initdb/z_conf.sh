@@ -29,8 +29,10 @@ append_jvm_defaults() {
 	if [[ -e "$extdir/hdfs_fdw.control" ]]; then
 		cat >>"$conf" <<-EOT
 
-			# hdfs_fdw: the JVM to load (hdfs_fdw.classpath also needs the Hive JDBC driver's jars)
+			# hdfs_fdw: the JVM to load, and its Java client, which it loads with its library (append
+			# the Hive JDBC driver's jars to the classpath, ':'-separated)
 			hdfs_fdw.jvmpath = '/usr/lib/jvm/default-java/lib/server'
+			hdfs_fdw.classpath = '/usr/lib/postgresql/$PG_MAJOR/lib/HiveJdbcClient-1.0.jar'
 		EOT
 	fi
 }

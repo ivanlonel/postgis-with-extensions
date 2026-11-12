@@ -28,7 +28,7 @@ SELECT r['answer']::integer AS duckdb_answer FROM read_parquet('/tmp/pwe_duckdb.
 
 SELECT plan(4);
 SELECT matches(pg_read_file('/tmp/pwe_duckdb_plan.txt'), 'DuckDB', 'DuckDB runs analytical queries');
-SELECT is(:'duckdb_sums', '0:125500 1:124750 2:125000 3:125250', 'DuckDB aggregates PostgreSQL tables');
-SELECT is(:'duckdb_csv_rows', '3', 'DuckDB reads CSV files');
-SELECT is(:'duckdb_answer', '42', 'DuckDB writes and reads Parquet files');
+SELECT is(:'duckdb_sums'::text, '0:125500 1:124750 2:125000 3:125250', 'DuckDB aggregates PostgreSQL tables');
+SELECT is(:'duckdb_csv_rows'::text, '3', 'DuckDB reads CSV files');
+SELECT is(:'duckdb_answer'::text, '42', 'DuckDB writes and reads Parquet files');
 SELECT * FROM finish(TRUE);
