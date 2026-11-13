@@ -54,6 +54,6 @@ Citus and DocumentDB among them. `X-3.6` tags got a single final release and are
   `uv run python -m scripts.render_readme` after editing `extensions.toml`.
 - Commit messages follow Conventional Commits.
 - Pull requests to master merge by rebase once the `CI passed` check succeeds (master's ruleset requires it), and
-  master's push run then publishes the images. Renovate turns auto-merge on for its own; for the owner's, turn it on
-  right after opening one that's ready to ship (`gh pr merge --auto --rebase <number>`), and open work in progress as a
-  draft instead.
+  master's push run then publishes the images (Renovate's wait for Monday's scheduled run). Renovate turns auto-merge
+  on for its own; for the owner's, turn it on right after opening one that's ready to ship
+  (`gh pr merge --auto --rebase <number>`), and open work in progress as a draft instead.

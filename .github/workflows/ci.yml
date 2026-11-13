@@ -114,7 +114,8 @@ jobs:
       CACHE_REF: ghcr.io/${{ github.repository }}:buildcache-${{ matrix.target }}-${{ inputs.postgis || '3.7' }}
       # The cache of the regular target an extended one builds on (a regular target's own).
       BASE_CACHE_REF: ghcr.io/${{ github.repository }}:buildcache-${{ matrix.base || matrix.target }}-${{ inputs.postgis || '3.7' }}
-      PUBLISH: ${{ github.event_name == 'push' || github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish && github.ref == 'refs/heads/master') }}
+      # Renovate's merges ship with the weekly scheduled run instead of each publishing again.
+      PUBLISH: ${{ (github.event_name == 'push' && github.event.head_commit.author.name != 'renovate[bot]') || github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish && github.ref == 'refs/heads/master') }}
       TEST_IMAGE: postgis-with-extensions:test
     steps: &build-test-steps
       - name: Get source code
