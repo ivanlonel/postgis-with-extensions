@@ -115,7 +115,7 @@ jobs:
         run: echo "week=$(date -u +%G-W%V)" >> "$GITHUB_OUTPUT"
 
       - name: Free disk space for an extended image
-        # Its Rust and Java builds, and the image itself, outgrow the runner's free space otherwise.
+        # Its Rust builds, and the image itself, outgrow the runner's free space otherwise.
         if: contains(matrix.target, '-')
         run: |
           sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL

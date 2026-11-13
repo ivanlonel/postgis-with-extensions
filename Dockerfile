@@ -302,33 +302,6 @@ RUN apt-get update \
     && meson install -C build --destdir /out
 
 
-FROM build-base AS hdfs-fdw
-# hdfs_fdw links libhive, its C++ bridge to HiveJdbcClient-1.0.jar, which runs in a JVM they load
-# from hdfs_fdw.jvmpath. The run path lets the server find libhive in its library directory.
-# Debian's slim images leave out the man directory the JDK's postinst links pages into.
-# renovate: datasource=github-releases depName=EnterpriseDB/hdfs_fdw extractVersion=^v(?<version>.+)$
-ARG HDFS_FDW_VERSION=2.3.3
-WORKDIR /src/hdfs_fdw
-RUN mkdir -p /usr/share/man/man1 \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends default-jdk-headless \
-    && rm -rf /var/lib/apt/lists/* \
-    && curl --fail --silent --show-error --location --retry 3 --output /tmp/hdfs_fdw.tar.gz \
-        "https://github.com/EnterpriseDB/hdfs_fdw/archive/refs/tags/v${HDFS_FDW_VERSION}.tar.gz" \
-    && tar -xzf /tmp/hdfs_fdw.tar.gz --strip-components=1 \
-    && pkglibdir="$(pg_config --pkglibdir)" \
-    && jdk_include=/usr/lib/jvm/default-java/include \
-    && shlib_link="-Llibhive -lhive -lstdc++ -Wl,-rpath,$pkglibdir" \
-    && make -C libhive USE_PGXS=1 JDK_INCLUDE="$jdk_include" \
-    && javac -d /tmp/hiveclient libhive/jdbc/*.java \
-    && jar cf /tmp/HiveJdbcClient-1.0.jar -C /tmp/hiveclient . \
-    && make -j "$(nproc)" USE_PGXS=1 JDK_INCLUDE="$jdk_include" SHLIB_LINK="$shlib_link" \
-    && make install USE_PGXS=1 JDK_INCLUDE="$jdk_include" SHLIB_LINK="$shlib_link" DESTDIR=/out \
-    && install -m 0755 libhive/libhive.so "/out$pkglibdir/" \
-    && install -m 0644 /tmp/HiveJdbcClient-1.0.jar "/out$pkglibdir/" \
-    && strip --strip-unneeded "/out$pkglibdir/libhive.so" "/out$pkglibdir/hdfs_fdw.so"
-
-
 FROM base AS final
 # CI passes the ISO week, so the PGDG packages refresh weekly while rebuilds within a week stay cached.
 ARG APT_CACHE_BUST=
@@ -389,7 +362,6 @@ COPY --link --from=vendor-extended /out/ /
 COPY --link --from=pg-parquet /out/ /
 COPY --link --from=pg-vectorize /out/ /
 COPY --link --from=pgroonga /out/ /
-COPY --link --from=hdfs-fdw /out/ /
 
 # Tells the tests (and anyone inspecting the image) which variant this is.
 ENV PWE_VARIANT=extended

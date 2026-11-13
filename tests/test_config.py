@@ -36,12 +36,10 @@ def test_new_cluster_defaults(default_server: Server, image: Image) -> None:
 
 
 def test_jvm_defaults(default_server: Server, image: Image) -> None:
-    """New clusters of the extended images set what PL/Java and hdfs_fdw need to start a JVM."""
+    """New clusters of the extended images set what PL/Java needs to start a JVM."""
     if not image.extended:
-        pytest.skip("only the extended images ship PL/Java and hdfs_fdw")
+        pytest.skip("only the extended images ship PL/Java")
     assert default_server.setting("pljava.vmoptions") == "-Djava.security.manager=allow"
-    assert default_server.setting("hdfs_fdw.jvmpath") == "/usr/lib/jvm/default-java/lib/server"
-    assert default_server.setting("hdfs_fdw.classpath") == f"{image.libdir}/HiveJdbcClient-1.0.jar"
 
 
 def test_enabled_library_settings(all_server: Server) -> None:

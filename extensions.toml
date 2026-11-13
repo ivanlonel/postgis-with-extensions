@@ -92,12 +92,6 @@ name = "first_last_agg"
 url = "https://github.com/wulczer/first_last_agg"
 
 [[extension]]
-name = "hdfs_fdw"
-url = "https://github.com/EnterpriseDB/hdfs_fdw"
-note = "New clusters set `hdfs_fdw.jvmpath` and `hdfs_fdw.classpath`: append Hive's JDBC driver jars (not shipped) to the latter. Can't share a session with PL/Java (one JVM each)"
-extended = true
-
-[[extension]]
 name = "h3-pg"
 url = "https://github.com/postgis/h3-pg"
 provides = ["h3", "h3_postgis"]
