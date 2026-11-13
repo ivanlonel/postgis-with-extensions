@@ -73,7 +73,8 @@ jobs:
     permissions:
       contents: read
     outputs:
-      targets: ${{ steps.matrix.outputs.matrix }}
+      regular: ${{ steps.split.outputs.regular }}
+      extended: ${{ steps.split.outputs.extended }}
     steps:
       - name: Get source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -86,6 +87,15 @@ jobs:
         with:
           target: default
 
+      - name: Split the regular and extended targets
+        # Extended targets are pg<major>-<suffix>; base names the regular target they build on.
+        id: split
+        env:
+          TARGETS: ${{ steps.matrix.outputs.matrix }}
+        run: |
+          echo "regular=$(jq -c 'map(select(.target | contains("-") | not))' <<< "$TARGETS")" >> "$GITHUB_OUTPUT"
+          echo "extended=$(jq -c 'map(select(.target | contains("-")) | .base = (.target | split("-")[0]))' <<< "$TARGETS")" >> "$GITHUB_OUTPUT"
+
   build-test:
     name: build-test (${{ matrix.target }})
     needs:
@@ -93,18 +103,20 @@ jobs:
       - matrix
     runs-on: ubuntu-latest
     timeout-minutes: 150
-    permissions:
+    permissions: &build-test-permissions
       contents: read
       packages: write # GHCR build cache, and the GHCR push of publishing runs
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJson(needs.matrix.outputs.targets) }}
-    env:
+        include: ${{ fromJson(needs.matrix.outputs.regular) }}
+    env: &build-test-env
       CACHE_REF: ghcr.io/${{ github.repository }}:buildcache-${{ matrix.target }}-${{ inputs.postgis || '3.7' }}
+      # The cache of the regular target an extended one builds on (a regular target's own).
+      BASE_CACHE_REF: ghcr.io/${{ github.repository }}:buildcache-${{ matrix.base || matrix.target }}-${{ inputs.postgis || '3.7' }}
       PUBLISH: ${{ github.event_name == 'push' || github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.publish && github.ref == 'refs/heads/master') }}
       TEST_IMAGE: postgis-with-extensions:test
-    steps:
+    steps: &build-test-steps
       - name: Get source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -141,9 +153,11 @@ jobs:
           source: .
           targets: ${{ matrix.target }}
           load: true
+          # The base cache comes first, so an extended image reuses its regular image's layers.
           set: |
             ${{ matrix.target }}.tags=${{ env.TEST_IMAGE }}
-            ${{ matrix.target }}.cache-from=type=registry,ref=${{ env.CACHE_REF }}
+            ${{ matrix.target }}.cache-from=type=registry,ref=${{ env.BASE_CACHE_REF }}
+            ${{ matrix.target }}.cache-from+=type=registry,ref=${{ env.CACHE_REF }}
             ${{ matrix.target }}.cache-to=type=registry,ref=${{ env.CACHE_REF }},mode=max,ignore-error=true
 
       - name: Report the image size
@@ -236,6 +250,26 @@ jobs:
           set: |
             ${{ matrix.target }}.cache-from=type=registry,ref=${{ env.CACHE_REF }}
 
+  build-test-full:
+    # Each extended image builds on its regular image's cache once every regular job is done, so it
+    # doesn't rebuild the regular layers and the published images share them. It still runs when a
+    # regular job fails (rebuilding what that one didn't cache), as one matrix used to.
+    name: build-test (${{ matrix.target }})
+    needs:
+      - lint
+      - matrix
+      - build-test
+    if: ${{ !cancelled() && needs.lint.result == 'success' && needs.matrix.result == 'success' && needs.matrix.outputs.extended != '[]' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    permissions: *build-test-permissions
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.matrix.outputs.extended) }}
+    env: *build-test-env
+    steps: *build-test-steps
+
   passed:
     # The one check master's ruleset requires (auto-merge waits for it), whatever the build matrix holds.
     # The ruleset names it by this job name: rename both together.
@@ -245,23 +279,28 @@ jobs:
       - lint
       - matrix
       - build-test
+      - build-test-full
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions: {}
     steps:
       - name: Check that every job succeeded
+        # build-test-full is skipped when there are no extended images (PostGIS 3.6); any other
+        # skip follows the failure of a job listed here too.
         env:
           RESULTS: ${{ join(needs.*.result, ' ') }}
         run: |
           for result in $RESULTS; do
-            if [[ "$result" != success ]]; then
+            if [[ "$result" != success && "$result" != skipped ]]; then
               echo "::error::A job this check depends on ended with: $result"
               exit 1
             fi
           done
 
   dockerhub-description:
-    needs: build-test
+    needs:
+      - build-test
+      - build-test-full
     if: github.event_name == 'push' || github.event_name == 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 5
