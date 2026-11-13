@@ -347,7 +347,7 @@ To add an extension:
   marked `-- image: extended` for the `-full` images.
 
 CI builds and tests every PostgreSQL major on each pull request, and publishes from `master` and the weekly scheduled
-run. Renovate keeps the pinned versions current.
+run. Renovate keeps the pinned versions current on Sundays; the Monday scheduled run publishes its updates.
 
 ## License
 

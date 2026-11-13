@@ -7,8 +7,9 @@
   ],
   "timezone": "America/Sao_Paulo",
   "schedule": [
-    // Before 8am every Monday, ahead of the weekly image rebuild.
-    "* 0-7 * * 1"
+    // Sunday evenings, so its merges (which don't publish) ship in Monday's scheduled rebuild. Eight
+    // hours, as each merge makes Renovate re-check at once: a package releasing daily gets few PRs.
+    "* 16-23 * * 0"
   ],
   "minimumReleaseAge": "1 day",
   "prHourlyLimit": 5,
@@ -18,8 +19,12 @@
   "rebaseWhen": "conflicted",
   // Raise PRs for known vulnerabilities from the osv.dev database, independent of the schedule.
   "osvVulnerabilityAlerts": true,
+  // Its default schedule is Monday morning, when its master run could cancel the pending scheduled one.
   "lockFileMaintenance": {
-    "enabled": true
+    "enabled": true,
+    "schedule": [
+      "* 16-23 * * 0"
+    ]
   },
   // enabledManagers is a strict allowlist: custom.regex must be named for the managers below to run.
   "enabledManagers": [
