@@ -17,22 +17,13 @@ conf="$PGDATA/postgresql.conf"
 trusted_plugins='pgoutput, test_decoding, wal2json, pglogical_output, pg_squeeze, pg_rewrite, decoderbufs, decoder_raw, pgactive'
 extdir="/usr/share/postgresql/$PG_MAJOR/extension"
 
-# The JVM-based extensions of the extended images don't work without these.
+# PL/Java, in the extended images, doesn't work without this.
 append_jvm_defaults() {
 	if [[ -e "$extdir/pljava.control" ]]; then
 		cat >>"$conf" <<-EOT
 
 			# PL/Java: from Java 18 on, the JVM only starts once the security manager mode is chosen
 			pljava.vmoptions = '-Djava.security.manager=allow'
-		EOT
-	fi
-	if [[ -e "$extdir/hdfs_fdw.control" ]]; then
-		cat >>"$conf" <<-EOT
-
-			# hdfs_fdw: the JVM to load, and its Java client, which it loads with its library (append
-			# the Hive JDBC driver's jars to the classpath, ':'-separated)
-			hdfs_fdw.jvmpath = '/usr/lib/jvm/default-java/lib/server'
-			hdfs_fdw.classpath = '/usr/lib/postgresql/$PG_MAJOR/lib/HiveJdbcClient-1.0.jar'
 		EOT
 	fi
 }
