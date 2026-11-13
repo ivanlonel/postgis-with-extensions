@@ -20,7 +20,7 @@ import sys
 import zlib
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Final
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 DIMENSIONS: Final = 384
 """Length of the vectors, as for sentence-transformers/all-MiniLM-L6-v2."""
@@ -53,11 +53,13 @@ class EmbeddingsHandler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self) -> None:
-        """Describe a model: the dimension of its vectors."""
-        if urlsplit(self.path).path.rstrip("/") != "/v1/info":
+        """Describe a model: the dimension of its vectors (pg_vectorize requires every field)."""
+        url = urlsplit(self.path)
+        if url.path.rstrip("/") != "/v1/info":
             self.send_error(404)
             return
-        self._reply({"embedding_dimension": DIMENSIONS})
+        model = parse_qs(url.query).get("model_name", [""])[0]
+        self._reply({"model": model, "embedding_dimension": DIMENSIONS, "max_seq_len": 256})
 
     def do_POST(self) -> None:
         """Embed the request's ``input`` (a string or a list of strings)."""
