@@ -43,6 +43,9 @@ RUN apt-get update \
         unzip \
         zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
+# Every download goes through curl --retry: these limits turn a stalled transfer into a timeout,
+# which it retries, instead of a hang until the job's timeout.
+COPY build/curlrc /root/.curlrc
 COPY --chmod=0755 build/build-pgxs.sh /usr/local/bin/build-pgxs
 
 
