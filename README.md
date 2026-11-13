@@ -100,8 +100,8 @@ New clusters also get `wal_level = logical`, 10 WAL senders and replication slot
 
 ### Citus and DocumentDB moved to the `-full` images
 
-Since November 2026, Citus and DocumentDB are only in the `-full` tags: clusters using them must switch (`18-3.7` to
-`18-3.7-full`). Clusters created before switching lack the setting new `-full` clusters get for PL/Java:
+The first `3.7` releases, from November 10, 2026, also had Citus and DocumentDB in the regular tags. They're now only in
+the `-full` tags: clusters using them must switch (`18-3.7` to `18-3.7-full`). Clusters created before switching lack the setting new `-full` clusters get for PL/Java:
 `pljava.vmoptions = '-Djava.security.manager=allow'`.
 
 ### From the 3.6 images to 3.7
