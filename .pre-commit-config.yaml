@@ -61,8 +61,8 @@ repos:
     hooks:
       # Scans the staged changes, so it checks nothing in CI, where nothing is staged.
       - id: gitleaks
-      # What CI runs instead (`--hook-stage manual gitleaks-history`): every commit there is. A
-      # shallow checkout has one commit, whose diff is then the whole tree.
+      # What CI runs instead (`--hook-stage manual gitleaks-history`): every commit there is,
+      # which is why CI checks out the full history (fetch-depth: 0).
       - id: gitleaks
         alias: gitleaks-history
         name: Detect hardcoded secrets in the history
