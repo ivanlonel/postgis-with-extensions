@@ -10,8 +10,10 @@ repos:
   - repo: builtin
     hooks:
       - id: check-added-large-files
+        # Every tracked file, not only staged ones: CI has nothing staged.
         args:
           - --maxkb=500
+          - --enforce-all
       - id: check-case-conflict
       - id: check-illegal-windows-names
       - id: check-merge-conflict
@@ -57,7 +59,17 @@ repos:
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.1
     hooks:
+      # Scans the staged changes, so it checks nothing in CI, where nothing is staged.
       - id: gitleaks
+      # What CI runs instead (`--hook-stage manual gitleaks-history`): every commit there is. A
+      # shallow checkout has one commit, whose diff is then the whole tree.
+      - id: gitleaks
+        alias: gitleaks-history
+        name: Detect hardcoded secrets in the history
+        entry: gitleaks git --redact --verbose
+        pass_filenames: false
+        stages:
+          - manual
 
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
