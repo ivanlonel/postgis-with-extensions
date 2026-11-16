@@ -49,7 +49,7 @@ repos:
         alias: ec
 
   - repo: https://github.com/crate-ci/typos
-    rev: v1.52.0
+    rev: v1.52.2
     hooks:
       - id: typos
         # Report only: --write-changes "corrects" domain words such as MobilityDB's dateset.
@@ -80,7 +80,7 @@ repos:
       - id: text-unicode-replacement-char
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.13.7
+    rev: 0.13.8
     hooks:
       - id: uv-lock
 
@@ -101,7 +101,7 @@ repos:
         args: []
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.17.4
+    rev: v0.17.5
     hooks:
       - id: ruff-check
         args:
@@ -169,7 +169,7 @@ repos:
           - mdformat-gfm==1.0.0
 
   - repo: https://github.com/renovatebot/pre-commit-hooks
-    rev: 44.224.2
+    rev: 44.239.1
     hooks:
       - id: renovate-config-validator
         args:
