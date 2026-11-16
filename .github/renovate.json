@@ -130,7 +130,9 @@
         "pep621",
         "pre-commit"
       ],
-      "groupName": "python tooling"
+      "groupName": "python tooling",
+      // Raise pyproject.toml's floors too, not just uv.lock (ranges like ~=0.0.100 would otherwise stay).
+      "rangeStrategy": "bump"
     },
     {
       // prek-action's prek-version input moves with the dev group's prek.
