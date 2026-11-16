@@ -34,7 +34,7 @@ variable "IMAGES" {
 # TimescaleDB for the majors its current release line supports (see timescaledb_version).
 # renovate: datasource=github-releases depName=timescale/timescaledb
 variable "TIMESCALEDB_VERSION" {
-  default = "2.31.0"
+  default = "2.32.0"
 }
 
 # CI sets it to the ISO week, so the PGDG packages refresh weekly.
