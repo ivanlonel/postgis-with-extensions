@@ -3,6 +3,11 @@
 # The postgis/postgis tag to extend, as <PostgreSQL major>-<PostGIS major.minor>.
 # docker-bake.hcl sets it for every target; the default only serves plain `docker build`.
 ARG BASE_IMAGE_TAG=18-3.7
+# The published image of this tag: its TimescaleDB libraries are carried forward (see final).
+ARG PREVIOUS_IMAGE=ghcr.io/ivanlonel/postgis-with-extensions:${BASE_IMAGE_TAG}
+
+
+FROM ${PREVIOUS_IMAGE} AS previous
 
 
 FROM postgis/postgis:${BASE_IMAGE_TAG} AS base
@@ -315,6 +320,12 @@ RUN --mount=type=bind,source=build,target=/build \
     --mount=type=bind,from=vendor,source=/debs,target=/debs \
     bash /build/install-runtime.sh /build/apt-packages.txt /debs/*.deb
 
+# TimescaleDB's loader opens the library of the version each database has installed, until it runs
+# ALTER EXTENSION timescaledb UPDATE: keep every release the previous image had. The current build,
+# copied next, overwrites its own version's files.
+# ponytail: grows by a few MB per TimescaleDB release; drop the oldest if size matters. A new PG
+# major has no published image yet: point PREVIOUS_IMAGE at one that has a timescaledb-*.so.
+COPY --link --from=previous /usr/lib/postgresql/${PG_MAJOR}/lib/timescaledb-*.so /usr/lib/postgresql/${PG_MAJOR}/lib/
 COPY --link --from=timescaledb /out/ /
 COPY --link --from=pgxn /out/ /
 COPY --link --from=datasketches /out/ /
