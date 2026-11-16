@@ -57,7 +57,7 @@ COPY --chmod=0755 build/build-pgxs.sh /usr/local/bin/build-pgxs
 FROM build-base AS timescaledb
 # docker-bake.hcl pins older releases for majors the current line no longer supports.
 # renovate: datasource=github-releases depName=timescale/timescaledb
-ARG TIMESCALEDB_VERSION=2.31.0
+ARG TIMESCALEDB_VERSION=2.32.0
 WORKDIR /src/timescaledb
 RUN curl --fail --silent --show-error --location --retry 3 --output /tmp/timescaledb.tar.gz \
         "https://github.com/timescale/timescaledb/archive/refs/tags/${TIMESCALEDB_VERSION}.tar.gz" \
@@ -259,7 +259,7 @@ RUN fetch-vendor-extended
 FROM build-base AS rust-base
 # pgrx extensions, which no one publishes builds of for Debian. libclang serves pgrx's bindgen.
 # renovate: datasource=github-releases depName=rust-lang/rust
-ARG RUST_VERSION=1.99.1
+ARG RUST_VERSION=1.100.0
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
     PATH=/usr/local/cargo/bin:$PATH
