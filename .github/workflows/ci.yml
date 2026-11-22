@@ -55,14 +55,14 @@ jobs:
       - name: Run prek
         uses: j178/prek-action@44924fe9ef4a6f88253c4b6b1bf11c689d3ce53d # v3.1.0
         with:
-          prek-version: "v0.5.10"
+          prek-version: "v0.5.11"
           extra-args: --all-files --verbose
 
       # The commit-time gitleaks hook scans staged changes, and nothing is staged here.
       - name: Scan the commits for secrets
         uses: j178/prek-action@44924fe9ef4a6f88253c4b6b1bf11c689d3ce53d # v3.1.0
         with:
-          prek-version: "v0.5.10"
+          prek-version: "v0.5.11"
           extra-args: --all-files --verbose --hook-stage manual gitleaks-history
 
       - name: Run the static tests
