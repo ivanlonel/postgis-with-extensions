@@ -14,8 +14,9 @@ Citus and DocumentDB among them. `X-3.6` tags got a single final release and are
 - `Dockerfile`: one stage per source build (`make install DESTDIR=/out`, copied into `final`); the `vendor` stage
   downloads third-party `.deb`s; `final` installs `build/apt-packages.txt` via `build/install-runtime.sh`, which also
   adds the PostGIS 3.7 compatibility shims (tiger geocoder on PG 14/15, `address_standardizer-3.so`, `-3` aliases).
-  `final` also copies the earlier TimescaleDB releases' `timescaledb-*.so` out of the published image of its tag
-  (`PREVIOUS_IMAGE`): existing databases load them until they run `ALTER EXTENSION timescaledb UPDATE`.
+  `final` also copies the earlier TimescaleDB and Toolkit releases' `timescaledb-*.so` and `timescaledb_toolkit-*.so`
+  out of the published image of its tag (`PREVIOUS_IMAGE`): existing databases load them until they run
+  `ALTER EXTENSION … UPDATE`.
   `extended` (the `-full` tags) builds on `final`: `build/apt-packages-extended.txt`, `vendor-extended`
   (`build/fetch-vendor-extended.sh`, stripping upstream's debug info), pgrx sources (`build/build-pgrx.sh` on
   `rust-base`) and its own stages; it sets `PWE_VARIANT=extended`, which the tests read.
