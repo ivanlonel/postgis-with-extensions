@@ -30,8 +30,11 @@ unzip -q -j "$workdir/pgvectorscale.zip" \
 	"pgvectorscale-postgresql-${PG_MAJOR}_${PGVECTORSCALE_VERSION}-Linux_amd64.deb" -d "$workdir"
 mv "$workdir/pgvectorscale-postgresql-${PG_MAJOR}_${PGVECTORSCALE_VERSION}-Linux_amd64.deb" /debs/pgvectorscale.deb
 
-# TimescaleDB Toolkit supports PostgreSQL 15 and later.
+# TimescaleDB Toolkit supports PostgreSQL 15 and later; 1.27.0 is its last release with PG 15 binaries.
 if ((PG_MAJOR >= 15)); then
+	if ((PG_MAJOR == 15)); then
+		TIMESCALEDB_TOOLKIT_VERSION=1.27.0
+	fi
 	fetch /debs/timescaledb-toolkit.deb \
 		"https://packagecloud.io/timescale/timescaledb/debian/pool/${VERSION_CODENAME}/main/t/timescaledb-toolkit/timescaledb-toolkit-postgresql-${PG_MAJOR}_${TIMESCALEDB_TOOLKIT_VERSION}~debian${VERSION_ID}_amd64.deb"
 fi
