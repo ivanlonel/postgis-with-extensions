@@ -9,7 +9,7 @@ pg_rowalesce 0.1.12
 pg_savior 0.1.0
 pg_xenophile 0.8.3
 pg_xxhash 0.0.1
-pgmq 1.13.1
+pgmq 1.13.2
 pgpdf 0.1.0
 pgsql_tweaks 1.1.0
 temporal_tables 1.2.2

@@ -57,7 +57,7 @@ COPY --chmod=0755 build/build-pgxs.sh /usr/local/bin/build-pgxs
 FROM build-base AS timescaledb
 # docker-bake.hcl pins older releases for majors the current line no longer supports.
 # renovate: datasource=github-releases depName=timescale/timescaledb
-ARG TIMESCALEDB_VERSION=2.32.0
+ARG TIMESCALEDB_VERSION=2.32.1
 WORKDIR /src/timescaledb
 RUN curl --fail --silent --show-error --location --retry 3 --output /tmp/timescaledb.tar.gz \
         "https://github.com/timescale/timescaledb/archive/refs/tags/${TIMESCALEDB_VERSION}.tar.gz" \
@@ -128,7 +128,7 @@ RUN case "$PG_MAJOR" in \
 
 FROM build-base AS pgactive
 # renovate: datasource=github-releases depName=aws/pgactive extractVersion=^v(?<version>.+)$
-ARG PGACTIVE_VERSION=2.1.9
+ARG PGACTIVE_VERSION=2.1.10
 WORKDIR /src/pgactive
 RUN curl --fail --silent --show-error --location --retry 3 --output /tmp/pgactive.tar.gz \
         "https://github.com/aws/pgactive/archive/refs/tags/v${PGACTIVE_VERSION}.tar.gz" \
@@ -177,7 +177,7 @@ RUN if [ "$PG_MAJOR" -le 17 ]; then \
 
 FROM build-base AS pg-stat-monitor
 # renovate: datasource=github-releases depName=percona/pg_stat_monitor
-ARG PG_STAT_MONITOR_VERSION=2.4.0
+ARG PG_STAT_MONITOR_VERSION=2.4.1
 RUN build-pgxs "https://github.com/percona/pg_stat_monitor/archive/refs/tags/${PG_STAT_MONITOR_VERSION}.tar.gz" USE_PGXS=1
 
 
@@ -201,7 +201,7 @@ RUN build-pgxs "https://github.com/iCyberon/pg_hashids/archive/refs/tags/v${PG_H
 
 FROM build-base AS pg-bigm
 # renovate: datasource=github-tags depName=pgbigm/pg_bigm extractVersion=^v(?<version>.+)$ versioning=loose
-ARG PG_BIGM_VERSION=1.2-20250903
+ARG PG_BIGM_VERSION=1.2-20261118
 RUN build-pgxs "https://github.com/pgbigm/pg_bigm/archive/refs/tags/v${PG_BIGM_VERSION}.tar.gz" USE_PGXS=1
 
 
@@ -226,7 +226,7 @@ ARG PG_GRAPHQL_VERSION=1.6.3
 # renovate: datasource=github-releases depName=supabase/pg_jsonschema extractVersion=^v(?<version>.+)$
 ARG PG_JSONSCHEMA_VERSION=0.3.4
 # renovate: datasource=github-releases depName=timescale/timescaledb-toolkit extractVersion=^(?<version>\d+\.\d+\.\d+)
-ARG TIMESCALEDB_TOOLKIT_VERSION=1.27.0
+ARG TIMESCALEDB_TOOLKIT_VERSION=1.28.0
 # renovate: datasource=github-releases depName=pksunkara/pgx_ulid extractVersion=^v(?<version>.+)$
 ARG PGX_ULID_VERSION=0.2.3
 # renovate: datasource=github-releases depName=kaspermarstal/plprql extractVersion=^v(?<version>.+)$
@@ -246,9 +246,9 @@ RUN fetch-vendor
 
 FROM build-base AS vendor-extended
 # renovate: datasource=github-releases depName=paradedb/paradedb extractVersion=^v(?<version>.+)$
-ARG PG_SEARCH_VERSION=0.26.6
+ARG PG_SEARCH_VERSION=0.27.0
 # renovate: datasource=github-releases depName=duckdb/pg_duckdb extractVersion=^v(?<version>.+)$
-ARG PG_DUCKDB_VERSION=1.2.0
+ARG PG_DUCKDB_VERSION=1.2.1
 # renovate: datasource=github-releases depName=supabase/wrappers extractVersion=^v(?<version>.+)$
 ARG WRAPPERS_VERSION=0.6.4
 COPY build/vendor-lib.sh /usr/local/lib/postgis-with-extensions/
@@ -275,7 +275,7 @@ COPY --chmod=0755 build/build-pgrx.sh /usr/local/bin/build-pgrx
 
 FROM rust-base AS pg-parquet
 # renovate: datasource=github-releases depName=CrunchyData/pg_parquet extractVersion=^v(?<version>.+)$
-ARG PG_PARQUET_VERSION=0.5.1
+ARG PG_PARQUET_VERSION=0.6.0
 RUN build-pgrx "https://github.com/CrunchyData/pg_parquet/archive/refs/tags/v${PG_PARQUET_VERSION}.tar.gz"
 
 
